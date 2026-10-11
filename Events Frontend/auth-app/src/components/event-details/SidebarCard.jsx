@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import ResendQrButton from "../ResendQrButton";
 import "../../styles/EventDetails.css";
 
 const formatDate = (dateStr) => {
@@ -107,6 +108,13 @@ export default function SidebarCard({ event, onRegister, refetchEvent }) {
             >
               Register Now
             </button>
+          )}
+
+          {isRegistered && !isStarted && (
+            <ResendQrButton
+              eventId={event.id ?? event.eventId}
+              className="ed-sidebar__btn ed-sidebar__btn--outline"
+            />
           )}
 
           <button

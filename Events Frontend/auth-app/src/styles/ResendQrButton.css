@@ -1,0 +1,19 @@
+.resend-qr {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.resend-qr__msg {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.resend-qr__msg--success {
+  color: #34d399;
+}
+
+.resend-qr__msg--error {
+  color: #f87171;
+}

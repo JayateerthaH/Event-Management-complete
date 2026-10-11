@@ -13,9 +13,13 @@ import com.google.zxing.common.HybridBinarizer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -101,6 +105,41 @@ class ResendQrTest {
 
         // Unlike registration, a resend is an explicit request, so the failure surfaces (502 via the handler)
         assertThatThrownBy(() -> service.resendQr(USER_ID, EVENT_ID)).isInstanceOf(EmailDeliveryException.class);
+    }
+
+    @Test
+    void secondRequestWithinCooldownIsRejectedThenAllowedAfterIt() throws Exception {
+        registered(false);
+        when(users.findFirstByEmailAndEventId(REG_EMAIL, EVENT_ID))
+                .thenReturn(Optional.of(new Users("existing-code-123", REG_EMAIL, EVENT_ID)));
+        Instant start = Instant.parse("2026-10-11T10:00:00Z");
+        service.setClock(Clock.fixed(start, ZoneOffset.UTC));
+
+        service.resendQr(USER_ID, EVENT_ID);
+
+        service.setClock(Clock.fixed(start.plusSeconds(30), ZoneOffset.UTC));
+        assertThatThrownBy(() -> service.resendQr(USER_ID, EVENT_ID))
+                .isInstanceOf(ResponseStatusException.class)
+                .satisfies(e -> assertThat(((ResponseStatusException) e).getStatusCode().value()).isEqualTo(429))
+                .hasMessageContaining("wait 30 seconds");
+
+        service.setClock(Clock.fixed(start.plus(ParticipationAuthService.RESEND_COOLDOWN), ZoneOffset.UTC));
+        service.resendQr(USER_ID, EVENT_ID);
+        verify(email, times(2)).sendQRMail(eq(REG_EMAIL), anyString(), anyString(), any());
+    }
+
+    @Test
+    void failedSendDoesNotStartTheCooldown() throws Exception {
+        registered(false);
+        when(users.findFirstByEmailAndEventId(REG_EMAIL, EVENT_ID))
+                .thenReturn(Optional.of(new Users("existing-code-123", REG_EMAIL, EVENT_ID)));
+        doThrow(new EmailDeliveryException("brevo down", new RuntimeException()))
+                .doNothing()
+                .when(email).sendQRMail(anyString(), anyString(), anyString(), any());
+
+        assertThatThrownBy(() -> service.resendQr(USER_ID, EVENT_ID)).isInstanceOf(EmailDeliveryException.class);
+        service.resendQr(USER_ID, EVENT_ID);   // immediate retry is allowed
+        verify(email, times(2)).sendQRMail(eq(REG_EMAIL), anyString(), anyString(), any());
     }
 
     private void registered(boolean attended) {

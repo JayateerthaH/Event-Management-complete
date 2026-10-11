@@ -34,3 +34,13 @@ export const registerForEvent = async (eventId, formData) => {
 
   return response;
 };
+
+/**
+ * POST /attendance/resend-qr/{eventId}
+ * Re-emails the attendance QR for the logged-in student's registration (same code as before).
+ * Errors: 404 not registered, 400 attendance already marked, 429 asked too recently, 502 email failed.
+ */
+export const resendQr = async (eventId) => {
+  const { data } = await api.post(`/attendance/resend-qr/${eventId}`);
+  return typeof data === "string" ? data : "QR code sent to your email.";
+};

@@ -145,6 +145,22 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("student can have their QR code emailed again", async ({ browser }) => {
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await page.goto(`/events/${eventId}`);
+      const button = page.locator(".ed-sidebar").getByRole("button", { name: "Resend QR code" });
+      const message = page.locator(".ed-sidebar .resend-qr__msg");
+      await button.click();
+      // Success needs a working mail provider (Brevo, or a stub via BREVO_URL); otherwise the backend reports 502
+      await expect(message).toHaveText(/QR code sent to|Email could not be sent/);
+      if ((await message.getAttribute("class")).includes("--success")) {
+        await expect(message).toContainText(studentEmail);
+        await button.click();
+        await expect(message).toContainText("Please wait"); // 60s cooldown protects the email quota
+      }
+    });
+  });
+
   test("organizer scans the student's QR code with the camera", async () => {
     const qrCode = await readQrCode(studentEmail, eventId);
     const video = path.join(os.tmpdir(), `qr-${run}.y4m`);

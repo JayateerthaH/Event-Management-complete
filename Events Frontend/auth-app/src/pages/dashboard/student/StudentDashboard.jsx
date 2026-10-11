@@ -16,6 +16,7 @@ import {
   downloadCertificate,
 } from "../../../services/certificateService";
 import FeedbackForm from "../../../components/FeedbackForm";
+import ResendQrButton from "../../../components/ResendQrButton";
 import {
   BarChart,
   Bar,
@@ -665,6 +666,7 @@ export default function StudentDashboard() {
                           )}
                         </div>
                         <div className="sd-event-row__actions">
+                          <ResendQrButton eventId={ev.id} className="sd-btn sd-btn--outline" />
                           <button
                             className="sd-btn sd-btn--primary"
                             onClick={() =>
@@ -828,6 +830,7 @@ export default function StudentDashboard() {
                         )}
                       </div>
                       <div className="sd-event-row__actions">
+                        <ResendQrButton eventId={ev.id} className="sd-btn sd-btn--outline" />
                         <button
                           className="sd-btn sd-btn--primary"
                           onClick={() =>
