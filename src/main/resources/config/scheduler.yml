@@ -4,6 +4,10 @@ spring:
 
   quartz:
     job-store-type: jdbc
+    jdbc:
+      # Idempotent copy of Quartz's script (the stock one DROPs its tables, wiping scheduled jobs)
+      initialize-schema: always
+      schema: classpath:db/quartz/tables_postgres.sql
     properties:
       org:
         quartz:
