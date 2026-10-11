@@ -17,6 +17,7 @@ import {
 } from "../../../services/certificateService";
 import FeedbackForm from "../../../components/FeedbackForm";
 import ResendQrButton from "../../../components/ResendQrButton";
+import RecommendedEvents from "../../../components/ai/RecommendedEvents";
 import {
   BarChart,
   Bar,
@@ -587,6 +588,8 @@ export default function StudentDashboard() {
                 </div>
               </div>
             </section>
+
+            <RecommendedEvents limit={6} />
 
             {/* Upcoming Registered Events */}
             <section className="sd-card">

@@ -1767,3 +1767,14 @@
     padding: 0.9rem 1rem;
   }
 }
+
+/* ─── "You might also like" (AI similar events) ─── */
+.ed-similar {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+}
+
+@media (max-width: 768px) {
+  .ed-similar { padding: 0 1rem 3rem; }
+}

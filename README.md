@@ -9,7 +9,7 @@ admins approve organizers and events and manage the platform.
 | Backend | Java 21, Spring Boot 4, Spring Security (JWT + refresh-token cookie), Spring Data JPA / Hibernate, Quartz |
 | Database | PostgreSQL (one schema per module) |
 | Frontend | React 19, Vite 7, React Router 7, axios, Recharts, html5-qrcode |
-| Integrations | Brevo (email), ZXing (QR codes), OpenHTMLtoPDF (certificates) |
+| Integrations | Brevo (email), ZXing (QR codes), OpenHTMLtoPDF (certificates), Claude via the Anthropic Java SDK (optional AI features) |
 
 ## Features
 
@@ -23,6 +23,12 @@ giving feedback; edit profile, interests, preferences and social links; request 
 FAQs, speakers, highlights and gallery images; add collaborators; scan attendee QR codes with the camera;
 see attendees; mark events complete (updates dashboards once); send announcements; request and read feedback;
 upload an HTML certificate template.
+
+**AI assistance** — students get personal event recommendations (with the reasons shown), "You might also like"
+suggestions on every event page, plain-English search ("free workshops this week") and an assistant that answers
+questions about an event using only what its page says. Organizers can draft an event description and FAQs from a
+few key points, turn rough notes into an announcement, and get a summary of attendee feedback (what worked, what
+to improve). See [AI features](#ai-features).
 
 **Admins** — overview of users, events, organizers and revenue; accept organizer/admin requests; approve or
 reject events; manage profile catalogs (badges, interests, notification types, social platforms, preferences).
@@ -44,6 +50,7 @@ The backend is a modular monolith; modules talk to each other through small Java
 | Analytics | `analyticsmodule` | student / organizer dashboards and stats | `analytics` |
 | Profile | `profilemodule` | student profiles and admin-managed catalogs | `profile` |
 | Notification | `notificationmodule` | email via Brevo | — |
+| AI | `aimodule` | recommendations, similar events, smart search, event assistant, drafting, feedback insights (`AiApi`) | — |
 | Scheduler | `schedulermodule` | scheduled emails (Quartz, JDBC job store) | `public.qrtz_*` |
 
 Errors are returned as JSON: `{ "error": "...", "statusCode": 404, "timeStamp": "..." }`.
@@ -127,8 +134,27 @@ Never commit real values.
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | no | GitHub OAuth (server-side redirect flow) |
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | no | default `jdbc:postgresql://localhost:5432/eventdb`, `admin` / `admin` |
 | `CORS_ALLOWED_ORIGINS` | no | frontend origin(s), comma-separated; default `http://localhost:5173` |
+| `ANTHROPIC_API_KEY` | for AI | Claude API key. Without it recommendations and similar events still work, search falls back to keywords, feedback insights show counts only, and the other AI tools are hidden in the UI |
+| `AI_MODEL`, `AI_TIMEOUT_SECONDS` | no | default `claude-opus-5-5`, `30` |
+| `ANTHROPIC_BASE_URL` | no | proxy or local stub of the Messages API (empty = Anthropic) |
 
 Frontend (`frontend/.env`): `VITE_API_URL` (backend URL) and `VITE_GOOGLE_CLIENT_ID`.
+
+## AI features
+
+All under `/ai`, login required unless noted. LLM-backed endpoints are rate limited per user and cached briefly;
+emails and phone numbers are removed from anything sent to the model, and the model only sees public event data.
+
+| Endpoint | Who | LLM | Where in the UI |
+|---|---|---|---|
+| `GET /ai/recommendations` | any user | no — transparent scoring (interests, department, past registrations, popularity, date) | Student dashboard → *Recommended for you* |
+| `GET /ai/events/{id}/similar` | **public** | no — same category, shared topics, department, venue | Event page → *You might also like* |
+| `GET /ai/search?q=` | any user | turns the query into the regular event filters; keyword fallback | Events page → smart search |
+| `POST /ai/events/{id}/ask` | any user | answers only from the event page; says when the page doesn't cover it | Event page → *Ask about this event* |
+| `POST /ai/events/generate-description` | organizer, admin | description + FAQs draft (FAQs can be saved with the new event) | Create Event → *Write with AI* |
+| `POST /ai/events/{id}/draft-announcement` | event managers | title + message in a chosen tone | Announcements → *Draft with AI* |
+| `GET /ai/events/{id}/feedback-summary` | event managers | sentiment, highlights, improvements (counts/average computed locally) | Feedback → *Feedback insights* |
+| `GET /ai/status` | any user | — | lets the UI hide LLM tools when no key is set |
 
 ## Testing
 

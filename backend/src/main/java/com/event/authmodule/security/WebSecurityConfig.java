@@ -53,7 +53,8 @@ public class WebSecurityConfig {
                                         "/events/{eventId:\\d+}/schedule", "/events/{eventId:\\d+}/faqs",
                                         "/events/{eventId:\\d+}/highlights", "/events/{eventId:\\d+}/speakers",
                                         "/events/{eventId:\\d+}/whatToBring",
-                                        "/event/images/{eventId:\\d+}", "/images/**").permitAll()
+                                        "/event/images/{eventId:\\d+}", "/images/**",
+                                        "/ai/events/{eventId:\\d+}/similar").permitAll()   // no LLM, approved events only
                                 .requestMatchers(HttpMethod.POST, "/events/filter").permitAll()   // approved events only
 //                        .requestMatchers("/admin/**").hasRole(ADMIN.name())
 //                        .requestMatchers("/organizer/**").hasAnyRole(ORGANIZER.name(), ADMIN.name())

@@ -17,6 +17,10 @@ import {
   fetchEventFeedback,
 } from "../../../services/feedbackService";
 import AddCollaboratorModal from "../../../components/AddCollaboratorModal";
+import { addFaq } from "../../../api/eventDetailsService";
+import DescriptionHelper from "../../../components/ai/DescriptionHelper";
+import AnnouncementHelper from "../../../components/ai/AnnouncementHelper";
+import FeedbackInsights from "../../../components/ai/FeedbackInsights";
 import {
   AreaChart,
   Area,
@@ -364,6 +368,9 @@ export default function OrganizerDashboard() {
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [creating, setCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState(null); // { type: 'success'|'error', text }
+  // AI-drafted FAQs the organizer chose to add once the event exists; key remounts the helper on reset
+  const [pendingFaqs, setPendingFaqs] = useState([]);
+  const [aiHelperKey, setAiHelperKey] = useState(0);
 
   // -- Deleting --------------------------------------------------------------
   const [deletingId, setDeletingId] = useState(null);
@@ -393,6 +400,7 @@ export default function OrganizerDashboard() {
   // -- Feedback ---------------------------------------------------------------
   const [fbEventId, setFbEventId] = useState("");
   const [fbData, setFbData] = useState([]);
+  const [fbLoadedFor, setFbLoadedFor] = useState(""); // event whose feedback is in fbData
   const [fbLoading, setFbLoading] = useState(false);
   const [fbReqLoading, setFbReqLoading] = useState(false);
   const [fbMsg, setFbMsg] = useState(null);
@@ -548,12 +556,26 @@ export default function OrganizerDashboard() {
     };
 
     try {
-      await createEvent(eventsDto);
+      const created = await createEvent(eventsDto);
+      let faqNote = "";
+      const createdId = created?.id ?? created?.eventId;
+      if (pendingFaqs.length > 0 && createdId) {
+        const saved = await Promise.allSettled(
+          pendingFaqs.map((f) => addFaq(createdId, { questions: f.question, answers: f.answer })),
+        );
+        const ok = saved.filter((r) => r.status === "fulfilled").length;
+        faqNote =
+          ok === pendingFaqs.length
+            ? ` ${ok} FAQs added.`
+            : ` ${ok} of ${pendingFaqs.length} FAQs added; add the rest from the event page.`;
+      }
       setCreateMsg({
         type: "success",
-        text: "Event created successfully! It will be visible after admin approval.",
+        text: `Event created successfully! It will be visible after admin approval.${faqNote}`,
       });
       setForm({ ...EMPTY_FORM });
+      setPendingFaqs([]);
+      setAiHelperKey((k) => k + 1);
       loadMyEvents();
     } catch (err) {
       const msg =
@@ -756,6 +778,7 @@ export default function OrganizerDashboard() {
     try {
       const data = await fetchEventFeedback(fbEventId);
       setFbData(data);
+      setFbLoadedFor(fbEventId);
     } catch (err) {
       const status = err?.response?.status;
       if (status === 403) {
@@ -1196,6 +1219,14 @@ export default function OrganizerDashboard() {
                   rows={4}
                   required
                 />
+                <DescriptionHelper
+                  key={aiHelperKey}
+                  form={form}
+                  onUseDescription={(text) =>
+                    setForm((prev) => ({ ...prev, description: text }))
+                  }
+                  onFaqsChange={setPendingFaqs}
+                />
               </div>
 
               {/* Row 3 */}
@@ -1277,6 +1308,8 @@ export default function OrganizerDashboard() {
                   onClick={() => {
                     setForm({ ...EMPTY_FORM });
                     setCreateMsg(null);
+                    setPendingFaqs([]);
+                    setAiHelperKey((k) => k + 1);
                   }}
                 >
                   Reset
@@ -1924,6 +1957,15 @@ export default function OrganizerDashboard() {
                 </select>
               </div>
 
+              <AnnouncementHelper
+                eventId={annEventId}
+                onUse={(draft) => {
+                  setAnnTitle(draft.title);
+                  setAnnMessage(draft.message);
+                  setAnnMsg(null);
+                }}
+              />
+
               <div className="od-form__group od-form__group--full">
                 <label className="od-form__label">Title</label>
                 <input
@@ -2173,11 +2215,13 @@ export default function OrganizerDashboard() {
               </button>
             </div>
 
+            {fbEventId && <FeedbackInsights key={fbEventId} eventId={fbEventId} />}
+
             {fbLoading ? (
               <div className="fb-loading">
                 <span className="fb-spinner" /> Loading feedback...
               </div>
-            ) : fbData.length > 0 ? (
+            ) : fbLoadedFor === fbEventId && fbData.length > 0 ? (
               <div className="od-table-wrap">
                 <table className="fb-feedback-table">
                   <thead>
@@ -2218,9 +2262,11 @@ export default function OrganizerDashboard() {
               </div>
             ) : (
               <p className="fb-empty">
-                {fbEventId
-                  ? "No feedback received yet for this event."
-                  : "Select an event to view or request feedback."}
+                {!fbEventId
+                  ? "Select an event to view or request feedback."
+                  : fbLoadedFor === fbEventId
+                    ? "No feedback received yet for this event."
+                    : "Click “View Feedback” to see individual responses."}
               </p>
             )}
           </section>

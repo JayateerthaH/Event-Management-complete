@@ -5,6 +5,7 @@ import com.event.eventmodule.entity.Events;
 import com.event.eventmodule.entity.analysis.MonthlyAttendanceCount;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EventApi {
     List<EventsDto> getPendingEvents(Long userId);
@@ -33,4 +34,7 @@ public interface EventApi {
     boolean canManageEvent(Long eventId, String userId, String roles, String email);
 
     List<FeedbackEntry> feedbackForEvent(Long eventId);
+
+    /** Public page content of any event (approved or not; callers check {@link EventProfile#approved()}). */
+    Optional<EventProfile> eventProfile(Long eventId);
 }

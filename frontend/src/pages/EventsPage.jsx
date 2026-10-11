@@ -1,9 +1,10 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import Navbar from "../components/Navbar";
 import SidebarFilters from "../components/SidebarFilters";
 import EventCard from "../components/EventCard";
 import Pagination from "../components/Pagination";
 import useEvents from "../hooks/useEvents";
+import SmartSearch from "../components/ai/SmartSearch";
 import "../styles/EventsPage.css";
 
 const EventCardSkeleton = () => (
@@ -95,6 +96,8 @@ const EventsPage = () => {
     clearFilters,
     filterOptions,
   } = useEvents(0, 6);
+  // While AI search results are shown, the regular filtered grid is hidden
+  const [aiActive, setAiActive] = useState(false);
 
   const handleApplyFilters = useCallback(
     (filters) => {
@@ -139,7 +142,9 @@ const EventsPage = () => {
             </p>
           </div>
 
-          {error ? (
+          <SmartSearch onActiveChange={setAiActive} />
+
+          {aiActive ? null : error ? (
             <ErrorState message={error} onRetry={refresh} />
           ) : loading ? (
             <div className="events-grid">
@@ -175,15 +180,17 @@ const EventsPage = () => {
             </div>
           )}
 
-          <div className="pagination-bar">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={goToPage}
-              hasNextPage={hasNextPage}
-              hasPrevPage={hasPrevPage}
-            />
-          </div>
+          {!aiActive && (
+            <div className="pagination-bar">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                hasNextPage={hasNextPage}
+                hasPrevPage={hasPrevPage}
+              />
+            </div>
+          )}
         </main>
       </div>
     </div>

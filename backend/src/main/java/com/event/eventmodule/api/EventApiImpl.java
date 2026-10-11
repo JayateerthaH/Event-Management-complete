@@ -13,10 +13,21 @@ import com.event.eventmodule.entity.Events;
 import com.event.eventmodule.entity.analysis.MonthlyAttendanceCount;
 import com.event.eventmodule.repository.CollaboratorsRepository;
 import com.event.eventmodule.repository.EventsRepository;
+import com.event.eventmodule.entity.event.EventSchedule;
+import com.event.eventmodule.repository.AboutEventRepository;
+import com.event.eventmodule.repository.EventDetailsRepository;
+import com.event.eventmodule.repository.EventScheduleRepository;
+import com.event.eventmodule.repository.EventSpeakersRepository;
+import com.event.eventmodule.repository.FAQsRepository;
+import com.event.eventmodule.repository.KeyHighlightsRepository;
+import com.event.eventmodule.repository.WhatToBringRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Public facade of the event module for other modules (analytics, participation).
@@ -33,6 +44,13 @@ public class EventApiImpl implements EventApi {
     private final EventService eventService;
     private final EventAccessService eventAccessService;
     private final FeedBackRepository feedBackRepository;
+    private final AboutEventRepository aboutEventRepository;
+    private final EventDetailsRepository eventDetailsRepository;
+    private final EventScheduleRepository eventScheduleRepository;
+    private final FAQsRepository faqsRepository;
+    private final EventSpeakersRepository speakersRepository;
+    private final WhatToBringRepository whatToBringRepository;
+    private final KeyHighlightsRepository keyHighlightsRepository;
 
     @Override
     public List<EventsDto> getPendingEvents(Long userId) {
@@ -122,6 +140,58 @@ public class EventApiImpl implements EventApi {
         return feedBackRepository.findAllByEventId(eventId).stream()
                 .map(f -> new FeedbackEntry(f.getNoOfStars() == null ? 0 : f.getNoOfStars(), f.getFeedBack()))
                 .toList();
+    }
+
+    @Override
+    public Optional<EventProfile> eventProfile(Long eventId) {
+        return eventsRepository.findById(eventId).map(e -> {
+            var details = eventDetailsRepository.findByEvents_Id(eventId);
+            return new EventProfile(
+                    toCard(e),
+                    Boolean.TRUE.equals(e.getIsApproved()),
+                    aboutEventRepository.findByEvents_Id(eventId).map(a -> a.getAbout()).orElse(null),
+                    details.map(d -> d.getOrganizedBy()).orElse(null),
+                    details.map(d -> d.getLevel()).orElse(null),
+                    details.map(d -> d.getLanguage()).orElse(null),
+                    details.map(d -> d.getDurationInHours()).orElse(null),
+                    details.map(d -> d.getDepartments() == null ? List.<String>of()
+                            : d.getDepartments().stream().map(Enum::name).sorted().toList()).orElse(List.of()),
+                    eventScheduleRepository.findByEvents_Id(eventId).map(EventApiImpl::scheduleItems).orElse(List.of()),
+                    nullToEmpty(faqsRepository.findByEvents_Id(eventId)).stream()
+                            .map(f -> new EventProfile.Faq(f.getQuestions(), f.getAnswers())).toList(),
+                    nullToEmpty(speakersRepository.findByEvents_Id(eventId)).stream()
+                            .map(sp -> new EventProfile.Speaker(sp.getName(), sp.getProfession(), sp.getShortExperience())).toList(),
+                    nullToEmpty(whatToBringRepository.findByEvents_Id(eventId)).stream()
+                            .map(w -> w.getItem()).filter(Objects::nonNull).toList(),
+                    keyHighlightsRepository.findByEvents_Id(eventId).stream()
+                            .map(h -> joinNonBlank(h.getName(), h.getSmallDescription())).filter(Objects::nonNull).toList());
+        });
+    }
+
+    // The schedule is stored as three parallel lists
+    private static List<EventProfile.ScheduleItem> scheduleItems(EventSchedule s) {
+        List<String> times = nullToEmpty(s.getTime()), titles = nullToEmpty(s.getSchedule()),
+                descriptions = nullToEmpty(s.getSmallDescription());
+        int n = Math.max(times.size(), Math.max(titles.size(), descriptions.size()));
+        List<EventProfile.ScheduleItem> items = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            items.add(new EventProfile.ScheduleItem(at(times, i), at(titles, i), at(descriptions, i)));
+        }
+        return items;
+    }
+
+    private static <T> List<T> nullToEmpty(List<T> list) {
+        return list == null ? List.of() : list;
+    }
+
+    private static String at(List<String> list, int i) {
+        return i < list.size() ? list.get(i) : null;
+    }
+
+    private static String joinNonBlank(String a, String b) {
+        String joined = java.util.stream.Stream.of(a, b).filter(x -> x != null && !x.isBlank())
+                .map(String::trim).collect(java.util.stream.Collectors.joining(": "));
+        return joined.isEmpty() ? null : joined;
     }
 
     private EventCard toCard(Events e) {

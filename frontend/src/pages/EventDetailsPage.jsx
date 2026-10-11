@@ -10,6 +10,8 @@ import ScheduleTab from "../components/event-details/ScheduleTab";
 import FaqTab from "../components/event-details/FaqTab";
 import SidebarCard from "../components/event-details/SidebarCard";
 import RegisterModal from "../components/event-details/RegisterModal";
+import EventAssistant from "../components/ai/EventAssistant";
+import SimilarEvents from "../components/ai/SimilarEvents";
 import { getEventImages, getImageUrl } from "../api/imageService";
 import { fetchEventAnnouncements } from "../api/announcementService";
 import "../styles/EventDetails.css";
@@ -357,13 +359,19 @@ export default function EventDetailsPage() {
 
       <TabsNavigation activeTab={activeTab} onTabChange={setActiveTab} />
       <div className="ed-layout">
-        <main className="ed-main">{renderTab()}</main>
+        <main className="ed-main">
+          {renderTab()}
+          <EventAssistant key={eventId} eventId={eventId} eventName={event.name} />
+        </main>
         <SidebarCard
           event={event}
           details={details}
           onRegister={() => setShowRegister(true)}
           refetchEvent={refetchEvent}
         />
+      </div>
+      <div className="ed-similar">
+        <SimilarEvents eventId={eventId} />
       </div>
       {showRegister && (
         <RegisterModal
