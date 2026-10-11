@@ -1,0 +1,120 @@
+/* Pagination Styles */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 40px;
+  padding: 20px 0;
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn svg {
+  width: 20px;
+  height: 20px;
+  color: #d1d5db;
+  transition: color 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.pagination-btn:hover:not(:disabled) svg {
+  color: #a78bfa;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pagination-numbers {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pagination-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 46px;
+  height: 46px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #d1d5db;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-number:hover:not(.active) {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.4);
+  color: #ffffff;
+}
+
+.pagination-number.active {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  border: 2px solid #a78bfa;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  box-shadow: 0 0 18px rgba(139, 92, 246, 0.6), 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+.pagination-ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  color: #9ca3af;
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .pagination {
+    gap: 6px;
+  }
+  
+  .pagination-btn,
+  .pagination-number {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+  
+  .pagination-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .pagination-number {
+    padding: 0 10px;
+    font-size: 0.95rem;
+  }
+  
+  .pagination-ellipsis {
+    width: 32px;
+  }
+}
+

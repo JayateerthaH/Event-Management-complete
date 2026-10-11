@@ -1,0 +1,137 @@
+package com.event.eventmodule.Registration;
+
+import com.event.eventmodule.entity.analysis.MonthlyAttendanceCount;
+import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
+public interface RegisterRepository extends JpaRepository<Register, Long> {
+
+    @Query("""
+        SELECT r.userId
+        FROM Register r
+        WHERE r.eventsDto.id = :eventId
+          AND r.isAttended = true
+    """)
+    List<Long> findUserIdsByEventIdAndIsAttendedTrue(@Param("eventId") Long eventId);
+
+    @Query("""
+        SELECT COUNT(r)
+        FROM Register r
+        WHERE r.eventsDto.id = :eventId
+    """)
+    Long countRegistrationsByEventId(@Param("eventId") Long eventId);
+
+    @Query("SELECT r FROM Register r JOIN FETCH r.eventsDto e WHERE e.organizerId = :organizerId ORDER BY e.eventDate DESC, r.id")
+    List<Register> findByEventOrganizer(@Param("organizerId") Long organizerId);
+
+    @Query("SELECT COUNT(DISTINCT r.userId) FROM Register r")
+    long countDistinctRegisteredUsers();
+
+    @Query("SELECT r.userId FROM Register r WHERE r.eventsDto.id = :eventId")
+    List<Long> findUserIdsByEventId(@Param("eventId") Long eventId);
+
+    @Query(value = """
+        SELECT
+            to_char(months.month, 'Mon YYYY') AS month,
+            COUNT(r.id) AS totalEvents
+        FROM
+            generate_series(
+                date_trunc('month', CURRENT_DATE) - interval '5 months',
+                date_trunc('month', CURRENT_DATE),
+                interval '1 month'
+            ) AS months(month)
+        LEFT JOIN events.events e
+            ON date_trunc('month', e.event_date) = months.month
+        LEFT JOIN events.register r
+            ON r.event_id = e.id
+           AND r.user_id = :userId
+           AND r.is_attended = true
+        GROUP BY months.month
+        ORDER BY months.month
+        """,
+            nativeQuery = true)
+    List<MonthlyAttendanceCount> getUserAttendanceLast6Months(
+            @Param("userId") Long userId
+    );
+
+    @Query(value = """
+        SELECT
+            to_char(months.month, 'Mon YYYY') AS month,
+            COUNT(r.id) AS totalEvents
+        FROM
+            generate_series(
+                date_trunc('month', CURRENT_DATE) - interval '5 months',
+                date_trunc('month', CURRENT_DATE),
+                interval '1 month'
+            ) AS months(month)
+        LEFT JOIN events.events e
+            ON date_trunc('month', e.event_date) = months.month
+           AND e.organizer_id = :organizerId
+        LEFT JOIN events.register r
+            ON r.event_id = e.id
+        GROUP BY months.month
+        ORDER BY months.month
+        """,
+            nativeQuery = true)
+    List<MonthlyAttendanceCount> getOrganizerAttendanceLast6Months(@Param("organizerId") Long userId);
+
+    @Query("""
+        SELECT r
+        FROM Register r
+        WHERE r.userId = :userId
+          AND r.isAttended = true
+          AND EXISTS (
+              SELECT 1
+              FROM CertificateTemplate ct
+              WHERE ct.eventId = r.eventsDto.id
+          )
+        """)
+    List<Register> findEligibleCertificates(
+            @Param("userId") Long userId
+    );
+
+    @Modifying
+    @Transactional
+    @Query("""
+        UPDATE Register r
+        SET r.isAttended = true
+        WHERE r.userId = :userId
+          AND r.eventsDto.id = :eventId
+    """)
+    void markAttended(
+            @Param("userId") Long userId,
+            @Param("eventId") Long eventId
+    );
+
+    @Query("select r.name from Register r " +
+            "where r.userId = :userId " +
+            "and r.eventsDto.id = :eventId " +
+            "and r.isAttended = true " +
+            "order by r.id desc")
+    Optional<String> findNameByUserIdAndEventId(@Param("userId") Long userId,@Param("eventId") Long eventId);
+
+    @Query("""
+        SELECT r FROM Register r
+        JOIN FETCH r.eventsDto e
+        WHERE e.eventDate BETWEEN :start AND :end
+    """)
+    List<Register> findRegistrationsForEventsBetween(
+            @Param("start") Date start,
+            @Param("end") Date end
+    );
+
+    // RegisterRepository.java
+    @Query("SELECT FUNCTION('MONTHNAME', e.eventDate) AS month, COUNT(r.id) AS count " +
+            "FROM Register r JOIN r.eventsDto e " +
+            "WHERE r.userId = :userId AND r.isAttended = true " +
+            "GROUP BY FUNCTION('MONTH', e.eventDate), FUNCTION('MONTHNAME', e.eventDate)")
+    List<MonthlyAttendanceCount> getMonthlyAttendanceCount(@Param("userId") Long userId);
+
+}

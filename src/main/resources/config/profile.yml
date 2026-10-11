@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: management-service
+
+app:
+  security:
+    internal-secret: ${INTERNAL_SECRET}

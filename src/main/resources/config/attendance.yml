@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: attendance-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+app:
+  security:
+    internal-secret: ${INTERNAL_SECRET}

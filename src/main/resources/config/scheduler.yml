@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: schedular-service
+
+  quartz:
+    job-store-type: jdbc
+    properties:
+      org:
+        quartz:
+          threadPool:
+            threadCount: 5
+
+app:
+  security:
+    internal-secret: ${INTERNAL_SECRET}

@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: dashboard-service
+
+
+app:
+  security:
+    internal-secret: ${INTERNAL_SECRET}
+
+
+logging:
+  level:
+    root: INFO

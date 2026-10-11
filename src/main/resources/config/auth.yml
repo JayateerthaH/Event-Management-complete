@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: auth-service
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:not-configured}
+            client-secret: ${GOOGLE_CLIENT_SECRET:not-configured}
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+
+          # Optional: GitHub login only works once real credentials are set
+          github:
+            client-id: ${GITHUB_CLIENT_ID:not-configured}
+            client-secret: ${GITHUB_CLIENT_SECRET:not-configured}
+
+#server:
+#  port: 4003
+
+jwt:
+  secretKey: ${JWT_SECRET}
+
+app:
+  security:
+    internal-secret: ${INTERNAL_SECRET}

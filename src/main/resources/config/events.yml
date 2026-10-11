@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: events-service
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+      resolve-lazily: true
+
+server:
+  tomcat:
+    max-swallow-size: 50MB
+    max-http-form-post-size: -1
+
+app:
+  security:
+    internal-secret: ${INTERNAL_SECRET}
+
+  images:
+    folder: ${APP_IMAGES_FOLDER:./uploads/}
+    url-prefix: /images/**
+    cache: 3600
+
+  home:
+    id: 1
+
+logging:
+  level:
+    root: INFO

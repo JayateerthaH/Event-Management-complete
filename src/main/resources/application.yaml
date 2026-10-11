@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: Events
+  profiles:
+    active: dev
+  config:
+    import:
+      # Local secrets (JWT_SECRET, BREVO_API_KEY, ...) — git-ignored; see .env.example in the project root
+      - optional:file:.env[.properties]
+      - classpath:config/auth.yml
+      - classpath:config/events.yml
+      - classpath:config/scheduler.yml
+      - classpath:config/analytics.yml
+      - classpath:config/profile.yml
+      - classpath:config/attendance.yml
+      - classpath:config/email.yml
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/eventdb?currentSchema=public}
+    username: ${DB_USERNAME:admin}
+    password: ${DB_PASSWORD:admin}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # options: create, create-drop, update, validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: public
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  sql:
+    init:
+      mode: always
+  jackson:
+    serialization:
+      indent_output: true
+    deserialization:
+      # Jackson 3 (Boot 4) rejects a missing/null primitive by default; this code base was written for
+      # Jackson 2's behavior (e.g. ProfileStudent.privacy is a primitive boolean).
+      fail-on-null-for-primitives: false
+
+logging:
+  level:
+    org.springframework: INFO
+    com.event: DEBUG
+
+server:
+  port: 8080
