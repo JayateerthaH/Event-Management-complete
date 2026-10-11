@@ -1,0 +1,9 @@
+app:
+  ai:
+    anthropic:
+      # Optional. Without it, recommendations still work and LLM features use their fallbacks.
+      api-key: ${ANTHROPIC_API_KEY:}
+      # Optional override (proxy / test stub); empty = Anthropic's default endpoint
+      base-url: ${ANTHROPIC_BASE_URL:}
+    model: ${AI_MODEL:claude-opus-5-5}
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:30}

@@ -1,5 +1,11 @@
 package com.event.eventmodule.api;
 
+import java.util.Date;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
+import com.event.eventmodule.repository.FeedBackRepository;
+import com.event.eventmodule.filter.EventService;
+import com.event.eventmodule.config.EventAccessService;
 import com.event.eventmodule.Registration.RegisterRepository;
 import com.event.eventmodule.Registration.RegistrationService;
 import com.event.eventmodule.dtoPayload.EventsDto;
@@ -24,6 +30,9 @@ public class EventApiImpl implements EventApi {
     private final RegisterRepository registerRepository;
     private final EventsRepository eventsRepository;
     private final CollaboratorsRepository collaboratorsRepository;
+    private final EventService eventService;
+    private final EventAccessService eventAccessService;
+    private final FeedBackRepository feedBackRepository;
 
     @Override
     public List<EventsDto> getPendingEvents(Long userId) {
@@ -68,6 +77,57 @@ public class EventApiImpl implements EventApi {
     @Override
     public long countAllEvents() {
         return eventsRepository.count();
+    }
+
+    @Override
+    public List<EventCard> upcomingOpenEvents() {
+        return eventsRepository.findByIsApprovedTrueAndEventDateAfterOrderByEventDateAsc(new Date()).stream()
+                .filter(e -> !Boolean.TRUE.equals(e.getIsCompleted()))
+                .map(this::toCard)
+                .toList();
+    }
+
+    @Override
+    public List<EventCard> registeredEvents(Long userId) {
+        return java.util.stream.Stream.concat(
+                        registrationService.getUpcomingEventsForUser(userId).stream(),
+                        registrationService.getPastEventsForUser(userId).stream())
+                .map(this::toCard)
+                .toList();
+    }
+
+    @Override
+    public List<EventCard> searchEvents(EventSearchCriteria c, int limit) {
+        return eventService.filterEvents(c.category(), c.keywords(), c.venue(), c.department(), c.dateRange(),
+                        c.costType(), PageRequest.of(0, Math.max(1, limit), Sort.by("eventDate").ascending()))
+                .getContent().stream()
+                .map(s -> new EventCard(s.getId(), s.getName(), s.getDescription(), s.getCategory(), s.getField(),
+                        s.getEventDate(), s.getVenue(), s.getMaxPeople(), s.getCostOfRegistration(), s.getImageUrl(),
+                        registerRepository.countRegistrationsByEventId(s.getId())))
+                .toList();
+    }
+
+    @Override
+    public List<String> eventCategories() {
+        return eventsRepository.findApprovedCategories();
+    }
+
+    @Override
+    public boolean canManageEvent(Long eventId, String userId, String roles, String email) {
+        return eventAccessService.isAllowed(eventId, userId, roles, email);
+    }
+
+    @Override
+    public List<FeedbackEntry> feedbackForEvent(Long eventId) {
+        return feedBackRepository.findAllByEventId(eventId).stream()
+                .map(f -> new FeedbackEntry(f.getNoOfStars() == null ? 0 : f.getNoOfStars(), f.getFeedBack()))
+                .toList();
+    }
+
+    private EventCard toCard(Events e) {
+        return new EventCard(e.getId(), e.getName(), e.getDescription(), e.getCategory(), e.getEventField(),
+                e.getEventDate(), e.getVenue(), e.getMaxPeople(), e.getCostOfRegistration(), e.getImageUrl(),
+                registerRepository.countRegistrationsByEventId(e.getId()));
     }
 
     private EventsDto convertToDto(Events e) {

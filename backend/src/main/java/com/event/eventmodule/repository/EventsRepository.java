@@ -45,4 +45,9 @@ public interface EventsRepository extends JpaRepository<Events, Long>, JpaSpecif
     List<Events> findByOrganizerId(Long organizerId);
 
     long countByIsApprovedTrue();
+
+    List<Events> findByIsApprovedTrueAndEventDateAfterOrderByEventDateAsc(java.util.Date after);
+
+    @Query("SELECT DISTINCT e.category FROM Events e WHERE e.isApproved = true AND e.category IS NOT NULL ORDER BY e.category")
+    List<String> findApprovedCategories();
 }
