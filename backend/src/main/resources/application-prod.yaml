@@ -1,0 +1,8 @@
+# Active when SPRING_PROFILES_ACTIVE=prod (set in the Dockerfile): quieter logs, compact JSON.
+logging:
+  level:
+    com.event: INFO
+spring:
+  jackson:
+    serialization:
+      indent_output: false

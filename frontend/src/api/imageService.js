@@ -1,15 +1,15 @@
 ﻿/**
- * imageService.js - Image upload via Vite proxy to avoid CORS
+ * imageService.js - event images (served and uploaded via the backend at VITE_API_URL)
  */
-import api, { getAccessToken } from "./apiClient";
+import api, { getAccessToken, API_BASE_URL, resolveImageUrl } from "./apiClient";
 
-export const getImageUrl = (fileName) => `/images/${fileName}`;
+export const getImageUrl = (fileName) => resolveImageUrl(fileName);
 
 export const uploadEventImage = async (eventId, file) => {
   const formData = new FormData();
   formData.append("file", file);
   const token = getAccessToken();
-  const res = await fetch(`/event/images/upload/${eventId}`, {
+  const res = await fetch(`${API_BASE_URL}/event/images/upload/${eventId}`, {
     method: "POST",
     body: formData,
     credentials: "include",

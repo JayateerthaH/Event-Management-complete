@@ -174,6 +174,37 @@ The end-to-end suite covers visitor browsing, signup, organizer onboarding, even
 registration, QR attendance through a (fake) camera, completion, feedback, certificate download,
 announcements, session refresh, profile editing and logout. Run it against a copy of the database.
 
+## Deployment
+
+**Backend** — `backend/Dockerfile` builds a production image (Java 21, non-root, `prod` profile):
+
+```bash
+docker build -t campusevents-api backend
+docker run -p 8080:8080 -v campusevents-data:/data --env-file backend/.env campusevents-api
+```
+
+Most hosts (Render, Railway, Fly.io, a VM) can build this Dockerfile directly. Set `PORT` if the host assigns one.
+**Attach a persistent disk at `/data`** — uploaded event images and certificate templates are stored there and
+are lost on every redeploy otherwise.
+
+**Frontend** — a static site: `cd frontend && npm ci && npm run build`, publish `frontend/dist`.
+Set `VITE_API_URL` to the backend's public URL **at build time**. SPA fallbacks are included for Netlify/Render
+(`public/_redirects`) and Vercel (`vercel.json`); on other hosts, rewrite unknown paths to `/index.html`.
+
+**Production settings** (backend environment):
+
+| Variable | Value |
+|---|---|
+| `JWT_SECRET`, `INTERNAL_SECRET` | new random values (not the development ones) |
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | your managed PostgreSQL |
+| `CORS_ALLOWED_ORIGINS` | the frontend's public URL, e.g. `https://campusevents.example.com` |
+| `FRONTEND_URL` | the same URL (used in email links) |
+| `COOKIE_SECURE=true`, `COOKIE_SAME_SITE=None` | when frontend and backend are on **different domains**; otherwise users are logged out when their session refreshes. Requires HTTPS |
+| `BREVO_API_KEY`, `PERSONAL_EMAIL` | email (QR codes, reminders); `PERSONAL_EMAIL` must be a sender verified in Brevo |
+| `ANTHROPIC_API_KEY` | optional, enables the Claude-backed AI features |
+
+Optional: `SHOW_SQL=true` logs SQL; `BREVO_URL` points email at a test server.
+
 ## Troubleshooting
 
 - **Backend hangs right after the Spring banner** — if the project lives in an iCloud-synced folder

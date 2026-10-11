@@ -98,7 +98,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="home-navbar">
+    <nav className={`home-navbar ${user ? "" : "home-navbar--guest"}`}>
       <div className="navbar-left">
         <div className="navbar-brand" onClick={() => navigate("/home")}>
           <svg className="brand-icon" fill="currentColor" viewBox="0 0 20 20">

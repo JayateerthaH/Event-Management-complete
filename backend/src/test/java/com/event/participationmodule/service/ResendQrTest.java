@@ -153,4 +153,18 @@ class ResendQrTest {
         var bitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(image)));
         return new MultiFormatReader().decode(bitmap).getText();
     }
+
+    @Test
+    void registrationIsSavedQrFirstBeforeTheEmailIsAttempted() throws Exception {
+        org.mockito.InOrder order = inOrder(users, requests, email);
+
+        service.sendQr(REG_EMAIL, USER_ID, EVENT_ID);
+
+        order.verify(users).save(any(Users.class));
+        order.verify(requests).save(any(UserRequest.class));
+        order.verify(email).sendQRMail(eq(REG_EMAIL), anyString(), anyString(), any(byte[].class));
+        // A method-wide transaction would delay the commit until after the email call returns
+        assertThat(ParticipationAuthService.class.getMethod("sendQr", String.class, Long.class, Long.class)
+                .isAnnotationPresent(org.springframework.transaction.annotation.Transactional.class)).isFalse();
+    }
 }

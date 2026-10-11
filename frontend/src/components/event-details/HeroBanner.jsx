@@ -1,18 +1,11 @@
 import { useState } from "react";
+import { resolveImageUrl } from "../../api/apiClient";
 import "../../styles/EventDetails.css";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&h=500&fit=crop";
 
-const buildImageUrl = (url) => {
-  if (!url) return FALLBACK_IMAGE;
-  try {
-    return new URL(url).toString();
-  } catch {
-    if (url.startsWith("/")) return url;
-    return `/images/${url}`;
-  }
-};
+const buildImageUrl = (url) => resolveImageUrl(url) || FALLBACK_IMAGE;
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";

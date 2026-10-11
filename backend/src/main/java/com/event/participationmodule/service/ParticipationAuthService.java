@@ -35,14 +35,16 @@ public class ParticipationAuthService {
     private final Map<String, Instant> lastResend = new ConcurrentHashMap<>();
     private Clock clock = Clock.systemUTC();   // replaceable in tests
 
-    @Transactional
+    // Deliberately not @Transactional: the records must be committed before the (slow, possibly failing)
+    // email call, otherwise "Resend QR" right after registering reports "not registered" until it returns.
+    // The QR is saved first, so any registration that resendQr() can see always has its QR code.
     public String sendQr(String email,Long userId,Long eventId) throws Exception {
 
         final String random = UUID.randomUUID().toString();
         byte[] qrPng = qrService.generateQRCode(random);
 
-        userRequestRepository.save(new UserRequest(eventId,email,userId));
         userRepository.save(new Users(random,email,eventId));
+        userRequestRepository.save(new UserRequest(eventId,email,userId));
 
         // Send Email with QR. A delivery failure must not undo the registration (the seat is taken and the
         // user is told they registered), so it is logged loudly; the student can use resendQr() later.

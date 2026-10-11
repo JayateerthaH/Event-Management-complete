@@ -22,6 +22,8 @@ app:
     folder: ${APP_IMAGES_FOLDER:./uploads/}
     url-prefix: /images/**
     cache: 3600
+  certificates:
+    folder: ${APP_CERTIFICATES_FOLDER:certificates}
 
   home:
     id: 1

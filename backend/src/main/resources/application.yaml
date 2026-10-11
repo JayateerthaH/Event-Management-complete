@@ -24,7 +24,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update   # options: create, create-drop, update, validate
-    show-sql: true
+    show-sql: ${SHOW_SQL:false}
     properties:
       hibernate:
         format_sql: true
@@ -52,4 +52,14 @@ logging:
     com.event: DEBUG
 
 server:
-  port: 8080
+  port: ${PORT:8080}
+  # Behind a load balancer / HTTPS proxy, build URLs from X-Forwarded-* headers
+  forward-headers-strategy: framework
+
+app:
+  # Used in email links ("View Event Details")
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  cookie:
+    # Cross-site deployment (frontend and API on different domains): COOKIE_SECURE=true, COOKIE_SAME_SITE=None
+    secure: ${COOKIE_SECURE:false}
+    same-site: ${COOKIE_SAME_SITE:Lax}

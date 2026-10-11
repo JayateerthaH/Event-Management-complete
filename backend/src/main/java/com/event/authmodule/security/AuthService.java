@@ -45,6 +45,13 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final OnBoardDtoRepository onBoardDtoRepository;
+
+    // Production with frontend and API on different sites needs COOKIE_SECURE=true and COOKIE_SAME_SITE=None,
+    // otherwise the browser won't send the refresh cookie and users are logged out when the access token expires.
+    @org.springframework.beans.factory.annotation.Value("${app.cookie.secure:false}")
+    private boolean cookieSecure = false;
+    @org.springframework.beans.factory.annotation.Value("${app.cookie.same-site:Lax}")
+    private String cookieSameSite = "Lax";
     private final DashboardApi dashboardApi;              // ✅ replaces UserClient
 
     // ─────────────────────────────────────────────
@@ -256,10 +263,10 @@ public class AuthService {
     private void writeRefreshCookie(HttpServletResponse response, String value, int maxAge, String path) {
         Cookie cookie = new Cookie("refreshToken", value);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);                    // true in production
+        cookie.setSecure(cookieSecure);
         cookie.setPath(path);
         cookie.setMaxAge(maxAge);
-        cookie.setAttribute("SameSite", "Lax");
+        cookie.setAttribute("SameSite", cookieSameSite);
         response.addCookie(cookie);
     }
 }

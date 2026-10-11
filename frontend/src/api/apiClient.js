@@ -2,7 +2,30 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 // All requests go directly to the API Gateway — no port 5173 involved
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080").replace(/\/+$/, "");
+export const API_BASE_URL = BASE_URL;
+
+/**
+ * Absolute URL for an event image. Images are served by the backend, so relative paths and bare file
+ * names must point at VITE_API_URL (the dev-server proxy doesn't exist in production). Old rows stored
+ * as http://localhost:8080/images/... are rebased too; other absolute URLs are kept.
+ */
+export const resolveImageUrl = (url) => {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) {
+    try {
+      const u = new URL(url);
+      if (/^(localhost|127\.0\.0\.1)$/.test(u.hostname) && u.pathname.startsWith("/images/")) {
+        return BASE_URL + u.pathname;
+      }
+    } catch {
+      /* fall through */
+    }
+    return url;
+  }
+  if (url.startsWith("/")) return BASE_URL + url;
+  return `${BASE_URL}/images/${url}`;
+};
 
 // ─── Token helpers ────────────────────────────────────────────────────────────
 // Refresh token lives ONLY in an HttpOnly cookie set by the backend.

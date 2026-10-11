@@ -1004,3 +1004,80 @@
     bottom: 10px;
   }
 }
+
+/* ─── Phone navbar: keep the page links reachable on a second row (they used to be hidden) ─── */
+@media (max-width: 768px) {
+  .home-navbar {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .navbar-left {
+    display: contents;
+  }
+
+  .navbar-brand {
+    order: 1;
+    min-width: 0;
+  }
+
+  .navbar-right {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .navbar-links {
+    display: flex;
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .navbar-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .navbar-links .nav-link {
+    white-space: nowrap;
+    padding: 6px 0;
+  }
+
+  .navbar-links .nav-link.active::after {
+    bottom: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-navbar {
+    padding: 10px 14px;
+  }
+
+  .brand-text {
+    font-size: 1.05rem;
+  }
+
+  .navbar-right {
+    gap: 6px;
+  }
+
+  .navbar-right .icon-btn,
+  .navbar-right .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .navbar-right > .nav-link {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+}
+
+/* Guests on small phones: search/bell/settings don't apply (Events is in the link row), keep one header row */
+@media (max-width: 480px) {
+  .home-navbar--guest .navbar-right .icon-btn {
+    display: none;
+  }
+}

@@ -34,7 +34,9 @@ public class CertificateTemplateService {
     private final CertificateTemplateRepository repository;
     private final RegisterRepository registerRepository;
     private final EventsRepository eventsRepository;
-    private static final String BASE_DIR = "certificates";
+    // Where uploaded certificate templates live (APP_CERTIFICATES_FOLDER); must be writable and persistent
+    @org.springframework.beans.factory.annotation.Value("${app.certificates.folder:certificates}")
+    private String baseDir = "certificates";
 
     public void uploadTemplate(MultipartFile file, Long eventId) throws IOException, IOException {
 
@@ -43,7 +45,7 @@ public class CertificateTemplateService {
             throw new IllegalArgumentException("Only HTML files allowed");
         }
 
-        Path dir = Paths.get(BASE_DIR, "event-" + eventId);
+        Path dir = Paths.get(baseDir, "event-" + eventId);
         Files.createDirectories(dir);
 
         Path filePath = dir.resolve("certificate.html");
@@ -67,7 +69,7 @@ public class CertificateTemplateService {
 //        if (feedBackTableRepository.existsByEventIdAndUserId(eventId, Long.valueOf(userId))) {
 //            throw new RuntimeException("Submit Feedback and Download Certificate");
 //        }
-        Path dir = Paths.get(BASE_DIR, "event-" + eventId);
+        Path dir = Paths.get(baseDir, "event-" + eventId);
         Path htmlPath = dir.resolve("certificate.html");
 
         if (!Files.exists(htmlPath)) {

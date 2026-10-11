@@ -418,7 +418,7 @@ export default function AdminDashboard() {
     return () => {
       cancelled = true;
     };
-  }, [activeTab]);
+  }, [activeTab, students.length, organizers.length]);
 
   // -- User search by email handler ------------------------------------------
   const handleUserSearch = async (e) => {
@@ -717,25 +717,27 @@ export default function AdminDashboard() {
     }
   };
 
-  // Load items for the active section — uses GET /admin/social for social, or fetches nothing (items managed individually)
-  const pcLoadItems = async () => {
-    setPcLoading(true);
-    setPcError(null);
-    try {
-      const items = await pcFetch(pcSection);
-      setPcItems(Array.isArray(items) ? items : items ? [items] : []);
-    } catch (err) {
-      console.error("[ProfileConfig] load error:", err);
-      setPcItems([]);
-    } finally {
-      setPcLoading(false);
-    }
-  };
-
-  // Load when section changes while profile-config is active
+  // Load the active section's items when it changes while profile-config is open.
+  // A response for a section the admin already left is ignored.
   useEffect(() => {
     if (activeTab !== "profile-config") return;
-    pcLoadItems();
+    let cancelled = false;
+    (async () => {
+      setPcLoading(true);
+      setPcError(null);
+      try {
+        const items = await pcFetch(pcSection);
+        if (!cancelled) setPcItems(Array.isArray(items) ? items : items ? [items] : []);
+      } catch (err) {
+        console.error("[ProfileConfig] load error:", err);
+        if (!cancelled) setPcItems([]);
+      } finally {
+        if (!cancelled) setPcLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [activeTab, pcSection]);
 
   const handlePcOpenCreate = () => {

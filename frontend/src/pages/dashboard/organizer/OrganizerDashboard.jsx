@@ -1287,7 +1287,7 @@ export default function OrganizerDashboard() {
               <div className="od-form__row">
                 <div className="od-form__group">
                   <label className="od-form__label">
-                    Registration Cost (?)
+                    Registration Cost (₹)
                   </label>
                   <input
                     className="od-form__input"
@@ -2237,8 +2237,8 @@ export default function OrganizerDashboard() {
                         <td>{fb?.userId ?? "--"}</td>
                         <td>
                           <span className="fb-stars-display">
-                            {"?".repeat(fb?.noOfStars || 0)}
-                            {"?".repeat(5 - (fb?.noOfStars || 0))}
+                            {"★".repeat(fb?.noOfStars || 0)}
+                            {"☆".repeat(5 - (fb?.noOfStars || 0))}
                           </span>
                           <span
                             style={{

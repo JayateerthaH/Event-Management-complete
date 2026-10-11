@@ -58,9 +58,9 @@ public class EventsDtoService {
 
         String fileName = fileService.saveFile(file);
 
-        // Full URL: http://localhost:8080/images/xxxx.png
-        String fullUrl = request.getScheme() + "://" + request.getServerName() + ":" +
-                request.getServerPort() + "/images/" + fileName;
+        // Full URL, e.g. https://api.example.com/images/xxxx.png (X-Forwarded-* aware behind a proxy)
+        String fullUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder
+                .fromContextPath(request).path("/images/").path(fileName).toUriString();
 
         Map<String, String> response = new HashMap<>();
         response.put("fileName", fileName); // store in DB

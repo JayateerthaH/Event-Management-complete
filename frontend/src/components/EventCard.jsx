@@ -1,5 +1,6 @@
 import { useState, memo } from "react";
 import { useNavigate } from "react-router-dom";
+import { resolveImageUrl } from "../api/apiClient";
 import "../styles/EventCard.css";
 
 const CATEGORY_COLORS = {
@@ -15,17 +16,7 @@ const CATEGORY_COLORS = {
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop";
 
-// Keep absolute backend URLs as-is; only normalize relative values.
-const buildImageUrl = (url) => {
-  if (!url) return FALLBACK_IMAGE;
-  try {
-    return new URL(url).toString();
-  } catch {
-    // Already a relative path like /images/file.jpg or just filename
-    if (url.startsWith("/")) return url;
-    return `/images/${url}`;
-  }
-};
+const buildImageUrl = (url) => resolveImageUrl(url) || FALLBACK_IMAGE;
 
 const formatDate = (dateString) => {
   if (!dateString) return "TBA";

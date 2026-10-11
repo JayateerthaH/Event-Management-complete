@@ -1,15 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { resolveImageUrl } from "../../api/apiClient";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop";
 
-// Same rules as EventCard: absolute URLs as-is, file names served from /images
-const imageSrc = (url) => {
-  if (!url) return FALLBACK_IMAGE;
-  if (/^https?:\/\//.test(url) || url.startsWith("/")) return url;
-  return `/images/${url}`;
-};
+const imageSrc = (url) => resolveImageUrl(url) || FALLBACK_IMAGE;
 
 const isFree = (cost) => !cost || /^0+(\.0+)?$/.test(String(cost).trim()) || String(cost).trim().toLowerCase() === "free";
 

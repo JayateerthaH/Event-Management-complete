@@ -24,6 +24,9 @@ class EventReminderScheduler {
     private final RegisterRepository registerRepository;
     private final NotificationApi notificationApi; // Injecting the shared Notification API
 
+    @org.springframework.beans.factory.annotation.Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl = "http://localhost:5173";
+
     /**
      * Track which reminders have been sent in-memory: "eventId-userId-type"
      * Note: In a large production system, this would be a database table.
@@ -129,7 +132,7 @@ class EventReminderScheduler {
                   </table>
                 </div>
                 <div style="text-align:center;margin:24px 0;">
-                  <a href="http://localhost:5173/events/%d"
+                  <a href="%s/events/%d"
                      style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">
                     View Event Details
                   </a>
@@ -146,6 +149,7 @@ class EventReminderScheduler {
                 eventDateStr,
                 event.getVenue() != null ? event.getVenue() : "TBD",
                 event.getCategory() != null ? event.getCategory() : "General",
+                frontendUrl.replaceAll("/+$", ""),
                 event.getId()
         );
     }
