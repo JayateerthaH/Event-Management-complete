@@ -213,8 +213,10 @@ public class AuthService {
 
         UserInfo user = tokenEntity.getUserInfo();
 
-        // Rotate refresh token
-        refreshTokenRepository.delete(tokenEntity);
+        // Rotate refresh token: single use — only the request that deletes it may continue
+        if (refreshTokenRepository.deleteByTokenValue(tokenEntity.getToken()) != 1) {
+            throw new BadCredentialsException("Refresh token already used or revoked");
+        }
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getUsername());
 
         addRefreshTokenCookie(response, newRefreshToken);
@@ -233,10 +235,8 @@ public class AuthService {
     // ─────────────────────────────────────────────
     @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-        authUtil.extractRefreshTokensFromCookies(request).stream()
-                .map(refreshTokenRepository::findByToken)
-                .filter(java.util.Objects::nonNull)
-                .forEach(refreshTokenRepository::delete);
+        authUtil.extractRefreshTokensFromCookies(request)
+                .forEach(refreshTokenRepository::deleteByTokenValue);
         writeRefreshCookie(response, "", 0, REFRESH_COOKIE_PATH);
         writeRefreshCookie(response, "", 0, LEGACY_REFRESH_COOKIE_PATH);
     }

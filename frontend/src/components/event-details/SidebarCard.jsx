@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { downloadIcs } from "../../utils/calendar";
 import ResendQrButton from "../ResendQrButton";
 import "../../styles/EventDetails.css";
 
@@ -15,7 +16,7 @@ const formatDate = (dateStr) => {
   }
 };
 
-export default function SidebarCard({ event, onRegister, refetchEvent }) {
+export default function SidebarCard({ event, details, onRegister, refetchEvent }) {
   // Poll for real-time registration count updates every 15 seconds
   const intervalRef = useRef(null);
   useEffect(() => {
@@ -119,7 +120,12 @@ export default function SidebarCard({ event, onRegister, refetchEvent }) {
 
           <button
             className="ed-sidebar__btn ed-sidebar__btn--outline"
-            onClick={onRegister}
+            onClick={() =>
+              downloadIcs(event, {
+                durationInHours: details?.durationInHours,
+                pageUrl: window.location.href,
+              })
+            }
             disabled={isStarted}
           >
             <svg

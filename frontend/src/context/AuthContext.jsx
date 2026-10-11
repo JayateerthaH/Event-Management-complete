@@ -10,9 +10,15 @@ const AuthContext = createContext(null);
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 // Revoke the refresh token server-side and expire its HttpOnly cookie (JS cannot clear it itself).
-// keepalive: logout navigates to /login right away, which would otherwise cancel this request.
+// Callers that navigate away wait for this (max 3s) so the redirect can't cut the request off;
+// keepalive is a backstop if the page unloads anyway.
 const revokeSession = () =>
-  fetch(`${API_URL}/auth/logout`, { method: 'POST', credentials: 'include', keepalive: true }).catch(() => {});
+  fetch(`${API_URL}/auth/logout`, {
+    method: 'POST',
+    credentials: 'include',
+    keepalive: true,
+    signal: AbortSignal.timeout(3000),
+  }).catch(() => {});
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -28,15 +34,17 @@ export function AuthProvider({ children }) {
 
   // Force logout — clears all state and redirects to login
   const forceLogout = useCallback(() => {
-    revokeSession();
-    try { googleLogout(); } catch (e /* eslint-disable-line no-unused-vars */) { console.error("Error parsing user data"); }
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('jwt_token');
-    localStorage.removeItem('google_token');
     if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-    window.location.href = '/login';
+    // Revoke on the server first; only then drop stored credentials and reload into /login.
+    revokeSession().finally(() => {
+      try { googleLogout(); } catch (e /* eslint-disable-line no-unused-vars */) { console.error("Error parsing user data"); }
+      // No setUser(null) here: the full reload below resets React state, and clearing it first made the
+      // route guard navigate to /login a second time (client-side) before this redirect.
+      localStorage.removeItem('user');
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('google_token');
+      window.location.href = '/login';
+    });
   }, []);
 
   // Schedule the next proactive refresh based on token expiry

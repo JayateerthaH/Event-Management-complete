@@ -56,6 +56,13 @@ test.describe.serial("CampusEvents journeys", () => {
       await page.goto("/dashboard");
       await expect(page).toHaveURL(/\/login$/);
 
+      // Field icons sit beside the inputs, never on top of the typed text
+      for (const field of ["#username", "#password"]) {
+        const icon = await page.locator(`.input-with-icon:has(${field}) .input-icon`).boundingBox();
+        const input = await page.locator(field).boundingBox();
+        expect(icon.x + icon.width).toBeLessThanOrEqual(input.x);
+      }
+
       await page.fill("#username", ADMIN.email);
       await page.fill("#password", "wrong-password");
       await page.click("button[type=submit]");
@@ -142,6 +149,14 @@ test.describe.serial("CampusEvents journeys", () => {
 
       await page.reload();
       await expect(page.getByText("Already Registered ✓")).toBeVisible();
+
+      // "Add to Calendar" downloads an all-day calendar entry (it used to open the registration form)
+      const downloadPromise = page.waitForEvent("download");
+      await page.getByRole("button", { name: "Add to Calendar" }).click();
+      const ics = fs.readFileSync(await (await downloadPromise).path(), "utf8");
+      expect(ics).toContain(`SUMMARY:${eventName}`);
+      expect(ics).toContain("DTSTART;VALUE=DATE:20261215");
+      await expect(page.locator(".reg-modal")).toHaveCount(0);
     });
   });
 
@@ -277,8 +292,10 @@ test.describe.serial("CampusEvents journeys", () => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
       await page.locator(".user-avatar[title=Account]").click();
       await page.locator(".nav-dropdown__item--logout").click();
-      await page.waitForURL("**/login");
-      await page.goto("/dashboard");
+      await page.waitForURL("**/login"); // the app only leaves once the session is revoked
+      await page.waitForLoadState("load");
+      // The route guard redirects straight to /login, so only wait for the navigation to start
+      await page.goto("/dashboard", { waitUntil: "commit" });
       await expect(page).toHaveURL(/\/login$/);
 
       // The browser still holds no usable refresh cookie: the server revoked it

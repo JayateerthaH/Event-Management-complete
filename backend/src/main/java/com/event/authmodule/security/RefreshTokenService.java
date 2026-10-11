@@ -28,7 +28,7 @@ public class RefreshTokenService {
 
     public void verifyExpiration(RefreshToken refreshToken) {
         if (refreshToken.getExpiryTime().isBefore(Instant.now())) {
-            refreshTokenRepository.delete(refreshToken);
+            refreshTokenRepository.deleteByTokenValue(refreshToken.getToken());
             throw new BadCredentialsException("Refresh token expired. Login again.");
         }
     }

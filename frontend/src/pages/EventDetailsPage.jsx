@@ -360,6 +360,7 @@ export default function EventDetailsPage() {
         <main className="ed-main">{renderTab()}</main>
         <SidebarCard
           event={event}
+          details={details}
           onRegister={() => setShowRegister(true)}
           refetchEvent={refetchEvent}
         />

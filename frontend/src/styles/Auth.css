@@ -183,23 +183,35 @@
   border-color: #ef4444;
 }
 
+/* Icon sits in its own tile beside the input, never on top of the typed text */
 .input-with-icon {
-  position: relative;
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  gap: 0.5rem;
 }
 
 .input-icon {
-  position: absolute;
-  left: 1rem;
-  font-size: 1.1rem;
-  opacity: 0.5;
+  flex: 0 0 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2b3544;
+  border: 1px solid #3d4754;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  opacity: 0.7;
   pointer-events: none;
-  z-index: 1;
+  transition: all 0.2s;
+}
+
+.input-with-icon:focus-within .input-icon {
+  border-color: #667eea;
+  opacity: 1;
 }
 
 .input-with-icon input {
-  padding-left: 2.75rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .error-text {
