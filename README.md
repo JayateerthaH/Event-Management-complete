@@ -52,12 +52,13 @@ Errors are returned as JSON: `{ "error": "...", "statusCode": 404, "timeStamp": 
 
 ```
 .
-├── pom.xml, mvnw                     # backend build (Maven wrapper)
-├── .env.example                      # backend configuration template
-├── src/main/java/com/event/          # backend modules (see table above)
-├── src/main/resources/               # application.yaml + config/*.yml per module
-├── src/test/java/                    # backend tests
-└── Events Frontend/auth-app/         # React frontend
+├── backend/                          # Spring Boot API
+│   ├── pom.xml, mvnw                 # build (Maven wrapper)
+│   ├── .env.example                  # backend configuration template
+│   ├── src/main/java/com/event/      # backend modules (see table above)
+│   ├── src/main/resources/           # application.yaml + config/*.yml per module
+│   └── src/test/java/                # backend tests
+└── frontend/                         # React app
     ├── src/                          # pages, components, API services
     ├── e2e/                          # Playwright end-to-end journeys
     └── .env.example                  # frontend configuration template
@@ -84,6 +85,7 @@ plus an idempotent Quartz script); existing data is never dropped.
 ### 2. Backend
 
 ```bash
+cd backend
 cp .env.example .env      # then fill in the values (see Configuration)
 ./mvnw spring-boot:run    # http://localhost:8080
 ```
@@ -91,7 +93,7 @@ cp .env.example .env      # then fill in the values (see Configuration)
 ### 3. Frontend
 
 ```bash
-cd "Events Frontend/auth-app"
+cd frontend
 cp .env.example .env      # VITE_API_URL=http://localhost:8080
 npm install
 npm run dev               # http://localhost:5173
@@ -112,7 +114,8 @@ Organizers sign up choosing the *Organizer* role, then an admin accepts them und
 
 ## Configuration
 
-Backend settings are read from environment variables or from a git-ignored `.env` file in the project root.
+Backend settings are read from environment variables or from a git-ignored `backend/.env` file
+(loaded from the directory you start the backend in).
 Never commit real values.
 
 | Variable | Required | Description |
@@ -125,16 +128,16 @@ Never commit real values.
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | no | default `jdbc:postgresql://localhost:5432/eventdb`, `admin` / `admin` |
 | `CORS_ALLOWED_ORIGINS` | no | frontend origin(s), comma-separated; default `http://localhost:5173` |
 
-Frontend (`Events Frontend/auth-app/.env`): `VITE_API_URL` (backend URL) and `VITE_GOOGLE_CLIENT_ID`.
+Frontend (`frontend/.env`): `VITE_API_URL` (backend URL) and `VITE_GOOGLE_CLIENT_ID`.
 
 ## Testing
 
 ```bash
 # Backend: unit + integration tests (EventsApplicationTests needs the database running)
-./mvnw test
+cd backend && ./mvnw test
 
 # Frontend: lint and production build
-cd "Events Frontend/auth-app" && npm run lint && npm run build
+cd frontend && npm run lint && npm run build
 
 # End-to-end: 12 browser journeys against the running stack (setup in e2e/README.md)
 npx playwright install chromium   # once
@@ -148,7 +151,7 @@ announcements, session refresh, profile editing and logout. Run it against a cop
 ## Troubleshooting
 
 - **Backend hangs right after the Spring banner** — if the project lives in an iCloud-synced folder
-  (e.g. `~/Desktop`), iCloud creates duplicate files such as `Foo 2.class` in `target/`. Delete `target/` and
+  (e.g. `~/Desktop`), iCloud creates duplicate files such as `Foo 2.class` in `backend/target/`. Delete it and
   move the project to a non-synced folder.
 - **`Port 8080 already in use`** — find the process with `lsof -i :8080`.
 - **QR / reminder emails not arriving** — check `BREVO_API_KEY`; failures are logged with the recipient and event.

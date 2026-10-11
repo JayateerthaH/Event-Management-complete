@@ -30,7 +30,7 @@ A modern React authentication application built with Vite, featuring email/passw
 
 1. **Clone and install dependencies:**
    ```bash
-   cd auth-app
+   cd frontend
    npm install
    ```
 
@@ -106,7 +106,7 @@ The signup form supports three role types:
 ## Project Structure
 
 ```
-auth-app/
+frontend/
 ├── src/
 │   ├── components/
 │   │   └── ProtectedRoute.jsx    # Route protection

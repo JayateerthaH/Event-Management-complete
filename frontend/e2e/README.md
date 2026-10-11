@@ -13,7 +13,7 @@ feedback, certificate download, announcements, session refresh, profile, logout.
    ```bash
    docker exec postgres_db createdb -U admin eventdb_e2e
    docker exec postgres_db pg_dump -U admin eventdb | docker exec -i postgres_db psql -U admin -d eventdb_e2e -q
-   # start the backend against it:  DB_URL='jdbc:postgresql://localhost:5432/eventdb_e2e?currentSchema=public' ./mvnw spring-boot:run
+   # start the backend against it (from backend/):  DB_URL='jdbc:postgresql://localhost:5432/eventdb_e2e?currentSchema=public' ./mvnw spring-boot:run
    # sign up e2e.admin@example.com / Passw0rd! in the app, then:
    docker exec postgres_db psql -U admin -d eventdb_e2e -c "update auth.app_user set role='{ADMIN}' where username='e2e.admin@example.com'; insert into auth.admin(id,name) select user_id,'E2E Admin' from auth.app_user where username='e2e.admin@example.com';"
    ```

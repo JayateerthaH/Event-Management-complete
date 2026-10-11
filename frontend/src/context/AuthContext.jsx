@@ -9,9 +9,10 @@ const AuthContext = createContext(null);
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-// Revoke the refresh token server-side and expire its HttpOnly cookie (JS cannot clear it itself)
+// Revoke the refresh token server-side and expire its HttpOnly cookie (JS cannot clear it itself).
+// keepalive: logout navigates to /login right away, which would otherwise cancel this request.
 const revokeSession = () =>
-  fetch(`${API_URL}/auth/logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
+  fetch(`${API_URL}/auth/logout`, { method: 'POST', credentials: 'include', keepalive: true }).catch(() => {});
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
