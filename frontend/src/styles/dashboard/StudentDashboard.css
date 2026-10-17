@@ -1072,3 +1072,16 @@
   font-size: 0.8rem;
   margin: 1rem 0 0;
 }
+
+/* Reminder to pick interests (students with none yet) */
+.interest-nudge {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;
+  background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 14px;
+  padding: 0.9rem 1.1rem; margin-bottom: 1.25rem; color: #e2e8f0;
+}
+.interest-nudge p { margin: 0; flex: 1 1 260px; line-height: 1.5; }
+.interest-nudge__actions { display: flex; gap: 0.5rem; align-items: center; }
+.interest-nudge__go { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; text-decoration: none;
+  border-radius: 9px; padding: 0.5rem 0.9rem; font-weight: 600; min-height: 38px; display: inline-flex; align-items: center; }
+.interest-nudge__close { background: none; border: 1px solid rgba(148, 163, 184, 0.3); color: #cbd5e1; border-radius: 9px;
+  padding: 0.5rem 0.9rem; font: inherit; cursor: pointer; min-height: 38px; }

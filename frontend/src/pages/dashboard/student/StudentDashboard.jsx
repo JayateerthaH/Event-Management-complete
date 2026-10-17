@@ -18,6 +18,7 @@ import {
 import FeedbackForm from "../../../components/FeedbackForm";
 import ResendQrButton from "../../../components/ResendQrButton";
 import RecommendedEvents from "../../../components/ai/RecommendedEvents";
+import InterestNudge from "../../../components/engagement/InterestNudge";
 import {
   BarChart,
   Bar,
@@ -589,6 +590,7 @@ export default function StudentDashboard() {
               </div>
             </section>
 
+            <InterestNudge />
             <RecommendedEvents limit={6} />
 
             {/* Upcoming Registered Events */}

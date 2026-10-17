@@ -2,7 +2,7 @@ import { test, expect, chromium } from "@playwright/test";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { dashboardLoaded, API, ADMIN, PASSWORD, login, openTab, trackErrors, readQrCode } from "./support/helpers.js";
+import { dashboardLoaded, API, ADMIN, PASSWORD, login, openTab, trackErrors, readQrCode, gotoSettled } from "./support/helpers.js";
 import { writeQrVideo } from "./support/qrVideo.js";
 
 /**
@@ -81,6 +81,9 @@ test.describe.serial("CampusEvents journeys", () => {
       await page.fill('input[name="confirmPassword"]', PASSWORD);
       await page.check('input[name="agreeToTerms"]');
       await page.click("button[type=submit]");
+      // New accounts are offered the interest picker first; it can be skipped
+      await page.waitForURL("**/welcome");
+      await page.getByRole("button", { name: "Skip for now" }).click();
       await page.waitForURL("**/dashboard");
       await dashboardLoaded(page);
     });
@@ -136,7 +139,18 @@ test.describe.serial("CampusEvents journeys", () => {
       await page.fill('input[name="confirmPassword"]', PASSWORD);
       await page.check('input[name="agreeToTerms"]');
       await page.click("button[type=submit]");
+      // Pick an interest (event categories are offered) so the first suggestions fit
+      await page.waitForURL("**/welcome");
+      const chip = page.locator(".welcome-chips button").first();
+      const topic = (await chip.innerText()).trim();
+      await chip.click();
+      await page.getByRole("button", { name: /Continue with 1 topic/ }).click();
       await page.waitForURL("**/dashboard");
+      const saved = await page.evaluate(async (api) => {
+        const res = await fetch(`${api}/management/interests`, { headers: { Authorization: `Bearer ${localStorage.getItem("jwt_token")}` } });
+        return (await res.json()).map((i) => i.interestName);
+      }, API);
+      expect(saved).toEqual([topic]);
       await dashboardLoaded(page);
 
       await page.goto(`/events/${eventId}`);
@@ -193,7 +207,7 @@ test.describe.serial("CampusEvents journeys", () => {
     expect(reg.status()).toBe(201);
 
     const setName = async (page, name) => {
-      await page.goto("/friends?tab=settings");
+      await gotoSettled(page, "/friends?tab=settings");
       await page.locator("#set-name").fill(name);
       await page.getByRole("button", { name: "Save settings" }).click();
       await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();

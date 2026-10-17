@@ -60,3 +60,17 @@ export async function readQrCode(email, eventId) {
   expect.soft(false, "QR code stored for registration within 10s").toBe(true);
   throw new Error("No QR code stored for the registration");
 }
+
+/**
+ * page.goto that retries once when WebKit reports the navigation was interrupted by the app's own
+ * post-login redirect still settling (seen only on the iPhone project, intermittently).
+ */
+export async function gotoSettled(page, url) {
+  try {
+    await page.goto(url);
+  } catch (e) {
+    if (!/interrupted by another navigation/.test(e.message)) throw e;
+    await page.waitForLoadState("networkidle");
+    await page.goto(url);
+  }
+}

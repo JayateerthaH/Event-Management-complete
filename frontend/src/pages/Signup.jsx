@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { GOOGLE_ENABLED } from '../config/google';
@@ -40,8 +40,10 @@ export default function Signup() {
     return { strength, label: 'Strong', color: '#10b981' };
   };
 
+  // New accounts pick their interests first; someone already logged in goes straight to the dashboard
+  const justSignedUp = useRef(false);
   useEffect(() => {
-    if (user) navigate('/dashboard');
+    if (user) navigate(justSignedUp.current ? '/welcome' : '/dashboard');
   }, [user, navigate]);
 
   const handleChange = (e) => {
@@ -133,8 +135,9 @@ export default function Signup() {
     setErrors({});
     try {
       const roles = formData.role === 'STUDENT' ? ['STUDENT'] : [formData.role, 'STUDENT'];
+      justSignedUp.current = true;
       await loginWithGoogle(credentialResponse, roles);
-      navigate('/dashboard');
+      navigate('/welcome');
     } catch (error) {
       setErrors({ submit: error.message });
     }
@@ -155,18 +158,16 @@ export default function Signup() {
         ? ['STUDENT'] 
         : [formData.role, 'STUDENT'];
 
-      console.log('Submitting signup with roles:', roles);
-
+      justSignedUp.current = true;
       await signup({
         username: formData.username,
         password: formData.password,
         roles: roles
       });
       
-      console.log('Signup successful, redirecting to /dashboard');
-      // Navigate happens automatically through AuthContext
+      // The effect above navigates to /welcome once the user is set
     } catch (error) {
-      console.error('Signup failed:', error.message);
+      justSignedUp.current = false;
       setErrors({ submit: error.message || 'Signup failed. Please try again.' });
     } finally {
       setLoading(false);
