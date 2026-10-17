@@ -58,7 +58,9 @@ test.describe.serial("CampusEvents journeys", () => {
 
       // Field icons sit beside the inputs, never on top of the typed text
       for (const field of ["#username", "#password"]) {
-        const icon = await page.locator(`.input-with-icon:has(${field}) .input-icon`).boundingBox();
+        const iconLocator = page.locator(`.input-with-icon:has(${field}) .input-icon`);
+        if (!(await iconLocator.isVisible())) continue; // phones hide the field icons (Mobile.css)
+        const icon = await iconLocator.boundingBox();
         const input = await page.locator(field).boundingBox();
         expect(icon.x + icon.width).toBeLessThanOrEqual(input.x);
       }

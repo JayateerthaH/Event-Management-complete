@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { GOOGLE_ENABLED } from '../config/google';
+import PasswordInput from '../components/PasswordInput';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Auth.css';
 
@@ -144,6 +145,10 @@ export default function Login() {
                   <input
                     type="email"
                     id="username"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
@@ -159,9 +164,9 @@ export default function Login() {
                 <label htmlFor="password">Password *</label>
                 <div className="input-with-icon">
                   <span className="input-icon">🔒</span>
-                  <input
-                    type="password"
+                  <PasswordInput
                     id="password"
+                    autoComplete="current-password"
                     name="password"
                     value={formData.password}
                     onChange={handleChange}

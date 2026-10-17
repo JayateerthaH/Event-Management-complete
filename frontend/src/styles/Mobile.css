@@ -1,99 +1,100 @@
 /*
- * Phone fixes shared by every page. Loaded after all other styles (main.jsx), so plain selectors win.
- * Found by auditing each page and dashboard tab at 360px wide.
+ * Phone fixes shared by every page, found by auditing each page and dashboard tab at 360px wide.
+ * Pages load their own CSS on demand (after this file), so every selector here starts with :root —
+ * one class more than the page rule it overrides, which wins regardless of load order.
  */
 
 /* Metric cards: let the label wrap and the card shrink instead of being cut off at the right edge */
-.sd-metric-card,
-.od-metric-card,
-.admin-metric-card,
-.sd-metric-card__info,
-.od-metric-card__info,
-.admin-metric-card__info {
+:root .sd-metric-card,
+:root .od-metric-card,
+:root .admin-metric-card,
+:root .sd-metric-card__info,
+:root .od-metric-card__info,
+:root .admin-metric-card__info {
   min-width: 0;
 }
 
 @media (max-width: 768px) {
   /* iOS Safari zooms into any field whose text is under 16px when it is tapped */
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
-  select,
-  textarea {
+  :root input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  :root select,
+  :root textarea {
     font-size: 16px !important;
   }
 
-  .sd-metric-card__label,
-  .od-metric-card__label,
-  .admin-metric-card__label {
+  :root .sd-metric-card__label,
+  :root .od-metric-card__label,
+  :root .admin-metric-card__label {
     white-space: normal;
   }
 
   /* Tap targets: at least ~40px for anything a finger has to hit */
-  .nav-link {
+  :root .nav-link {
     display: inline-flex;
     align-items: center;
     min-height: 40px;
   }
 
   /* !important: page styles (e.g. the login "Remember me" box) size these more specifically */
-  input[type="checkbox"],
-  input[type="radio"] {
+  :root input[type="checkbox"],
+  :root input[type="radio"] {
     width: 20px !important;
     height: 20px !important;
   }
 
-  .ai-chip {
+  :root .ai-chip {
     min-height: 36px;
     padding-top: 8px;
     padding-bottom: 8px;
   }
 
-  .sd-btn--download,
-  .em-edit-btn,
-  .em-back-btn {
+  :root .sd-btn--download,
+  :root .em-edit-btn,
+  :root .em-back-btn {
     min-height: 40px;
   }
 
-  .em-back-btn {
+  :root .em-back-btn {
     display: inline-flex;
     align-items: center;
   }
 
-  .pf-hero__camera {
+  :root .pf-hero__camera {
     width: 40px;
     height: 40px;
   }
 
-  .od-action-btn {
+  :root .od-action-btn {
     min-width: 40px;
     min-height: 40px;
   }
 
-  .ed-modal__close,
-  .pc-btn--edit,
-  .pc-btn--delete {
+  :root .ed-modal__close,
+  :root .pc-btn--edit,
+  :root .pc-btn--delete {
     min-width: 40px;
     min-height: 40px;
   }
 
-  .em-add-btn,
-  .admin-edit-btn,
-  .admin-accept-btn,
-  .pc-btn,
-  .ai-btn--text,
-  .sd-link-btn,
-  .od-link-btn {
+  :root .em-add-btn,
+  :root .admin-edit-btn,
+  :root .admin-accept-btn,
+  :root .pc-btn,
+  :root .ai-btn--text,
+  :root .sd-link-btn,
+  :root .od-link-btn {
     min-height: 40px;
   }
 
-  .od-link-btn,
-  .sd-link-btn {
+  :root .od-link-btn,
+  :root .sd-link-btn {
     white-space: nowrap;
   }
 
   /* Small labels and badges: keep them at a readable 11px */
-  .ed-hero__badge,
-  .sd-tag,
-  .sd-event-row__month {
+  :root .ed-hero__badge,
+  :root .sd-tag,
+  :root .sd-event-row__month {
     font-size: 11px;
   }
 }
@@ -101,23 +102,23 @@
 /* Tables as cards on phones: each row becomes a card of "Column: value" lines (labels come from
    utils/responsiveTables.js), so action buttons like Approve are visible without sideways scrolling */
 @media (max-width: 640px) {
-  table.rt-cards,
-  table.rt-cards tbody,
-  table.rt-cards tr,
-  table.rt-cards td {
+  :root table.rt-cards,
+  :root table.rt-cards tbody,
+  :root table.rt-cards tr,
+  :root table.rt-cards td {
     display: block;
     width: 100%;
   }
 
-  table.rt-cards {
+  :root table.rt-cards {
     min-width: 0 !important;
   }
 
-  table.rt-cards thead {
+  :root table.rt-cards thead {
     display: none;
   }
 
-  table.rt-cards tr {
+  :root table.rt-cards tr {
     margin-bottom: 12px;
     padding: 8px 14px;
     border: 1px solid rgba(139, 92, 246, 0.2);
@@ -125,7 +126,7 @@
     background: rgba(255, 255, 255, 0.02);
   }
 
-  table.rt-cards td {
+  :root table.rt-cards td {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -137,7 +138,7 @@
     overflow-wrap: anywhere;
   }
 
-  table.rt-cards td::before {
+  :root table.rt-cards td::before {
     content: attr(data-label);
     flex-shrink: 0;
     max-width: 45%;
@@ -147,11 +148,11 @@
     color: #94a3b8;
   }
 
-  table.rt-cards td[data-label=""]::before {
+  :root table.rt-cards td[data-label=""]::before {
     content: none;
   }
 
-  table.rt-cards td[data-label=""] {
+  :root table.rt-cards td[data-label=""] {
     justify-content: center;
     text-align: center;
   }
@@ -161,56 +162,56 @@
    and the Student / Organizer / Admin choice fits on one row instead of three tall cards */
 @media (max-width: 768px) {
   /* flex: 1 in a full-height column made this half the screen; size it to its content */
-  .auth-left-panel {
+  :root .auth-left-panel {
     flex: 0 0 auto;
     min-height: 0;
     padding: 1.25rem 1.5rem 1rem;
   }
 
-  .auth-left-panel .brand-header {
+  :root .auth-left-panel .brand-header {
     margin-bottom: 0.75rem;
   }
 
-  .auth-left-panel .hero-image,
-  .auth-left-panel .hero-subtitle {
+  :root .auth-left-panel .hero-image,
+  :root .auth-left-panel .hero-subtitle {
     display: none;
   }
 
-  .auth-left-panel .hero-title {
+  :root .auth-left-panel .hero-title {
     font-size: 1.6rem;
     margin-bottom: 0;
   }
 
-  .role-selector {
+  :root .role-selector {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.5rem;
   }
 
-  .role-option {
+  :root .role-option {
     padding: 0.6rem 0.25rem;
     gap: 0.25rem;
   }
 
-  .role-icon {
+  :root .role-icon {
     font-size: 1.4rem;
   }
 }
 
 /* Event filters on phones: the sidebar is hidden (SidebarFilters.css), so a "Filters" button opens it as a
    full-screen panel. Desktop keeps the sidebar and never shows the button or the close (✕) button. */
-.mobile-filters-btn,
-.filters-close-btn {
+:root .mobile-filters-btn,
+:root .filters-close-btn {
   display: none;
 }
 
-.filters-header__actions {
+:root .filters-header__actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 @media (max-width: 768px) {
-  .mobile-filters-btn {
+  :root .mobile-filters-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -226,12 +227,12 @@
     cursor: pointer;
   }
 
-  .mobile-filters-btn svg {
+  :root .mobile-filters-btn svg {
     width: 18px;
     height: 18px;
   }
 
-  .mobile-filters-btn__count {
+  :root .mobile-filters-btn__count {
     min-width: 22px;
     height: 22px;
     padding: 0 6px;
@@ -244,7 +245,7 @@
     justify-content: center;
   }
 
-  .sidebar-filters.sidebar-filters--open {
+  :root .sidebar-filters.sidebar-filters--open {
     display: block;
     position: fixed;
     inset: 0;
@@ -258,7 +259,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  .sidebar-filters--open .filters-close-btn {
+  :root .sidebar-filters--open .filters-close-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -273,7 +274,7 @@
   }
 
   /* Keep "Apply Filters" reachable at the bottom while scrolling the options */
-  .sidebar-filters--open .apply-filters-btn {
+  :root .sidebar-filters--open .apply-filters-btn {
     position: sticky;
     bottom: 0;
     margin-top: 16px;
@@ -284,15 +285,37 @@
 /* Notifications on phones: the 380px panel was anchored to the bell, which isn't at the screen edge, so
    it ran off the left side. Anchor it to the navbar instead and span the screen with a 12px margin. */
 @media (max-width: 600px) {
-  .notif-wrap {
+  :root .notif-wrap {
     position: static;
   }
 
-  .notif-panel {
+  :root .notif-panel {
     left: 12px;
     right: 12px;
     width: auto;
     top: 60px;
     max-height: min(480px, calc(100vh - 90px));
+  }
+}
+
+/* Login / Sign up on phones: the form starts at the top, full-width fields, no repeated heading */
+@media (max-width: 768px) {
+  :root .auth-right-panel {
+    flex: 1 0 auto;
+    align-items: flex-start;
+    padding: 1.25rem 1.25rem 2rem;
+  }
+
+  :root .auth-form-container {
+    width: 100%;
+  }
+
+  :root .form-section-title,
+  :root .input-icon {
+    display: none;
+  }
+
+  :root .form-title {
+    font-size: 1.5rem;
   }
 }
