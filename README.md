@@ -9,7 +9,7 @@ admins approve organizers and events and manage the platform.
 | Backend | Java 21, Spring Boot 4, Spring Security (JWT + refresh-token cookie), Spring Data JPA / Hibernate, Quartz |
 | Database | PostgreSQL (one schema per module) |
 | Frontend | React 19, Vite 7, React Router 7, axios, Recharts, html5-qrcode |
-| Integrations | Brevo (email), ZXing (QR codes), OpenHTMLtoPDF (certificates), Claude via the Anthropic Java SDK (optional AI features) |
+| Integrations | Brevo (email), ZXing (QR codes), OpenHTMLtoPDF (certificates), optional AI features via Claude (Anthropic Java SDK) or Google Gemini (Interactions API) |
 
 ## Features
 
@@ -134,9 +134,11 @@ Never commit real values.
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | no | GitHub OAuth (server-side redirect flow) |
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | no | default `jdbc:postgresql://localhost:5432/eventdb`, `admin` / `admin` |
 | `CORS_ALLOWED_ORIGINS` | no | frontend origin(s), comma-separated; default `http://localhost:5173` |
-| `ANTHROPIC_API_KEY` | for AI | Claude API key. Without it recommendations and similar events still work, search falls back to keywords, feedback insights show counts only, and the other AI tools are hidden in the UI |
-| `AI_MODEL`, `AI_TIMEOUT_SECONDS` | no | default `claude-opus-5-5`, `30` |
-| `ANTHROPIC_BASE_URL` | no | proxy or local stub of the Messages API (empty = Anthropic) |
+| `ANTHROPIC_API_KEY` **or** `GEMINI_API_KEY` | for AI | Claude or Gemini API key. Without either, recommendations and similar events still work, search falls back to keywords, feedback insights show counts only, and the other AI tools are hidden in the UI |
+| `AI_PROVIDER` | no | `auto` (default: Claude if its key is set, else Gemini), `claude`, `gemini` or `none` |
+| `AI_MODEL` / `GEMINI_MODEL` | no | Claude model (default `claude-opus-5-5`) / Gemini model (default `gemini-3.8-flash`; `gemini-3.5-flash-lite` is cheaper) |
+| `AI_TIMEOUT_SECONDS` | no | per AI request, default `30` |
+| `ANTHROPIC_BASE_URL` / `GEMINI_BASE_URL` | no | proxy or local test stub (empty = the provider's endpoint) |
 
 Frontend (`frontend/.env`): `VITE_API_URL` (backend URL) and `VITE_GOOGLE_CLIENT_ID`.
 
@@ -144,6 +146,8 @@ Frontend (`frontend/.env`): `VITE_API_URL` (backend URL) and `VITE_GOOGLE_CLIENT
 
 All under `/ai`, login required unless noted. LLM-backed endpoints are rate limited per user and cached briefly;
 emails and phone numbers are removed from anything sent to the model, and the model only sees public event data.
+The model is Claude or Gemini (see `AI_PROVIDER`); both return the same validated JSON, so every feature works the
+same with either. Gemini calls use `store=false`, so interactions are not saved on Google's side for later retrieval.
 
 | Endpoint | Who | LLM | Where in the UI |
 |---|---|---|---|
@@ -201,7 +205,7 @@ Set `VITE_API_URL` to the backend's public URL **at build time**. SPA fallbacks 
 | `FRONTEND_URL` | the same URL (used in email links) |
 | `COOKIE_SECURE=true`, `COOKIE_SAME_SITE=None` | when frontend and backend are on **different domains**; otherwise users are logged out when their session refreshes. Requires HTTPS |
 | `BREVO_API_KEY`, `PERSONAL_EMAIL` | email (QR codes, reminders); `PERSONAL_EMAIL` must be a sender verified in Brevo |
-| `ANTHROPIC_API_KEY` | optional, enables the Claude-backed AI features |
+| `ANTHROPIC_API_KEY` or `GEMINI_API_KEY` | optional, enables the LLM-backed AI features (`AI_PROVIDER` picks one if both are set) |
 
 Optional: `SHOW_SQL=true` logs SQL; `BREVO_URL` points email at a test server.
 

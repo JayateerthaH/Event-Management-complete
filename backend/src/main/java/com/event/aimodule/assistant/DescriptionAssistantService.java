@@ -35,7 +35,7 @@ public class DescriptionAssistantService {
                 : request.keyPoints().stream().filter(Objects::nonNull).map(String::trim).filter(p -> !p.isEmpty()).limit(15).toList();
         if (!llm.isEnabled()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "The AI assistant is not configured on this server (set ANTHROPIC_API_KEY).");
+                    "The AI assistant is not configured on this server (set ANTHROPIC_API_KEY or GEMINI_API_KEY).");
         }
 
         String content = PiiRedactor.redact("""

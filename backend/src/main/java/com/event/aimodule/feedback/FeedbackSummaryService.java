@@ -38,7 +38,7 @@ public class FeedbackSummaryService {
         }
         if (!llm.isEnabled()) {
             return new FeedbackSummaryResponse(entries.size(), average, false, null,
-                    "AI summaries are not configured on this server (set ANTHROPIC_API_KEY).");
+                    "AI summaries are not configured on this server (set ANTHROPIC_API_KEY or GEMINI_API_KEY).");
         }
 
         List<FeedbackEntry> used = entries.size() > MAX_ENTRIES ? entries.subList(entries.size() - MAX_ENTRIES, entries.size()) : entries;

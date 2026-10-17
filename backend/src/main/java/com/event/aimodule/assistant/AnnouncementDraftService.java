@@ -47,7 +47,7 @@ public class AnnouncementDraftService {
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId)).card();
         if (!llm.isEnabled()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "The AI assistant is not configured on this server (set ANTHROPIC_API_KEY).");
+                    "The AI assistant is not configured on this server (set ANTHROPIC_API_KEY or GEMINI_API_KEY).");
         }
 
         String content = PiiRedactor.redact("""

@@ -47,7 +47,7 @@ public class EventQuestionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
         if (!llm.isEnabled()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
-                    "The event assistant is not configured on this server (set ANTHROPIC_API_KEY).");
+                    "The event assistant is not configured on this server (set ANTHROPIC_API_KEY or GEMINI_API_KEY).");
         }
 
         String facts = PiiRedactor.redact(EventFacts.describe(event));
