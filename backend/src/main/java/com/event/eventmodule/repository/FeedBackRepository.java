@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface FeedBackRepository extends JpaRepository<FeedBack, Long> {
     List<FeedBack> findAllByEventId(Long eventId);
+    long countByUserId(Long userId);
 
     boolean existsByUserIdAndEventId(Long userId, Long eventId);
     

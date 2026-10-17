@@ -134,4 +134,7 @@ public interface RegisterRepository extends JpaRepository<Register, Long> {
             "GROUP BY FUNCTION('MONTH', e.eventDate), FUNCTION('MONTHNAME', e.eventDate)")
     List<MonthlyAttendanceCount> getMonthlyAttendanceCount(@Param("userId") Long userId);
 
+
+    @Query("SELECT r FROM Register r JOIN FETCH r.eventsDto WHERE r.userId = :userId AND r.isAttended = true")
+    List<Register> findAttendedByUserId(@Param("userId") Long userId);
 }

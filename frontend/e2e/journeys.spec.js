@@ -349,6 +349,19 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("attending, feedback and a certificate earn badges, announced in the bell", async ({ browser }) => {
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      const badges = page.locator(".achievements");
+      await expect(badges).toBeVisible();
+      for (const name of ["First step", "Certified"]) {
+        await expect(badges.locator(".badge-tile.is-earned", { hasText: name })).toBeVisible();
+      }
+      await expect(badges.locator(".badge-tile:not(.is-earned)", { hasText: "Regular" }).getByText("1/5")).toBeVisible();
+      await page.locator("button[title=Notifications]").click();
+      await expect(page.getByText('You earned the "First step" badge').first()).toBeVisible();
+    });
+  });
+
   test("organizer sends an announcement and the registered student is notified", async ({ browser }) => {
     const title = `Room change ${run}`;
     await asUser(browser, organizerEmail, PASSWORD, async (page) => {

@@ -18,6 +18,7 @@ const BUDDY_TITLES = {
   BUDDY_REQUEST: "New friend request",
   BUDDY_ACCEPTED: "Request accepted",
   FRIEND_GOING: "Your friend is going",
+  ACHIEVEMENT: "New badge earned",
 };
 
 const timeAgo = (dateStr) => {
@@ -89,7 +90,8 @@ export default function Navbar() {
         key: `b-${n.id}`, title: BUDDY_TITLES[n.type] || "Friends", message: n.message, createdAt: n.createdAt,
         unread: !n.read,
         to: n.type === "FRIEND_GOING" && n.eventId ? `/events/${n.eventId}`
-          : n.type === "BUDDY_REQUEST" ? "/friends?tab=requests" : "/friends",
+          : n.type === "BUDDY_REQUEST" ? "/friends?tab=requests"
+          : n.type === "ACHIEVEMENT" ? "/dashboard" : "/friends",
       }));
       setNotifications(
         [...buddies, ...announcements].sort((x, y) => new Date(y.createdAt || 0) - new Date(x.createdAt || 0)),

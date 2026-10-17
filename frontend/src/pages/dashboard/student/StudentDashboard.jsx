@@ -20,6 +20,7 @@ import ResendQrButton from "../../../components/ResendQrButton";
 import RecommendedEvents from "../../../components/ai/RecommendedEvents";
 import InterestNudge from "../../../components/engagement/InterestNudge";
 import SavedEvents from "../../../components/engagement/SavedEvents";
+import Achievements from "../../../components/engagement/Achievements";
 import {
   BarChart,
   Bar,
@@ -339,6 +340,8 @@ export default function StudentDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
+  const [badgeCount, setBadgeCount] = useState(null);
+  const handleBadgeSummary = useCallback((s) => setBadgeCount(s.earned), []);
   const [userInfo, setUserInfo] = useState(null);
   const [pendingEvents, setPendingEvents] = useState([]);
   const [pastEvents, setPastEvents] = useState([]);
@@ -585,8 +588,8 @@ export default function StudentDashboard() {
                   </svg>
                 </span>
                 <div className="sd-metric-card__info">
-                  <span className="sd-metric-card__value">{achievements}</span>
-                  <span className="sd-metric-card__label">Achievements</span>
+                  <span className="sd-metric-card__value">{badgeCount ?? achievements}</span>
+                  <span className="sd-metric-card__label">Badges earned</span>
                 </div>
               </div>
             </section>
@@ -594,6 +597,7 @@ export default function StudentDashboard() {
             <InterestNudge />
             <RecommendedEvents limit={6} />
             <SavedEvents />
+            <Achievements onSummary={handleBadgeSummary} />
 
             {/* Upcoming Registered Events */}
             <section className="sd-card">

@@ -17,6 +17,7 @@ import java.util.Map;
 public class BuddyController {
 
     private final BuddyService buddyService;
+    private final com.event.socialmodule.achievement.AchievementService achievementService;
 
     public record SayHi(Long userId, Long eventId) {}
     public record ReportBody(Long userId, String reason) {}
@@ -121,7 +122,17 @@ public class BuddyController {
 
     @GetMapping("/notifications")
     public List<NotificationView> notifications(@RequestAttribute("userId") String userId) {
+        try {
+            achievementService.recheckIfDue(id(userId));   // newly earned badges show up in the bell
+        } catch (RuntimeException ignored) {
+            // badges are a nice-to-have; never break the bell
+        }
         return buddyService.notifications(id(userId));
+    }
+
+    @GetMapping("/achievements")
+    public com.event.socialmodule.achievement.AchievementService.Summary achievements(@RequestAttribute("userId") String userId) {
+        return achievementService.forStudent(id(userId));
     }
 
     @PostMapping("/notifications/read")

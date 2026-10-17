@@ -40,6 +40,11 @@ public interface EventApi {
     /** Public page content of any event (approved or not; callers check {@link EventProfile#approved()}). */
     Optional<EventProfile> eventProfile(Long eventId);
 
+    /** What a student has done so far, for achievements. */
+    record Participation(List<EventCard> attended, int registrations, long feedbackGiven, int certificates) {}
+
+    Participation participation(Long userId);
+
     /** Approved events the user saved ("Interested"), most recently saved first. */
     List<EventCard> savedEvents(Long userId);
 

@@ -32,3 +32,25 @@
 .saved-events__name:hover { color: #c4b5fd; }
 .saved-events__meta { grid-area: meta; color: #94a3b8; font-size: 0.85rem; }
 .saved-events__list .save-btn { grid-area: btn; }
+
+.achievements__count { color: #c4b5fd; font-size: 0.85rem; font-weight: 600; }
+.achievements__grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 170px), 1fr)); }
+.badge-tile {
+  display: grid; gap: 0.3rem; align-content: start; padding: 0.9rem; border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025); border: 1px dashed rgba(148, 163, 184, 0.25); color: #94a3b8;
+}
+.badge-tile.is-earned { border-style: solid; border-color: rgba(251, 191, 36, 0.45); background: rgba(251, 191, 36, 0.06); color: #e2e8f0; }
+.badge-tile__icon { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(148, 163, 184, 0.12); color: #64748b; }
+.badge-tile.is-earned .badge-tile__icon { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1f1300; }
+.badge-tile__icon svg { width: 22px; height: 22px; }
+.badge-tile__name { font-weight: 700; color: #f1f5f9; }
+.badge-tile:not(.is-earned) .badge-tile__name { color: #cbd5e1; }
+.badge-tile__desc { font-size: 0.8rem; line-height: 1.4; }
+.badge-tile__status { font-size: 0.78rem; font-weight: 700; color: #fbbf24; }
+.badge-tile__progress { display: flex; align-items: center; gap: 0.5rem; }
+.badge-tile__bar { flex: 1; height: 6px; border-radius: 999px; background: rgba(148, 163, 184, 0.18); overflow: hidden; }
+.badge-tile__bar span { display: block; height: 100%; background: #8b5cf6; border-radius: inherit; }
+.badge-tile__num { font-size: 0.75rem; font-variant-numeric: tabular-nums; }
+.achievements__note { margin: 0.75rem 0 0; font-size: 0.8rem; color: #64748b; }

@@ -106,6 +106,14 @@ public class EventApiImpl implements EventApi {
     }
 
     @Override
+    public Participation participation(Long userId) {
+        List<EventCard> attended = registerRepository.findAttendedByUserId(userId).stream()
+                .map(r -> toCard(r.getEventsDto())).toList();
+        return new Participation(attended, userRegistrationRepository.findByUserId(userId).size(),
+                feedBackRepository.countByUserId(userId), registerRepository.findEligibleCertificates(userId).size());
+    }
+
+    @Override
     public List<EventCard> savedEvents(Long userId) {
         List<Long> ids = savedEventRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
                 .map(com.event.eventmodule.saved.SavedEvent::getEventId).toList();

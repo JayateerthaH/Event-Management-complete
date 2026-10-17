@@ -37,3 +37,5 @@ export const markBuddyNotificationsRead = () => api.post("/social/notifications/
 
 export const getStudentReports = () => data(api.get("/social/admin/reports"));
 export const resolveStudentReport = (id) => api.post(`/social/admin/reports/${id}/resolve`);
+
+export const getAchievements = () => data(api.get("/social/achievements"));
