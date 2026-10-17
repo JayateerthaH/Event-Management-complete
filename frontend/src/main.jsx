@@ -44,8 +44,9 @@ window.addEventListener('vite:preloadError', (event) => {
 // Installable app: the service worker keeps the app shell and the tickets page available offline.
 // Once it controls the page, load the tickets page code so it's cached before the student needs it.
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
+  // Registered a few seconds after load, when the browser is idle, so installing it never competes with
+  // the first page load or an immediate navigation (WebKit can abort a navigation that overlaps it).
+  const register = () => navigator.serviceWorker
       .register('/sw.js')
       .then(() => {
         const warm = () => {
@@ -57,5 +58,8 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
         else navigator.serviceWorker.addEventListener('controllerchange', warm, { once: true })
       })
       .catch(() => {})
+  window.addEventListener('load', () => {
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1))
+    setTimeout(() => idle(register), 4000)
   })
 }

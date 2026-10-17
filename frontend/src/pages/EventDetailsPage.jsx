@@ -370,7 +370,8 @@ export default function EventDetailsPage() {
         <SidebarCard
           event={event}
           details={details}
-          onRegister={() => setShowRegister(true)}
+          onRegister={() => setShowRegister("register")}
+          onJoinWaitlist={() => setShowRegister("waitlist")}
           refetchEvent={refetchEvent}
         />
       </div>
@@ -380,6 +381,7 @@ export default function EventDetailsPage() {
       {showRegister && (
         <RegisterModal
           event={event}
+          mode={showRegister === "waitlist" ? "waitlist" : "register"}
           onClose={() => setShowRegister(false)}
           onSuccess={() => {
             setShowRegister(false);

@@ -3,6 +3,7 @@ import { downloadIcs } from "../../utils/calendar";
 import ResendQrButton from "../ResendQrButton";
 import SaveButton from "../engagement/SaveButton";
 import ShareButton from "../engagement/ShareButton";
+import SeatControls from "./SeatControls";
 import "../../styles/EventDetails.css";
 
 const formatDate = (dateStr) => {
@@ -18,7 +19,7 @@ const formatDate = (dateStr) => {
   }
 };
 
-export default function SidebarCard({ event, details, onRegister, refetchEvent }) {
+export default function SidebarCard({ event, details, onRegister, onJoinWaitlist, refetchEvent }) {
   // Poll for real-time registration count updates every 15 seconds
   const intervalRef = useRef(null);
   useEffect(() => {
@@ -111,6 +112,15 @@ export default function SidebarCard({ event, details, onRegister, refetchEvent }
             >
               Register Now
             </button>
+          )}
+
+          {!isStarted && (
+            <SeatControls
+              eventId={event.id ?? event.eventId}
+              onJoinWaitlist={onJoinWaitlist}
+              onChanged={refetchEvent}
+              refreshKey={`${isRegistered}-${registered}`}
+            />
           )}
 
           {isRegistered && !isStarted && (

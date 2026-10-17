@@ -49,6 +49,7 @@ public class NotificationPrefsService {
             case NEW_EVENT -> p.isNewEvents();
             case ACHIEVEMENT -> p.isBadges();
             case DIGEST -> p.isWeeklyDigest();
+            case SEAT_OPENED -> true;   // they asked for the seat; always tell them
         };
     }
 

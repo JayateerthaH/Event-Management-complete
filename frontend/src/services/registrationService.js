@@ -44,3 +44,18 @@ export const resendQr = async (eventId) => {
   const { data } = await api.post(`/attendance/resend-qr/${eventId}`);
   return typeof data === "string" ? data : "QR code sent to your email.";
 };
+
+/** Seat status for the logged-in student: registered, full, waitlist position, whether they can release. */
+export const getSeatStatus = async (eventId) => (await api.get(`/event/${eventId}/seat`)).data;
+
+/** Join a full event's waitlist; the details are used to register automatically when a seat opens. */
+export const joinWaitlist = async (eventId, formData) =>
+  (await api.post(`/event/${eventId}/waitlist`, {
+    name: formData.name, email: formData.email, phone: formData.phone,
+    department: formData.department, yearOfStudy: formData.yearOfStudy,
+  })).data;
+
+export const leaveWaitlist = async (eventId) => (await api.delete(`/event/${eventId}/waitlist`)).data;
+
+/** "Can't make it": frees the seat for the next student on the waitlist. */
+export const releaseSeat = async (eventId) => (await api.delete(`/event/${eventId}/register`)).data;

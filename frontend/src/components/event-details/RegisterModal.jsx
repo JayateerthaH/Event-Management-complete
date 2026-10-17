@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { registerForEvent } from '../../services/registrationService';
+import { registerForEvent, joinWaitlist } from '../../services/registrationService';
 import { useAuth } from '../../context/AuthContext';
 
 const DEPARTMENTS = [
@@ -13,7 +13,9 @@ const YEARS = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Alumni', 'Other'
 
 const EMPTY = { name: '', email: '', phone: '', department: '', yearOfStudy: '' };
 
-export default function RegisterModal({ event, onClose, onSuccess }) {
+/** mode "waitlist": the same details join the waitlist and are used to register when a seat opens. */
+export default function RegisterModal({ event, onClose, onSuccess, mode = 'register' }) {
+  const waitlist = mode === 'waitlist';
   const { user } = useAuth();
 
   const [form, setForm] = useState(() => ({
@@ -60,16 +62,22 @@ export default function RegisterModal({ event, onClose, onSuccess }) {
     setLoading(true);
 
     try {
-      const res = await registerForEvent(eventId, form);
-
-      // Extract success message from backend response
-      const resData = res?.data;
-      const message =
-        resData?.message ??
-        resData?.msg ??
-        resData?.status ??
-        (typeof resData === 'string' ? resData : null) ??
-        'Registration successful!';
+      let message;
+      if (waitlist) {
+        const status = await joinWaitlist(eventId, form);
+        message = `You're number ${status.position} on the waitlist.`;
+        window.dispatchEvent(new Event('ce-seat-changed'));
+      } else {
+        const res = await registerForEvent(eventId, form);
+        // Extract success message from backend response
+        const resData = res?.data;
+        message =
+          resData?.message ??
+          resData?.msg ??
+          resData?.status ??
+          (typeof resData === 'string' ? resData : null) ??
+          'Registration successful!';
+      }
 
       setSuccessMessage(message);
       setErrorMessage('');
@@ -118,11 +126,15 @@ export default function RegisterModal({ event, onClose, onSuccess }) {
                 <polyline points="9 12 11 14 15 9" />
               </svg>
             </div>
-            <h3>You&apos;re Registered!</h3>
+            <h3>{waitlist ? "You're on the waitlist" : <>You&apos;re Registered!</>}</h3>
             <p className="reg-success__message">{successMessage}</p>
             <p className="reg-success__sub">
-              You have successfully registered for <strong>{eventName}</strong>.
-              <br />Check your email for confirmation details.
+              {waitlist ? (
+                <>If a seat opens for <strong>{eventName}</strong>, we&apos;ll register you automatically and email your QR ticket.</>
+              ) : (
+                <>You have successfully registered for <strong>{eventName}</strong>.
+                <br />Check your email for confirmation details.</>
+              )}
             </p>
             <button
               className="reg-success__btn"
@@ -142,7 +154,7 @@ export default function RegisterModal({ event, onClose, onSuccess }) {
       <div className="ed-modal reg-modal" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="ed-modal__header">
-          <h3>Register for <span className="reg-modal__event-name">{eventName}</span></h3>
+          <h3>{waitlist ? 'Join the waitlist for' : 'Register for'} <span className="reg-modal__event-name">{eventName}</span></h3>
           <button className="ed-modal__close" onClick={onClose} aria-label="Close" disabled={loading}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -262,14 +274,14 @@ export default function RegisterModal({ event, onClose, onSuccess }) {
             {loading ? (
               <>
                 <span className="reg-form__spinner" />
-                Registering&hellip;
+                {waitlist ? 'Joining' : 'Registering'}&hellip;
               </>
             ) : (
               <>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                Complete Registration
+                {waitlist ? 'Join waitlist' : 'Complete Registration'}
               </>
             )}
           </button>

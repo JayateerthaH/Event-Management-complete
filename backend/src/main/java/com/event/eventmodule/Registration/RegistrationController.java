@@ -21,8 +21,10 @@ public class RegistrationController {
     private final RegisterRepository registerRepository;
 
     @PostMapping("/{eventId}/register")
-    public synchronized ResponseEntity<?> register(@PathVariable Long eventId, @RequestBody Register register,@RequestAttribute("userId") String userId) throws Exception {
-        return registrationService.save(Long.valueOf(userId),eventId,register);
+    public ResponseEntity<?> register(@PathVariable Long eventId, @RequestBody Register register,@RequestAttribute("userId") String userId) throws Exception {
+        synchronized (RegistrationLock.LOCK) {   // shared with releasing a seat and waitlist promotion
+            return registrationService.save(Long.valueOf(userId),eventId,register);
+        }
     }
 
     // Returns every user's registration mapping — admin only

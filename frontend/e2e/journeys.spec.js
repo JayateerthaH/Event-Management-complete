@@ -498,6 +498,56 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("waitlist: a full event takes a waitlist, and a released seat goes to the next student", async ({ browser, request }) => {
+    const jwt = async (username) => (await (await request.post(`${API}/auth/login`, { data: { username, password: PASSWORD } })).json()).jwt;
+    const auth = (t) => ({ Authorization: `Bearer ${t}` });
+    const org = await jwt(organizerEmail);
+    const when = new Date(Date.now() + 6 * 86400_000).toISOString();
+    const tinyName = `Tiny Room ${run}`;
+    const created = await (await request.post(`${API}/event/organizer/create`, { headers: auth(org),
+      data: { name: tinyName, description: "One seat", category: "Talk", eventField: "CSE", eventDate: when, venue: "Room 1", maxPeople: 1, costOfRegistration: "0" } })).json();
+    expect((await request.put(`${API}/events/admin/approve/${created.id}`, { headers: auth(await jwt(ADMIN.email)) })).ok()).toBe(true);
+    const holder = `holder.${run}@example.com`;
+    await request.post(`${API}/auth/signup`, { data: { username: holder, password: PASSWORD, roles: ["STUDENT"] } });
+    const holderJwt = await jwt(holder);
+    const reg = await request.post(`${API}/event/${created.id}/register`, { headers: auth(holderJwt),
+      data: { name: "Hold Er", email: holder, phone: "9876500001", department: "CSE", yearOfStudy: "2" } });
+    expect(reg.status()).toBe(201);
+
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await gotoSettled(page, `/events/${created.id}`);
+      const sidebar = page.locator(".ed-sidebar");
+      await sidebar.getByRole("button", { name: /Join the waitlist/ }).click();
+      const modal = page.locator(".reg-modal");
+      await modal.getByPlaceholder("Enter your full name").fill("Stu Dent");
+      await modal.getByPlaceholder("your.email@example.com").fill(studentEmail);
+      await modal.getByPlaceholder("+91 98765 43210").fill("9876543210");
+      await modal.locator("select").nth(0).selectOption({ index: 1 });
+      await modal.locator("select").nth(1).selectOption({ index: 1 });
+      await modal.locator('input[type="checkbox"]').check();
+      await modal.locator('button[type="submit"]').click();
+      await expect(page.locator(".reg-success__message")).toHaveText("You're number 1 on the waitlist.");
+      await page.getByRole("button", { name: "Done" }).click();
+      await expect(sidebar.getByRole("status")).toContainText("You're number 1 on the waitlist");
+    });
+
+    // The holder can't make it
+    expect((await request.delete(`${API}/event/${created.id}/register`, { headers: auth(holderJwt) })).ok()).toBe(true);
+
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await page.locator("button[title=Notifications]").click();
+      await expect(page.getByText(`A seat opened: you're now registered for ${tinyName}`)).toBeVisible();
+      await page.keyboard.press("Escape");
+      await gotoSettled(page, `/events/${created.id}`);
+      const sidebar = page.locator(".ed-sidebar");
+      await expect(sidebar.getByText("Already Registered ✓")).toBeVisible();
+      // and now the student releases it themselves
+      await sidebar.getByRole("button", { name: "Can't make it? Release your seat" }).click();
+      await sidebar.getByRole("button", { name: "Release my seat" }).click();
+      await expect(sidebar.getByRole("button", { name: "Register Now" })).toBeVisible();
+    });
+  });
+
   test("an expiring session is refreshed with the HttpOnly cookie", async ({ browser }) => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
       const result = await page.evaluate(async (api) => {
