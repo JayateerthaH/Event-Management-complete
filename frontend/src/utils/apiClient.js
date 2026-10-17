@@ -8,7 +8,7 @@ import api, {
   saveTokens,      // deprecated alias
   clearTokens,
   isTokenExpired,
-  AUTH_BASE_URL,
+  refreshAccessToken,
 } from '../api/apiClient';
 import { jwtDecode } from 'jwt-decode';
 
@@ -24,53 +24,10 @@ export const isTokenExpiredOrExpiring = (token, bufferSeconds = 60) => {
   } catch { return true; }
 };
 
-// ─── silentRefresh — used by the AuthContext scheduled timer ──────────────────
-let _isRefreshing = false;
-let _queue = [];
-
-const processQueue = (err, token = null) => {
-  _queue.forEach(({ resolve, reject }) => err ? reject(err) : resolve(token));
-  _queue = [];
-};
-
-export const silentRefresh = async () => {
-  if (_isRefreshing) {
-    return new Promise((resolve, reject) => _queue.push({ resolve, reject }));
-  }
-  _isRefreshing = true;
-
-  const BASE_URL = AUTH_BASE_URL;
-
-  try {
-    // Refresh token is in an HttpOnly cookie — browser sends it automatically.
-    // No body needed.
-    const res = await fetch(`${BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-    if (res.status === 401 || res.status === 403) throw new Error('REFRESH_FAILED');
-    if (!res.ok) throw new Error('NETWORK_ERROR');
-
-    const data   = await res.json();
-    const newJwt = data.accessToken || data.jwt || data.token || data.access_token;
-    if (!newJwt)  throw new Error('REFRESH_FAILED');
-
-    saveAccessToken(newJwt);
-    window.dispatchEvent(new CustomEvent('jwt:refreshed', { detail: { token: newJwt } }));
-    processQueue(null, newJwt);
-    return newJwt;
-  } catch (err) {
-    processQueue(err);
-    if (err.message === 'REFRESH_FAILED') {
-      window.dispatchEvent(new CustomEvent('jwt:forceLogout'));
-    }
-    throw err;
-  } finally {
-    _isRefreshing = false;
-  }
-};
+// ─── silentRefresh — used by AuthContext (startup and scheduled refresh) ─────
+// Shares the single in-flight refresh with the 401 interceptor; two concurrent refreshes would
+// reuse a rotated refresh token and log the user out.
+export const silentRefresh = () => refreshAccessToken();
 
 // ─── Fetch-like response wrapper ─────────────────────────────────────────────
 const toFetchLike = (axiosRes) => ({

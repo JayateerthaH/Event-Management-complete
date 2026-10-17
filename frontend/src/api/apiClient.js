@@ -182,17 +182,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// ─── Refresh logic — one call at a time, queue concurrent requests ─────────────
-
-let isRefreshing = false;
-let waitQueue = []; // { resolve, reject }
-
-const processQueue = (error, newToken = null) => {
-  waitQueue.forEach(({ resolve, reject }) =>
-    error ? reject(error) : resolve(newToken),
-  );
-  waitQueue = [];
-};
+// ─── Refresh logic — one call at a time, shared by every caller ────────────────
 
 const doRefresh = async () => {
   // The refresh token is in an HttpOnly cookie — the browser sends it
@@ -223,6 +213,27 @@ const doRefresh = async () => {
   return newJwt;
 };
 
+// Each refresh rotates the refresh cookie, so a second concurrent refresh would present an already-used
+// token and be rejected (logging the user out). Every caller — the 401 interceptor and AuthContext's
+// startup/scheduled refresh — shares this one in-flight request.
+let refreshPromise = null;
+
+export const refreshAccessToken = () => {
+  if (!refreshPromise) {
+    refreshPromise = doRefresh()
+      .catch((err) => {
+        if (err.message === "REFRESH_FAILED") {
+          window.dispatchEvent(new CustomEvent("jwt:forceLogout"));
+        }
+        throw err;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+};
+
 // ─── Response interceptor — handle HTML detection + 401 → refresh → retry ────
 
 api.interceptors.response.use(
@@ -250,33 +261,19 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retried) {
       originalRequest._retried = true;
 
-      if (isRefreshing) {
-        // Another refresh is in flight — queue and wait
-        try {
-          const newToken = await new Promise((resolve, reject) => {
-            waitQueue.push({ resolve, reject });
-          });
-          originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-          return api(originalRequest);
-        } catch (queueErr) {
-          return Promise.reject(queueErr);
-        }
+      // Sent with a token that has been replaced since (a refresh finished meanwhile): just retry
+      const current = getAccessToken();
+      if (current && originalRequest.headers?.["Authorization"] !== `Bearer ${current}`) {
+        originalRequest.headers["Authorization"] = `Bearer ${current}`;
+        return api(originalRequest);
       }
 
-      isRefreshing = true;
       try {
-        const newToken = await doRefresh();
-        processQueue(null, newToken);
+        const newToken = await refreshAccessToken();
         originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshErr) {
-        processQueue(refreshErr, null);
-        if (refreshErr.message === "REFRESH_FAILED") {
-          window.dispatchEvent(new CustomEvent("jwt:forceLogout"));
-        }
         return Promise.reject(refreshErr);
-      } finally {
-        isRefreshing = false;
       }
     }
 
