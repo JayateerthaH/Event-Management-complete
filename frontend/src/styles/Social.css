@@ -170,3 +170,5 @@
 .following-list__head b { color: #f8fafc; }
 .following-list__head span { color: #94a3b8; font-size: 0.85rem; }
 .social-link { color: #c4b5fd; }
+.cal-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.cal-reset { justify-self: start; }

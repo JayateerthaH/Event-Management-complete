@@ -548,6 +548,28 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("calendar subscription: the feed lists the student's events, and resetting the link revokes the old one", async ({ browser, request }) => {
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await gotoSettled(page, "/settings");
+      const input = page.locator("#cal-url");
+      await expect(input).toHaveValue(/\/api\/public\/calendar\/[A-Za-z0-9_-]+\.ics$/);
+      await expect(page.getByRole("link", { name: "Add to Google Calendar" })).toHaveAttribute("href", /calendar\.google\.com.*cid=webcal/);
+      const feedPath = (u) => `${API}/public/calendar/${u.match(/calendar\/([A-Za-z0-9_-]+)\.ics/)[1]}.ics`;
+      const oldUrl = await input.inputValue();
+      const res = await request.get(feedPath(oldUrl));
+      expect(res.headers()["content-type"]).toContain("text/calendar");
+      const ics = (await res.text()).replace(/\r\n /g, "");
+      expect(ics).toContain(`SUMMARY:${eventName}`);
+      expect(ics).toContain("BEGIN:VCALENDAR");
+
+      await page.getByRole("button", { name: "Reset link" }).click();
+      await page.getByRole("button", { name: "Reset link" }).click(); // confirm
+      await expect(input).not.toHaveValue(oldUrl);
+      expect((await request.get(feedPath(oldUrl))).status()).toBe(404);
+      expect((await request.get(feedPath(await input.inputValue()))).ok()).toBe(true);
+    });
+  });
+
   test("an expiring session is refreshed with the HttpOnly cookie", async ({ browser }) => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
       const result = await page.evaluate(async (api) => {
