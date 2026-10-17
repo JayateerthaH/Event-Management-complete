@@ -8,6 +8,7 @@ import api, {
   saveTokens,      // deprecated alias
   clearTokens,
   isTokenExpired,
+  AUTH_BASE_URL,
 } from '../api/apiClient';
 import { jwtDecode } from 'jwt-decode';
 
@@ -38,7 +39,7 @@ export const silentRefresh = async () => {
   }
   _isRefreshing = true;
 
-  const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  const BASE_URL = AUTH_BASE_URL;
 
   try {
     // Refresh token is in an HttpOnly cookie — browser sends it automatically.

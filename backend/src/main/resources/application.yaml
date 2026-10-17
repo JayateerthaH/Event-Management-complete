@@ -62,3 +62,5 @@ app:
     # Cross-site deployment (frontend and API on different domains): COOKIE_SECURE=true, COOKIE_SAME_SITE=None
     secure: ${COOKIE_SECURE:false}
     same-site: ${COOKIE_SAME_SITE:Lax}
+    # Behind a frontend proxy that serves the API under a prefix (frontend/vercel.json: /api): COOKIE_PATH_PREFIX=/api
+    path-prefix: ${COOKIE_PATH_PREFIX:}

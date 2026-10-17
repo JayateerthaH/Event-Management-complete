@@ -4,6 +4,10 @@ import { jwtDecode } from "jwt-decode";
 // All requests go directly to the API Gateway — no port 5173 involved
 const BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080").replace(/\/+$/, "");
 export const API_BASE_URL = BASE_URL;
+// Login, signup, refresh and logout carry the HttpOnly refresh cookie. In production VITE_AUTH_URL=/api sends
+// them through the frontend's own domain (proxied by vercel.json), so the cookie is first-party: Safari blocks
+// third-party cookies, and its users would otherwise be logged out whenever the access token expires.
+export const AUTH_BASE_URL = (import.meta.env.VITE_AUTH_URL || BASE_URL).replace(/\/+$/, "");
 
 /**
  * Absolute URL for an event image. Images are served by the backend, so relative paths and bare file
@@ -193,7 +197,7 @@ const processQueue = (error, newToken = null) => {
 const doRefresh = async () => {
   // The refresh token is in an HttpOnly cookie — the browser sends it
   // automatically when credentials: 'include' is set.  No body needed.
-  const res = await fetch(`${BASE_URL}/auth/refresh`, {
+  const res = await fetch(`${AUTH_BASE_URL}/auth/refresh`, {
     method: "POST",
     credentials: "include", // sends the HttpOnly cookie
     headers: { "Content-Type": "application/json" },

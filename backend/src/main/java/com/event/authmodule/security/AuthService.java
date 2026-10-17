@@ -52,6 +52,10 @@ public class AuthService {
     private boolean cookieSecure = false;
     @org.springframework.beans.factory.annotation.Value("${app.cookie.same-site:Lax}")
     private String cookieSameSite = "Lax";
+    // Set when the API is reached through a frontend proxy under a prefix (e.g. /api), so the cookie path
+    // matches what the browser requests; empty when the frontend calls the API directly.
+    @org.springframework.beans.factory.annotation.Value("${app.cookie.path-prefix:}")
+    private String cookiePathPrefix = "";
     private final DashboardApi dashboardApi;              // ✅ replaces UserClient
 
     // ─────────────────────────────────────────────
@@ -264,7 +268,7 @@ public class AuthService {
         Cookie cookie = new Cookie("refreshToken", value);
         cookie.setHttpOnly(true);
         cookie.setSecure(cookieSecure);
-        cookie.setPath(path);
+        cookie.setPath(cookiePathPrefix + path);
         cookie.setMaxAge(maxAge);
         cookie.setAttribute("SameSite", cookieSameSite);
         response.addCookie(cookie);

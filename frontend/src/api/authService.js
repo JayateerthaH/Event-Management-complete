@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import { saveAccessToken, clearTokens } from './apiClient';
+import { saveAccessToken, clearTokens, AUTH_BASE_URL } from './apiClient';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const BASE_URL = AUTH_BASE_URL;
 
 // Use plain axios (no interceptors) for auth endpoints so we never get
 // caught in a refresh loop during login / signup

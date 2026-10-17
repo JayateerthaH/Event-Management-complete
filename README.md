@@ -209,6 +209,17 @@ Set `VITE_API_URL` to the backend's public URL **at build time**. SPA fallbacks 
 
 Optional: `SHOW_SQL=true` logs SQL; `BREVO_URL` points email at a test server.
 
+**Live deployment** (free tier): frontend on Vercel (https://campusevents-jh.vercel.app), backend on Render
+(https://campusevents-api.onrender.com), PostgreSQL on Neon. Pushing to `main` redeploys both.
+- `frontend/vercel.json` proxies `/api/*` to the backend, and the frontend is built with `VITE_AUTH_URL=/api`, so
+  login, refresh and logout run on the frontend's own domain. The refresh cookie is then first-party (Safari
+  blocks third-party cookies). The backend sets `COOKIE_PATH_PREFIX=/api` to match. If the backend URL changes,
+  update `vercel.json`.
+- On Render's 512 MB free plan, the backend runs with `MALLOC_ARENA_MAX=2`, `SERVER_TOMCAT_THREADS_MAX=40` and
+  `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=45 -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss256k -XX:MaxMetaspaceSize=150m -XX:ReservedCodeCacheSize=40m -XX:MaxDirectMemorySize=32m`.
+- `.github/workflows/keep-alive.yml` pings the backend every 10 minutes so it doesn't sleep. The free plan has no
+  persistent disk, so uploaded images and certificate templates are lost on each backend redeploy.
+
 ## Troubleshooting
 
 - **Backend hangs right after the Spring banner** — if the project lives in an iCloud-synced folder

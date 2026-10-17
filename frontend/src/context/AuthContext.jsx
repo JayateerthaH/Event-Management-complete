@@ -3,11 +3,12 @@ import { createContext, useContext, useState, useEffect, useRef, useCallback } f
 import { googleLogout } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { silentRefresh, isTokenExpiredOrExpiring } from '../utils/apiClient';
+import { AUTH_BASE_URL } from '../api/apiClient';
 import { loginRequest, signupRequest } from '../api/authService';
 
 const AuthContext = createContext(null);
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_URL = AUTH_BASE_URL;
 
 // Revoke the refresh token server-side and expire its HttpOnly cookie (JS cannot clear it itself).
 // Callers that navigate away wait for this (max 3s) so the redirect can't cut the request off;
