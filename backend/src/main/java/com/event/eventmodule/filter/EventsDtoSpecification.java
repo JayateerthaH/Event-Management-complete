@@ -17,6 +17,21 @@ public class EventsDtoSpecification {
                 );
     }
 
+    /** Category is any of the given values (case-insensitive); no values means no restriction. */
+    public static Specification<Events> hasAnyCategory(java.util.Collection<String> categories) {
+        java.util.List<String> values = categories == null ? java.util.List.of()
+                : categories.stream().filter(c -> c != null && !c.isBlank()).map(c -> c.trim().toLowerCase()).distinct().toList();
+        return (root, query, cb) -> values.isEmpty() ? cb.conjunction() : cb.lower(root.get("category")).in(values);
+    }
+
+    /** Venue contains any of the given values (case-insensitive), like hasVenue for one. */
+    public static Specification<Events> hasAnyVenue(java.util.Collection<String> venues) {
+        java.util.List<String> values = venues == null ? java.util.List.of()
+                : venues.stream().filter(v -> v != null && !v.isBlank()).map(v -> v.trim().toLowerCase()).distinct().toList();
+        return (root, query, cb) -> values.isEmpty() ? cb.conjunction()
+                : cb.or(values.stream().map(v -> cb.like(cb.lower(root.get("venue")), "%" + v + "%")).toArray(jakarta.persistence.criteria.Predicate[]::new));
+    }
+
     // 🔥 SEARCH IN NAME + DESCRIPTION
     public static Specification<Events> hasSearch(String search) {
         return (root, query, cb) -> {

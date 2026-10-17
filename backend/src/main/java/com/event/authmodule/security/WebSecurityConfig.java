@@ -47,7 +47,7 @@ public class WebSecurityConfig {
                                 // Read-only public content: the frontend's Home, Events and Event Details pages
                                 // are browsable without logging in. Writes and user-specific data stay protected.
                                 .requestMatchers(HttpMethod.GET,
-                                        "/home/basic-info", "/home/category", "/home/featured",
+                                        "/home/basic-info", "/home/category", "/home/featured", "/events/filter-options",
                                         "/events/{eventId:\\d+}",
                                         "/events/{eventId:\\d+}/about", "/events/{eventId:\\d+}/details",
                                         "/events/{eventId:\\d+}/schedule", "/events/{eventId:\\d+}/faqs",

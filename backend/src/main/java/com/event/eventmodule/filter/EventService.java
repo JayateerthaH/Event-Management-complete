@@ -18,10 +18,19 @@ public class EventService {
 
     private final EventsRepository eventsRepository;
 
+    public Page<EventSummaryDto> filterEvents(String category, String search, String venue, String eventField,
+                                              String dateRange, String costType, Pageable pageable) {
+        return filterEvents(single(category), search, single(venue), eventField, dateRange, costType, pageable);
+    }
+
+    private static java.util.List<String> single(String value) {
+        return value == null || value.isBlank() ? java.util.List.of() : java.util.List.of(value);
+    }
+
     public Page<EventSummaryDto> filterEvents(
-            String category,
+            java.util.List<String> categories,
             String search,
-            String venue,
+            java.util.List<String> venues,
             String eventField,
             String dateRange,
             String costType,   // 🔥 NEW
@@ -94,9 +103,9 @@ public class EventService {
         }
 
         Specification<Events> spec = Specification
-                .where(EventsDtoSpecification.hasCategory(category))
+                .where(EventsDtoSpecification.hasAnyCategory(categories))
                 .and(EventsDtoSpecification.hasSearch(search))
-                .and(EventsDtoSpecification.hasVenue(venue))
+                .and(EventsDtoSpecification.hasAnyVenue(venues))
                 .and(EventsDtoSpecification.hasEventField(eventField))
                 .and(EventsDtoSpecification.hasCost(costType)) // 🔥
                 .and(EventsDtoSpecification.hasDateRange(start, end))

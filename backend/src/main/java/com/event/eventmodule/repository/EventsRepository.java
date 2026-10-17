@@ -52,6 +52,16 @@ public interface EventsRepository extends JpaRepository<Events, Long>, JpaSpecif
     @Query("SELECT DISTINCT e.category FROM Events e WHERE e.isApproved = true AND e.category IS NOT NULL ORDER BY e.category")
     List<String> findApprovedCategories();
 
+    /** [lower-case category, number of approved events] */
+    @Query("SELECT LOWER(e.category), COUNT(e) FROM Events e WHERE e.isApproved = true AND e.category IS NOT NULL AND e.category <> '' GROUP BY LOWER(e.category) ORDER BY LOWER(e.category)")
+    List<Object[]> countApprovedByCategory();
+
+    @Query("SELECT DISTINCT e.venue FROM Events e WHERE e.isApproved = true AND e.venue IS NOT NULL AND e.venue <> '' ORDER BY e.venue")
+    List<String> findApprovedVenues();
+
+    @Query("SELECT DISTINCT e.eventField FROM Events e WHERE e.isApproved = true AND e.eventField IS NOT NULL AND e.eventField <> '' ORDER BY e.eventField")
+    List<String> findApprovedEventFields();
+
     @Query("select e.eventDate from Events e where e.eventDate >= :from and e.eventDate < :to")
     List<Date> findEventDatesBetween(@org.springframework.data.repository.query.Param("from") Date from,
                                      @org.springframework.data.repository.query.Param("to") Date to);

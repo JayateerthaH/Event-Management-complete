@@ -90,7 +90,8 @@ public class EventsDtoController {
 
         // Jackson 3 binds through the all-args constructor, so omitted fields arrive as null, not their defaults
         int page = request.getPage() != null && request.getPage() >= 0 ? request.getPage() : 0;
-        int size = request.getSize() != null && request.getSize() > 0 ? request.getSize() : 6;
+        // Capped so one request can't pull the whole catalog (the events page asks for 6 at a time)
+        int size = request.getSize() != null && request.getSize() > 0 ? Math.min(request.getSize(), MAX_PAGE_SIZE) : 6;
         Pageable pageable = PageRequest.of(
                 page,
                 size,
@@ -98,13 +99,31 @@ public class EventsDtoController {
         );
 
         return eventsDtoService.filterEvents(
-                request.getCategory(),
+                merge(request.getCategory(), request.getCategories()),
                 request.getSearch(),
-                request.getVenue(),
+                merge(request.getVenue(), request.getVenues()),
                 request.getEventField(),
                 request.getDateRange(),
                 request.getCostType(),
                 pageable
         );
+    }
+    static final int MAX_PAGE_SIZE = 100;
+
+    private static List<String> merge(String one, List<String> many) {
+        List<String> all = new java.util.ArrayList<>(many == null ? List.of() : many);
+        if (one != null && !one.isBlank()) all.add(one);
+        return all;
+    }
+
+    /** Categories (with counts), venues and departments of approved events, for the events page filters. */
+    @GetMapping("/filter-options")
+    public Map<String, Object> filterOptions() {
+        List<Map<String, Object>> categories = eventsRepository.countApprovedByCategory().stream()
+                .map(r -> Map.<String, Object>of("value", r[0], "count", r[1])).toList();
+        return Map.of(
+                "categories", categories,
+                "venues", eventsRepository.findApprovedVenues(),
+                "departments", eventsRepository.findApprovedEventFields());
     }
 }
