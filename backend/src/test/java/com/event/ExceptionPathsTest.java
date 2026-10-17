@@ -12,8 +12,15 @@ import com.event.profilemodule.Repository.InterestsRepository;
 import com.event.profilemodule.Repository.NotificationsRepository;
 import com.event.profilemodule.service_implementation.admin.InterestsServiceImpl;
 import com.event.profilemodule.service_implementation.admin.NotificationsServiceImpl;
+import com.event.sharedmodule.exception.ApiError;
+import com.event.sharedmodule.exception.GlobalExceptionHandler;
 import com.event.sharedmodule.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -68,5 +75,19 @@ class ExceptionPathsTest {
         verify(requests).save(any(UserRequest.class));
         verify(users).save(any(Users.class));
         assertThat(result).contains("could not be sent");
+    }
+
+    // A too-long value (PostgreSQL 22001) is bad input, not a conflict with existing data
+    @Test
+    void tooLongValueIsBadRequestNotConflict() {
+        GlobalExceptionHandler handler = new GlobalExceptionHandler();
+        ResponseEntity<ApiError> tooLong = handler.handleConflict(new DataIntegrityViolationException("insert failed",
+                new SQLException("value too long for type character varying(255)", "22001")));
+        ResponseEntity<ApiError> duplicate = handler.handleConflict(new DataIntegrityViolationException("insert failed",
+                new SQLException("duplicate key value violates unique constraint", "23505")));
+
+        assertThat(tooLong.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(tooLong.getBody().getError()).isEqualTo("One of the fields is too long");
+        assertThat(duplicate.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 }

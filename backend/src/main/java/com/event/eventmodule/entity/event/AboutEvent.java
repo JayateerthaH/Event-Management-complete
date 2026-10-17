@@ -20,7 +20,7 @@ public class AboutEvent {
     @Column(nullable = false)
     private Long id;
 
-    @Column(length = 300)
+    @Column(columnDefinition = "TEXT")
     private String about;
 
     @OneToOne(mappedBy = "aboutEvent")

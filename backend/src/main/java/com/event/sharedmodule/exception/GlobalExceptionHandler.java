@@ -76,6 +76,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleConflict(DataIntegrityViolationException ex) {
         log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
+        // SQLState 22001: a value exceeds its column's length — the client's input, not a conflict
+        if (ex.getMostSpecificCause() instanceof java.sql.SQLException sql && "22001".equals(sql.getSQLState())) {
+            return build("One of the fields is too long", HttpStatus.BAD_REQUEST);
+        }
         return build("Request conflicts with existing data", HttpStatus.CONFLICT);
     }
 

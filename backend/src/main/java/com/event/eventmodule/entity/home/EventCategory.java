@@ -19,6 +19,7 @@ public class EventCategory {
     private Long id;
 
     private String category;
+    @Column(columnDefinition = "TEXT")
     private String smallDescription;
     private Long totalEvents;
 

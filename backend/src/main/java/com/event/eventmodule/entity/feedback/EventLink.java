@@ -16,6 +16,7 @@ public class EventLink {
     @Column(nullable = false)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String url;
     private Long eventId;
 

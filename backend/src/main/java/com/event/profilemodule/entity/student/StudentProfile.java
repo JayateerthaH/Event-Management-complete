@@ -29,6 +29,7 @@ public class StudentProfile {
     private Long phoneNumber;
     private String department;
     private String yearOfStudy;
+    @Column(columnDefinition = "TEXT")
     private String bio;
 
     @Builder.Default

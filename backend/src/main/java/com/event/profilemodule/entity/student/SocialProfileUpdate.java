@@ -15,6 +15,7 @@ public class SocialProfileUpdate {
     @EmbeddedId
     private SocialProfileKey id;
     
+    @Column(columnDefinition = "TEXT")
     private String urlLink;
 
 }

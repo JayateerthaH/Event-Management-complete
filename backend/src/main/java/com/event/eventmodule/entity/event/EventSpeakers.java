@@ -24,6 +24,7 @@ public class EventSpeakers {
 
     private String name;
     private String profession;
+    @Column(columnDefinition = "TEXT")
     private String shortExperience;
 
     private List<String> profile;

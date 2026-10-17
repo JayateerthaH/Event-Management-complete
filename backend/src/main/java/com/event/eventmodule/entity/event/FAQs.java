@@ -19,7 +19,9 @@ public class FAQs {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(nullable = false)
     private Long id;
+    @Column(columnDefinition = "TEXT")
     private String questions;
+    @Column(columnDefinition = "TEXT")
     private String answers;
 
     @ManyToOne

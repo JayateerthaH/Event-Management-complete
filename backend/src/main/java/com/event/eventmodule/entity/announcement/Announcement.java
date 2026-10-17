@@ -32,6 +32,7 @@ public class Announcement {
     @Column(nullable = false)
     private Long id;
 
+    @Column(columnDefinition = "TEXT")
     private String announcement;
     private String title;
 

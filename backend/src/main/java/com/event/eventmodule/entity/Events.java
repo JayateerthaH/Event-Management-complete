@@ -29,6 +29,7 @@ public class Events {
     private Long id;
 
     private String name;
+    @Column(columnDefinition = "TEXT")
     private String description;
     private String category;
     private String eventField; // RENAMED

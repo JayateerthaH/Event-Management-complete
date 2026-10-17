@@ -26,6 +26,7 @@ public class KeyHighlights {
 
     private String name;
 
+    @Column(columnDefinition = "TEXT")
     private String smallDescription;
 
     @OneToOne(mappedBy = "keyHighlights")

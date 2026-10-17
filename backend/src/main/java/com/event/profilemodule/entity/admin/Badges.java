@@ -24,6 +24,7 @@ public class Badges {
     @Column(nullable = false)
     private Long id;
     private String badgeName;
+    @Column(columnDefinition = "TEXT")
     private String badgeDescription;
 
     @ManyToMany(mappedBy = "badges")

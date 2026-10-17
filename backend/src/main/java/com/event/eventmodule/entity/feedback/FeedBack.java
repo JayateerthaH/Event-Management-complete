@@ -19,6 +19,7 @@ public class FeedBack {
     private Long id;
 
     private Long noOfStars;
+    @Column(columnDefinition = "TEXT")
     private String feedBack;
 
     private Long userId;
