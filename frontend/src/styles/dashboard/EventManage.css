@@ -922,3 +922,64 @@
     height: 180px;
   }
 }
+
+/* Cover image ("thumbnail"): badge on the current cover, button on the others. Thumbnails use the same
+   16:9 frame as event cards so the organizer sees what the cover will look like. */
+.em-gallery__img {
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+.em-gallery__hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.em-gallery__cover-badge,
+.em-gallery__cover-btn {
+  position: absolute;
+  left: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.em-gallery__cover-badge {
+  top: 8px;
+  padding: 4px 10px;
+  background: #8b5cf6;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.em-gallery__cover-btn {
+  bottom: 40px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(2, 6, 23, 0.72);
+  color: #f1f5f9;
+  cursor: pointer;
+}
+
+.em-gallery__cover-btn:hover,
+.em-gallery__cover-btn:focus-visible {
+  background: #8b5cf6;
+  border-color: #8b5cf6;
+  outline: none;
+}
+
+.em-gallery__item:not(:has(.em-gallery__caption)) .em-gallery__cover-btn {
+  bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .em-gallery__cover-btn {
+    min-height: 36px;
+  }
+
+  .em-gallery__delete {
+    width: 36px;
+    height: 36px;
+  }
+}

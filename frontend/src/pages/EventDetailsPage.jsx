@@ -239,17 +239,17 @@ export default function EventDetailsPage() {
                     <div
                       key={img.id}
                       className="ed-gallery__item"
-                      onClick={() => setLightboxImg(getImageUrl(img.fileName))}
+                      onClick={() => setLightboxImg(getImageUrl(img, 1600))}
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) =>
                         e.key === "Enter" &&
-                        setLightboxImg(getImageUrl(img.fileName))
+                        setLightboxImg(getImageUrl(img, 1600))
                       }
                       aria-label={img.originalName || "View image"}
                     >
                       <img
-                        src={getImageUrl(img.fileName)}
+                        src={getImageUrl(img, 600)}
                         alt={img.originalName || "Event image"}
                         className="ed-gallery__img"
                         loading="lazy"

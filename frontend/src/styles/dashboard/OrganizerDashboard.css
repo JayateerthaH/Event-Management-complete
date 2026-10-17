@@ -495,3 +495,21 @@ select.od-form__input option {
   .od-metrics { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .od-form__row { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Create Event: optional cover image and its 16:9 preview (how it looks on event cards) */
+.od-form__hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.od-cover-preview {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  margin-top: 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}

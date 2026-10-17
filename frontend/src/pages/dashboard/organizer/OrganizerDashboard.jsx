@@ -18,6 +18,7 @@ import {
 } from "../../../services/feedbackService";
 import AddCollaboratorModal from "../../../components/AddCollaboratorModal";
 import { addFaq } from "../../../api/eventDetailsService";
+import { uploadEventImage } from "../../../api/imageService";
 import DescriptionHelper from "../../../components/ai/DescriptionHelper";
 import AnnouncementHelper from "../../../components/ai/AnnouncementHelper";
 import FeedbackInsights from "../../../components/ai/FeedbackInsights";
@@ -370,6 +371,42 @@ export default function OrganizerDashboard() {
   const [createMsg, setCreateMsg] = useState(null); // { type: 'success'|'error', text }
   // AI-drafted FAQs the organizer chose to add once the event exists; key remounts the helper on reset
   const [pendingFaqs, setPendingFaqs] = useState([]);
+  // Optional cover image ("thumbnail"), uploaded right after the event is created
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(null);
+  const [coverInputKey, setCoverInputKey] = useState(0);
+
+  const clearCover = () => {
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+    setCoverFile(null);
+    setCoverPreview(null);
+    setCoverInputKey((k) => k + 1);
+  };
+
+  const handleCoverChange = (e) => {
+    const file = e.target.files?.[0];
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+    if (!file) {
+      setCoverFile(null);
+      setCoverPreview(null);
+      return;
+    }
+    if (!file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) {
+      setCreateMsg({
+        type: "error",
+        text: !file.type.startsWith("image/")
+          ? "The cover must be an image (JPG, PNG, WebP…)."
+          : `The cover image is too large: ${(file.size / (1024 * 1024)).toFixed(1)} MB (maximum 10 MB).`,
+      });
+      setCoverFile(null);
+      setCoverPreview(null);
+      setCoverInputKey((k) => k + 1);
+      return;
+    }
+    setCreateMsg(null);
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  };
   const [aiHelperKey, setAiHelperKey] = useState(0);
 
   // -- Deleting --------------------------------------------------------------
@@ -569,12 +606,21 @@ export default function OrganizerDashboard() {
             ? ` ${ok} FAQs added.`
             : ` ${ok} of ${pendingFaqs.length} FAQs added; add the rest from the event page.`;
       }
+      if (coverFile && createdId) {
+        try {
+          await uploadEventImage(createdId, coverFile); // an event's first image becomes its cover
+          faqNote += " Cover image added.";
+        } catch (err) {
+          faqNote += ` The cover image couldn't be uploaded (${err?.message || "unknown error"}); add it from Manage → Gallery.`;
+        }
+      }
       setCreateMsg({
         type: "success",
         text: `Event created successfully! It will be visible after admin approval.${faqNote}`,
       });
       setForm({ ...EMPTY_FORM });
       setPendingFaqs([]);
+      clearCover();
       setAiHelperKey((k) => k + 1);
       loadMyEvents();
     } catch (err) {
@@ -1300,6 +1346,28 @@ export default function OrganizerDashboard() {
                 </div>
               </div>
 
+              {/* Cover image ("thumbnail"); more images and a different cover from Manage → Gallery */}
+              <div className="od-form__group">
+                <label className="od-form__label" htmlFor="od-cover-input">
+                  Cover image (optional)
+                </label>
+                <input
+                  key={coverInputKey}
+                  id="od-cover-input"
+                  className="od-form__input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCoverChange}
+                />
+                <p className="od-form__hint">
+                  Shown on event cards and at the top of the event page, like a video thumbnail.
+                  Up to 10 MB. You can add more images and change the cover later in Manage → Gallery.
+                </p>
+                {coverPreview && (
+                  <img src={coverPreview} alt="Cover preview" className="od-cover-preview" />
+                )}
+              </div>
+
               {/* Submit row */}
               <div className="od-form__actions">
                 <button
@@ -1309,6 +1377,7 @@ export default function OrganizerDashboard() {
                     setForm({ ...EMPTY_FORM });
                     setCreateMsg(null);
                     setPendingFaqs([]);
+                    clearCover();
                     setAiHelperKey((k) => k + 1);
                   }}
                 >

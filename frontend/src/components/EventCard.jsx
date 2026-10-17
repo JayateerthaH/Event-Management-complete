@@ -1,6 +1,6 @@
 import { useState, memo } from "react";
 import { useNavigate } from "react-router-dom";
-import { resolveImageUrl } from "../api/apiClient";
+import { imageVariant, imageSrcSet } from "../api/apiClient";
 import "../styles/EventCard.css";
 
 const CATEGORY_COLORS = {
@@ -16,7 +16,8 @@ const CATEGORY_COLORS = {
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop";
 
-const buildImageUrl = (url) => resolveImageUrl(url) || FALLBACK_IMAGE;
+// The event's cover, cropped to 16:9 like a video thumbnail (Cloudinary sizes it for the screen)
+const buildImageUrl = (url) => imageVariant(url, { width: 640, ratio: "16:9" }) || FALLBACK_IMAGE;
 
 const formatDate = (dateString) => {
   if (!dateString) return "TBA";
@@ -131,6 +132,8 @@ const EventCard = memo(
           )}
           <img
             src={imageError ? FALLBACK_IMAGE : buildImageUrl(imageUrl)}
+            srcSet={imageError ? undefined : imageSrcSet(imageUrl, [400, 640, 960], "16:9")}
+            sizes="(max-width: 768px) 100vw, 400px"
             alt={name}
             className={`event-card-image ${imageLoaded ? "loaded" : ""}`}
             onLoad={handleImageLoad}

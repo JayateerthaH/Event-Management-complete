@@ -1,9 +1,19 @@
 ﻿/**
  * imageService.js - event images (served and uploaded via the backend at VITE_API_URL)
  */
-import api, { getAccessToken, API_BASE_URL, resolveImageUrl } from "./apiClient";
+import api, { getAccessToken, API_BASE_URL, imageVariant } from "./apiClient";
 
-export const getImageUrl = (fileName) => resolveImageUrl(fileName);
+/** URL of a gallery image ({ url, fileName } from the API, or a file name), optionally `width` pixels wide. */
+export const getImageUrl = (image, width) => {
+  const url = typeof image === "string" ? image : image?.url || image?.fileName;
+  return imageVariant(url, width ? { width } : {});
+};
+
+/** PUT /event/images/{imageId}/cover — show this image on the event's cards and page. */
+export const setCoverImage = async (imageId) => {
+  const { data } = await api.put(`/event/images/${imageId}/cover`);
+  return data;
+};
 
 export const uploadEventImage = async (eventId, file) => {
   const formData = new FormData();

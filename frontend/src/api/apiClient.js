@@ -31,6 +31,31 @@ export const resolveImageUrl = (url) => {
   return `${BASE_URL}/images/${url}`;
 };
 
+/**
+ * Image URL at a given size. For Cloudinary images, Cloudinary resizes and converts on the fly: the
+ * best format the browser supports (WebP/AVIF), automatic quality, `width` pixels wide, and with `ratio`
+ * (e.g. "16:9") a smart crop that keeps the important part in frame — like a YouTube thumbnail.
+ * Other images (stored on the server's disk) are returned as they are.
+ */
+const CLOUDINARY_UPLOAD = /^(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.+)$/;
+export const imageVariant = (url, { width, ratio } = {}) => {
+  const resolved = resolveImageUrl(url);
+  const match = resolved && resolved.match(CLOUDINARY_UPLOAD);
+  if (!match || /^[a-z]{1,3}_[^/]*\//.test(match[2]) && !/^v\d+\//.test(match[2])) return resolved;
+  const parts = ["f_auto", "q_auto"];
+  if (ratio) parts.push("c_fill", "g_auto", `ar_${ratio}`);
+  else parts.push("c_limit");
+  if (width) parts.push(`w_${width}`);
+  return `${match[1]}${parts.join(",")}/${match[2]}`;
+};
+
+/** srcSet for a Cloudinary image at several widths (undefined for other images, so the browser uses src). */
+export const imageSrcSet = (url, widths, ratio) => {
+  const resolved = resolveImageUrl(url);
+  if (!resolved || !CLOUDINARY_UPLOAD.test(resolved)) return undefined;
+  return widths.map((w) => `${imageVariant(url, { width: w, ratio })} ${w}w`).join(", ");
+};
+
 // ─── Token helpers ────────────────────────────────────────────────────────────
 // Refresh token lives ONLY in an HttpOnly cookie set by the backend.
 // The frontend never reads, stores, or sends it — the browser handles it

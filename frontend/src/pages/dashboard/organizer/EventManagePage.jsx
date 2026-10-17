@@ -24,6 +24,7 @@ import {
   getEventImages,
   deleteEventImage,
   getImageUrl,
+  setCoverImage,
 } from "../../../api/imageService";
 import "../../../styles/dashboard/EventManage.css";
 
@@ -225,6 +226,9 @@ export default function EventManagePage() {
     try {
       const imgs = await getEventImages(eventId);
       setGalleryImages(imgs);
+      // Keep the header thumbnail in step with the cover (it may change on upload, set-cover or delete)
+      const cover = imgs.find((img) => img.cover);
+      setEvent((prev) => (prev ? { ...prev, imageUrl: cover ? cover.url : null } : prev));
     } catch (err) {
       console.error("[Gallery] load error:", err);
       setGalleryError(`Couldn't load gallery images. ${err?.message || ""}`.trim());
@@ -252,8 +256,8 @@ export default function EventManagePage() {
         const img = await uploadEventImage(eventId, file);
         uploaded.push(img);
       }
-      // Prepend new images to the top of the list
-      setGalleryImages((prev) => [...uploaded.reverse(), ...prev]);
+      // Reload rather than prepend: the first image of an event becomes its cover
+      if (uploaded.length) await loadGallery();
     } catch (err) {
       console.error("[Gallery] upload error:", err);
       setGalleryError(err?.message || "Upload failed. Please try again.");
@@ -268,10 +272,22 @@ export default function EventManagePage() {
     setGalleryError(null);
     try {
       await deleteEventImage(imageId);
-      setGalleryImages((prev) => prev.filter((img) => img.id !== imageId));
+      await loadGallery(); // deleting the cover moves it to the newest remaining image
     } catch (err) {
       console.error("[Gallery] delete error:", err);
       setGalleryError(`Couldn't delete the image. ${err?.message || ""}`.trim());
+    }
+  };
+
+  /* ── Choose the cover image (shown on event cards and at the top of the event page) ─*/
+  const handleSetCover = async (imageId) => {
+    setGalleryError(null);
+    try {
+      await setCoverImage(imageId);
+      await loadGallery();
+    } catch (err) {
+      console.error("[Gallery] cover error:", err);
+      setGalleryError(`Couldn't set the cover image. ${err?.message || ""}`.trim());
     }
   };
 
@@ -818,16 +834,33 @@ export default function EventManagePage() {
 
         {/* Images grid */}
         {!galleryLoading && galleryImages.length > 0 && (
+          <p className="em-gallery__hint">
+            The <strong>cover</strong> is the image shown on event cards and at the top of the event page.
+            Tap &ldquo;Set as cover&rdquo; on any image to use it instead.
+          </p>
+        )}
+        {!galleryLoading && galleryImages.length > 0 && (
           <div className="em-gallery">
             {galleryImages.map((img) => (
               <div key={img.id} className="em-gallery__item">
                 <img
-                  src={getImageUrl(img.fileName)}
+                  src={getImageUrl(img, 600)}
                   alt={img.originalName || "Event image"}
                   className="em-gallery__img"
                   loading="lazy"
-                  onClick={() => setLightboxImg(getImageUrl(img.fileName))}
+                  onClick={() => setLightboxImg(getImageUrl(img, 1600))}
                 />
+                {img.cover ? (
+                  <span className="em-gallery__cover-badge">Cover</span>
+                ) : (
+                  <button
+                    type="button"
+                    className="em-gallery__cover-btn"
+                    onClick={() => handleSetCover(img.id)}
+                  >
+                    Set as cover
+                  </button>
+                )}
                 <button
                   className="em-gallery__delete"
                   onClick={() => handleDeleteImage(img.id)}
@@ -1395,7 +1428,14 @@ export default function EventManagePage() {
         </button>
         <div className="em-header__info">
           {eventImage && (
-            <img src={eventImage} alt="" className="em-header__thumb" />
+            <img
+              src={getImageUrl(eventImage, 160)}
+              alt=""
+              className="em-header__thumb"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
           )}
           <div>
             <h1 className="em-header__title">{eventTitle}</h1>

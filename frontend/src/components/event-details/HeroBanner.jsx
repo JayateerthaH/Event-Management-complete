@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { resolveImageUrl } from "../../api/apiClient";
+import { imageVariant, imageSrcSet } from "../../api/apiClient";
 import "../../styles/EventDetails.css";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&h=500&fit=crop";
 
-const buildImageUrl = (url) => resolveImageUrl(url) || FALLBACK_IMAGE;
+const buildImageUrl = (url) => imageVariant(url, { width: 1600 }) || FALLBACK_IMAGE;
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -54,6 +54,8 @@ export default function HeroBanner({ event }) {
         {!imgLoaded && <div className="ed-hero__skeleton" />}
         <img
           src={imgSrc}
+          srcSet={imgError ? undefined : imageSrcSet(event.imageUrl || event.image, [800, 1200, 1600])}
+          sizes="100vw"
           alt={event.name || "Event"}
           className={`ed-hero__img ${imgLoaded ? "loaded" : ""}`}
           onLoad={() => setImgLoaded(true)}

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { resolveImageUrl } from "../../api/apiClient";
+import { imageVariant } from "../../api/apiClient";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop";
 
-const imageSrc = (url) => resolveImageUrl(url) || FALLBACK_IMAGE;
+const imageSrc = (url) => imageVariant(url, { width: 480, ratio: "16:9" }) || FALLBACK_IMAGE;
 
 const isFree = (cost) => !cost || /^0+(\.0+)?$/.test(String(cost).trim()) || String(cost).trim().toLowerCase() === "free";
 
