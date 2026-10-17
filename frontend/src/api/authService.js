@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import { saveAccessToken, clearTokens, AUTH_BASE_URL } from './apiClient';
+import { saveAccessToken, clearTokens, AUTH_BASE_URL, apiErrorMessage } from './apiClient';
 
 const BASE_URL = AUTH_BASE_URL;
 
@@ -27,10 +27,10 @@ export const loginRequest = async ({ username, password }) => {
       const msg = err.response.data?.message || err.response.data?.error;
       if (err.response.status === 401) throw new Error('Invalid email or password');
       if (err.response.status === 404) throw new Error('User not found');
-      if (err.response.status >= 500)  throw new Error('Server error. Please try again later.');
+      if (err.response.status >= 500)  throw new Error(apiErrorMessage(err));
       throw new Error(msg || 'Login failed');
     }
-    throw new Error('Cannot connect to server. Is the backend running on port 8080?');
+    throw new Error(apiErrorMessage(err));
   }
 
   const data = res.data;
@@ -67,11 +67,11 @@ export const signupRequest = async (signupData) => {
     if (err.response) {
       const msg = err.response.data?.message || err.response.data?.error;
       if (err.response.status === 400) throw new Error(msg || 'Invalid signup data.');
-      if (err.response.status === 409) throw new Error('Email already exists. Use a different email.');
-      if (err.response.status >= 500)  throw new Error('Server error. Please try again later.');
+      if (err.response.status === 409) throw new Error(msg || 'Email already exists. Use a different email.');
+      if (err.response.status >= 500)  throw new Error(apiErrorMessage(err));
       throw new Error(msg || 'Signup failed');
     }
-    throw new Error('Cannot connect to server. Is the backend running on port 8080?');
+    throw new Error(apiErrorMessage(err));
   }
 
   const data   = res.data;

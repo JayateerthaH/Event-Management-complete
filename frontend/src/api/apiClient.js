@@ -97,6 +97,37 @@ export const isTokenExpired = (token) => {
   }
 };
 
+// ─── User-facing error messages ───────────────────────────────────────────────
+
+const STATUS_MESSAGES = {
+  400: "Some of the information is invalid. Please check it and try again.",
+  401: "Your session has expired. Please log in again.",
+  403: "You don't have permission to do that.",
+  404: "That item could not be found. It may have been removed.",
+  409: "This conflicts with existing data.",
+  413: "The file is too large.",
+};
+
+/**
+ * The message to show the user for a failed request: the backend's own explanation (ApiError's `error`)
+ * when there is one, otherwise a plain description of what went wrong — never axios's
+ * "Request failed with status code 409".
+ */
+export const apiErrorMessage = (err, fallback = "Something went wrong. Please try again.") => {
+  const data = err?.response?.data;
+  if (typeof data === "string" && data.trim() && !data.trim().startsWith("<")) return data.trim();
+  const fromBody = data?.error || data?.message || data?.detail;
+  if (typeof fromBody === "string" && fromBody.trim()) return fromBody.trim();
+  const status = err?.response?.status;
+  if (status >= 500) return "The server ran into a problem. Please try again in a moment.";
+  if (status) return STATUS_MESSAGES[status] || fallback;
+  if (err?.code === "ECONNABORTED" || /timeout/i.test(err?.message || ""))
+    return "The server took too long to respond. Please try again.";
+  if (err?.code === "ERR_NETWORK" || err?.message === "Network Error")
+    return "Can't reach the server. Check your internet connection and try again.";
+  return err?.message || fallback;
+};
+
 // ─── Axios instance ───────────────────────────────────────────────────────────
 
 const api = axios.create({
@@ -277,11 +308,14 @@ api.interceptors.response.use(
       }
     }
 
+    // Every caller that shows err.message now shows the backend's explanation (or a plain one)
+    error.message = apiErrorMessage(error, error.message);
+
     // Log non-401 errors with endpoint for easier debugging
     if (error.response) {
       console.error(
         `[API] ${error.config?.method?.toUpperCase()} ${error.config?.url}` +
-          ` → ${error.response.status}: ${error.response.data?.message || error.message}`,
+          ` → ${error.response.status}: ${error.message}`,
       );
     } else {
       console.error(

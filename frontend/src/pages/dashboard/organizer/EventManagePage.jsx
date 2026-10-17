@@ -227,7 +227,7 @@ export default function EventManagePage() {
       setGalleryImages(imgs);
     } catch (err) {
       console.error("[Gallery] load error:", err);
-      setGalleryError("Failed to load gallery images.");
+      setGalleryError(`Couldn't load gallery images. ${err?.message || ""}`.trim());
     } finally {
       setGalleryLoading(false);
     }
@@ -271,7 +271,7 @@ export default function EventManagePage() {
       setGalleryImages((prev) => prev.filter((img) => img.id !== imageId));
     } catch (err) {
       console.error("[Gallery] delete error:", err);
-      setGalleryError("Failed to delete image.");
+      setGalleryError(`Couldn't delete the image. ${err?.message || ""}`.trim());
     }
   };
 

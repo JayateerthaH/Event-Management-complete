@@ -20,6 +20,7 @@ export default function ResendQrButton({ eventId, className = "" }) {
       const text =
         err?.response?.data?.error ||
         err?.response?.data?.message ||
+        err?.message ||
         "Could not resend the QR code. Please try again.";
       setMessage({ type: "error", text });
     } finally {

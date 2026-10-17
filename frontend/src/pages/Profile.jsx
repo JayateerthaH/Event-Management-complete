@@ -257,8 +257,8 @@ export default function Profile() {
       setProfile(updated);
       setEditing(false);
       flash("Profile saved successfully!");
-    } catch {
-      flash("Failed to save profile.");
+    } catch (err) {
+      flash(`Couldn't save your profile. ${err?.message || ""}`.trim());
     } finally {
       setSaving(false);
     }
@@ -297,8 +297,8 @@ export default function Profile() {
       setVolunteerPrefs(updated);
       setSelectedPrefIds(new Set(updated.map((p) => p.preferenceId)));
       flash("Volunteer preferences updated!");
-    } catch {
-      flash("Failed to update volunteer preferences.");
+    } catch (err) {
+      flash(`Couldn't update volunteer preferences. ${err?.message || ""}`.trim());
     } finally {
       setSaving(false);
     }
@@ -320,8 +320,8 @@ export default function Profile() {
       const updated = await updateNotificationPrefs([...selectedNotifIds]);
       setSelectedNotifIds(new Set(updated.map((n) => n.id)));
       flash("Notification preferences updated!");
-    } catch {
-      flash("Failed to update notification preferences.");
+    } catch (err) {
+      flash(`Couldn't update notification preferences. ${err?.message || ""}`.trim());
     } finally {
       setSaving(false);
     }
@@ -343,8 +343,8 @@ export default function Profile() {
       const updated = await updateStudentInterests([...selectedInterestIds]);
       setSelectedInterestIds(new Set(updated.map((i) => i.interestId)));
       flash("Interests updated!");
-    } catch {
-      flash("Failed to update interests.");
+    } catch (err) {
+      flash(`Couldn't update interests. ${err?.message || ""}`.trim());
     } finally {
       setSaving(false);
     }
@@ -368,8 +368,8 @@ export default function Profile() {
       setBadges(list);
       setSelectedBadgeIds(new Set(list.map((b) => b.id)));
       flash("Badges updated!");
-    } catch {
-      flash("Failed to update badges.");
+    } catch (err) {
+      flash(`Couldn't update badges. ${err?.message || ""}`.trim());
     } finally {
       setSaving(false);
     }
@@ -401,8 +401,8 @@ export default function Profile() {
       const updated = await updateSocialLinks(currentMap);
       setSocials(updated);
       flash("Social profile removed.");
-    } catch {
-      flash("Failed to remove social profile.");
+    } catch (err) {
+      flash(`Couldn't remove the social profile. ${err?.message || ""}`.trim());
     } finally {
       setSaving(false);
     }
@@ -420,8 +420,8 @@ export default function Profile() {
       setSocials(updated);
       setNewSocialUrls((prev) => ({ ...prev, [platformId]: "" }));
       flash("Social profile linked!");
-    } catch {
-      flash("Failed to add social profile.");
+    } catch (err) {
+      flash(`Couldn't add the social profile. ${err?.message || ""}`.trim());
     } finally {
       setSaving(false);
     }

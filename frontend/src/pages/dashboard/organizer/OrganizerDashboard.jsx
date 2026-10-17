@@ -599,7 +599,7 @@ export default function OrganizerDashboard() {
         prev.filter((ev) => (ev.id ?? ev.eventId) !== eventId),
       );
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to delete event");
+      alert(`Couldn't delete the event. ${err?.message || ""}`.trim());
     } finally {
       setDeletingId(null);
     }
@@ -787,7 +787,7 @@ export default function OrganizerDashboard() {
           text: "Only the event creator can view feedback.",
         });
       } else {
-        setFbMsg({ type: "error", text: "Failed to load feedback." });
+        setFbMsg({ type: "error", text: `Couldn't load feedback. ${err?.message || ""}`.trim() });
       }
       setFbData([]);
     } finally {

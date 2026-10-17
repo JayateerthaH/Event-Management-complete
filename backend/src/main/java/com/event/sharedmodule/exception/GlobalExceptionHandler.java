@@ -1,6 +1,7 @@
 package com.event.sharedmodule.exception;
 
 import com.event.notificationmodule.EmailDeliveryException;
+import com.event.sharedmodule.FieldTooLongException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
@@ -96,6 +97,12 @@ public class GlobalExceptionHandler {
         return build(ex.getReason() != null ? ex.getReason() : status.getReasonPhrase(), status);
     }
 
+    // A text field longer than its column (FieldLengthCheck); the message names the field and the limit
+    @ExceptionHandler(FieldTooLongException.class)
+    public ResponseEntity<ApiError> handleFieldTooLong(FieldTooLongException ex) {
+        return build(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     // Handle any other uncaught exceptions. Internal details are logged, not returned to the client.
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(Exception ex) {
@@ -103,6 +110,10 @@ public class GlobalExceptionHandler {
         if (ex instanceof ErrorResponse errorResponse) {
             HttpStatus status = HttpStatus.valueOf(errorResponse.getStatusCode().value());
             return build(status.getReasonPhrase(), status);
+        }
+        // Checks that run while a transaction commits (e.g. @PreUpdate) arrive wrapped
+        for (Throwable t = ex.getCause(); t != null; t = t.getCause()) {
+            if (t instanceof FieldTooLongException tooLong) return handleFieldTooLong(tooLong);
         }
         log.error("Unhandled exception", ex);
         return build("An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);

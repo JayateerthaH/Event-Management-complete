@@ -97,7 +97,7 @@ export default function QRScanner() {
       const rawMsg =
         err?.response?.data?.error ||
         err?.response?.data?.message ||
-        err?.response?.data ||
+        (typeof err?.response?.data === "string" ? err.response.data : null) ||
         err?.message ||
         "Failed to mark attendance";
 
