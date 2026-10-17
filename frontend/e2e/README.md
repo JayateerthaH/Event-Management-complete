@@ -26,6 +26,12 @@ feedback, certificate download, announcements, session refresh, profile, logout.
 E2E_DB_NAME=eventdb_e2e npx playwright test
 ```
 
+Phones: `E2E_MOBILE=1` adds an Android (Pixel 7, Chromium) and an iPhone (iPhone 13, WebKit) run of the same journeys:
+
+```bash
+E2E_MOBILE=1 E2E_DB_NAME=eventdb_e2e npx playwright test --project=android --project=iphone
+```
+
 | Variable | Default | Purpose |
 |---|---|---|
 | `E2E_BASE_URL` | `http://localhost:5173` | frontend |

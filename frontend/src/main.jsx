@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import './index.css'
 import App from './App.jsx'
+import './styles/Mobile.css' // after App so its phone fixes override page styles
+import { startResponsiveTables } from './utils/responsiveTables'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { GOOGLE_CLIENT_ID, GOOGLE_ENABLED } from './config/google'
 
@@ -21,3 +23,5 @@ createRoot(document.getElementById('root')).render(
     </ErrorBoundary>
   </StrictMode>,
 )
+
+startResponsiveTables()

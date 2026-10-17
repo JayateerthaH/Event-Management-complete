@@ -278,7 +278,7 @@
 /* ── Details grid ─────────────────────────────────────────────────────── */
 .em-details-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.75rem 1.5rem;
 }
 
@@ -700,12 +700,12 @@
 /* ── Modal form fields ───────────────────────────────────────────────── */
 .em-modal__row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.85rem;
 }
 @media (max-width: 520px) {
   .em-modal__row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -895,7 +895,7 @@
   }
 
   .em-details-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .em-header__info {
@@ -915,7 +915,7 @@
 
 @media (max-width: 520px) {
   .em-gallery {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .em-gallery__img {

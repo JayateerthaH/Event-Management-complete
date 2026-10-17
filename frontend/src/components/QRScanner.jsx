@@ -135,17 +135,22 @@ export default function QRScanner() {
       setError(null);
       setScanning(true);
 
-      const codes = await Html5Qrcode.getCameras();
+      const codes = await Html5Qrcode.getCameras();   // also asks for camera permission
       if (codes && codes.length) {
-        const cameraId = codes[0].id;
         const html5QrCode = new Html5Qrcode("reader");
         html5QrRef.current = html5QrCode;
 
         await html5QrCode.start(
-          cameraId,
+          // Prefer the back camera: on phones the first listed camera is usually the front one.
+          // "environment" is a preference, so laptops with a single camera still work.
+          { facingMode: "environment" },
           {
             fps: 10,
-            qrbox: { width: 250, height: 250 },
+            // Square scan box sized to the camera view (250px overflowed narrow phone screens)
+            qrbox: (w, h) => {
+              const size = Math.max(150, Math.floor(Math.min(w, h) * 0.7));
+              return { width: size, height: size };
+            },
           },
           (decodedText) => {
             if (!processingRef.current) {
@@ -161,7 +166,12 @@ export default function QRScanner() {
         setScanning(false);
       }
     } catch (err) {
-      setError("Failed to start scanner: " + err.message);
+      const blocked = err?.name === "NotAllowedError" || /permission|denied|not allowed/i.test(String(err?.message || err));
+      setError(
+        blocked
+          ? "Camera access is blocked. Allow camera access for this site in your browser settings, then tap Start Scanner again."
+          : "Failed to start scanner: " + (err?.message || err),
+      );
       setScanning(false);
     }
   };

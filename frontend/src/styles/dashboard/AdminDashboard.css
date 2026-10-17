@@ -255,7 +255,7 @@ CARD
 
 .admin-charts-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 1rem;
 }
 
@@ -275,7 +275,7 @@ CARD
   .admin-sidebar__tab { padding: 0.5rem 0.8rem; font-size: 0.75rem; }
   .admin-content { padding: 1rem; }
   .admin-welcome { flex-direction: column; gap: 0.75rem; align-items: flex-start; padding: 1.25rem; }
-  .admin-charts-row { grid-template-columns: 1fr; }
+  .admin-charts-row { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 540px) {

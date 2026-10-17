@@ -136,7 +136,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 .od-metrics {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
 }
 
@@ -314,7 +314,7 @@
 }
 
 .od-form__row {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem;
 }
 
 .od-form__group {
@@ -472,8 +472,8 @@ select.od-form__input option {
    RESPONSIVE
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 1100px) {
-  .od-metrics { grid-template-columns: repeat(2, 1fr); }
-  .od-form__row { grid-template-columns: 1fr; }
+  .od-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .od-form__row { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 860px) {
@@ -492,6 +492,6 @@ select.od-form__input option {
 }
 
 @media (max-width: 540px) {
-  .od-metrics { grid-template-columns: 1fr 1fr; }
-  .od-form__row { grid-template-columns: 1fr; }
+  .od-metrics { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .od-form__row { grid-template-columns: minmax(0, 1fr); }
 }

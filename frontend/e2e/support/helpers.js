@@ -15,6 +15,15 @@ export async function login(page, email, password = PASSWORD) {
   await page.fill("#password", password);
   await page.click("button[type=submit]");
   await page.waitForURL("**/dashboard");
+  await dashboardLoaded(page);
+}
+
+/**
+ * Wait until the dashboard has finished its requests, as a person would before moving on. WebKit (iPhone)
+ * reports requests cancelled by leaving a page mid-load as errors, which the suite would count.
+ */
+export async function dashboardLoaded(page) {
+  await page.waitForLoadState("networkidle");
 }
 
 /** Clicks a dashboard sidebar tab (scoped to the sidebar; "Events" also exists in the navbar). */

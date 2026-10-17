@@ -2,7 +2,7 @@ import { test, expect, chromium } from "@playwright/test";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { API, ADMIN, PASSWORD, login, openTab, trackErrors, readQrCode } from "./support/helpers.js";
+import { dashboardLoaded, API, ADMIN, PASSWORD, login, openTab, trackErrors, readQrCode } from "./support/helpers.js";
 import { writeQrVideo } from "./support/qrVideo.js";
 
 /**
@@ -80,6 +80,7 @@ test.describe.serial("CampusEvents journeys", () => {
       await page.check('input[name="agreeToTerms"]');
       await page.click("button[type=submit]");
       await page.waitForURL("**/dashboard");
+      await dashboardLoaded(page);
     });
 
     await asUser(browser, ADMIN.email, ADMIN.password, async (page) => {
@@ -134,6 +135,7 @@ test.describe.serial("CampusEvents journeys", () => {
       await page.check('input[name="agreeToTerms"]');
       await page.click("button[type=submit]");
       await page.waitForURL("**/dashboard");
+      await dashboardLoaded(page);
 
       await page.goto(`/events/${eventId}`);
       await page.getByText("Register Now").first().click();
@@ -185,7 +187,9 @@ test.describe.serial("CampusEvents journeys", () => {
       args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream", `--use-file-for-fake-video-capture=${video}`],
     });
     try {
-      const context = await camBrowser.newContext({ baseURL: test.info().project.use.baseURL, permissions: ["camera"] });
+      // Same screen as the project (a phone in the android/iphone runs); the fake camera needs Chromium
+      const { baseURL, viewport, isMobile, hasTouch, deviceScaleFactor, userAgent } = test.info().project.use;
+      const context = await camBrowser.newContext({ baseURL, viewport, isMobile, hasTouch, deviceScaleFactor, userAgent, permissions: ["camera"] });
       const page = await context.newPage();
       await login(page, organizerEmail);
       await page.goto(`/scan/${eventId}`);
