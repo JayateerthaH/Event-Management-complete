@@ -13,7 +13,7 @@ const FEE_FILTERS = [
   { id: "paid", label: "Paid Events" },
 ];
 
-const SidebarFilters = memo(({ onApplyFilters, onClearAll, options = {} }) => {
+const SidebarFilters = memo(({ onApplyFilters, onClearAll, options = {}, isOpen = false, onClose }) => {
   const categories = Array.isArray(options.categories)
     ? options.categories
     : [];
@@ -95,7 +95,10 @@ const SidebarFilters = memo(({ onApplyFilters, onClearAll, options = {} }) => {
     selectedFeeFilter;
 
   return (
-    <aside className="sidebar-filters">
+    <aside
+      className={`sidebar-filters${isOpen ? " sidebar-filters--open" : ""}`}
+      aria-label="Event filters"
+    >
       <div className="filters-header">
         <h2 className="filters-title">
           <svg
@@ -111,11 +114,17 @@ const SidebarFilters = memo(({ onApplyFilters, onClearAll, options = {} }) => {
           </svg>
           Filters
         </h2>
-        {hasActiveFilters && (
-          <button className="clear-all-btn" onClick={handleClearAll}>
-            Clear All
+        <div className="filters-header__actions">
+          {hasActiveFilters && (
+            <button className="clear-all-btn" onClick={handleClearAll}>
+              Clear All
+            </button>
+          )}
+          {/* Phones only: closes the full-screen filter panel */}
+          <button type="button" className="filters-close-btn" onClick={onClose} aria-label="Close filters">
+            ✕
           </button>
-        )}
+        </div>
       </div>
 
       <div className="filter-section">
@@ -285,7 +294,13 @@ const SidebarFilters = memo(({ onApplyFilters, onClearAll, options = {} }) => {
         </div>
       </div>
 
-      <button className="apply-filters-btn" onClick={handleApplyFilters}>
+      <button
+        className="apply-filters-btn"
+        onClick={() => {
+          handleApplyFilters();
+          onClose?.(); // on phones, show the results
+        }}
+      >
         <svg
           className="check-icon"
           viewBox="0 0 24 24"

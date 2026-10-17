@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import SidebarFilters from "../components/SidebarFilters";
 import EventCard from "../components/EventCard";
@@ -98,10 +98,30 @@ const EventsPage = () => {
   } = useEvents(0, 6);
   // While AI search results are shown, the regular filtered grid is hidden
   const [aiActive, setAiActive] = useState(false);
+  // Phones: the filters open as a full-screen panel from the "Filters" button
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [activeFilterCount, setActiveFilterCount] = useState(0);
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden"; // keep the page behind the panel from scrolling
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [filtersOpen]);
 
   const handleApplyFilters = useCallback(
     (filters) => {
       applyFilters(filters);
+      setActiveFilterCount(
+        (filters.search?.trim() ? 1 : 0) +
+          (filters.categories?.length || 0) +
+          (filters.date ? 1 : 0) +
+          (filters.department && filters.department !== "all" ? 1 : 0) +
+          (filters.venues?.length || 0) +
+          (filters.fee ? 1 : 0),
+      );
     },
     [applyFilters],
   );
@@ -132,6 +152,8 @@ const EventsPage = () => {
           onApplyFilters={handleApplyFilters}
           onClearAll={handleClearFilters}
           options={filterOptions}
+          isOpen={filtersOpen}
+          onClose={() => setFiltersOpen(false)}
         />
 
         <main className="events-main">
@@ -140,6 +162,19 @@ const EventsPage = () => {
             <p className="events-page-subtitle">
               Find and register for exciting campus events
             </p>
+            {/* Shown on phones only (Mobile.css); the sidebar is hidden there */}
+            <button
+              type="button"
+              className="mobile-filters-btn"
+              onClick={() => setFiltersOpen(true)}
+              aria-haspopup="dialog"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
+              </svg>
+              Filters
+              {activeFilterCount > 0 && <span className="mobile-filters-btn__count">{activeFilterCount}</span>}
+            </button>
           </div>
 
           <SmartSearch onActiveChange={setAiActive} />
