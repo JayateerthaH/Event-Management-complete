@@ -4,6 +4,8 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   server: {
+    // node_modules may be a symlink to node_modules.nosync (kept out of iCloud); don't watch it
+    watch: { ignored: ["**/node_modules.nosync/**"] },
     // Only proxy paths that are EXCLUSIVELY backend API endpoints.
     // React Router handles /home, /events, /dashboard as SPA page routes.
     proxy: {
