@@ -54,7 +54,7 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/onboard")
     public List<OnBoard> getAllOnBoards(){
-        return onBoardDtoRepository.findAll();
+        return adminService.pendingRequests();
     }
 
 

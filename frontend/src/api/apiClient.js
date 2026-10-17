@@ -45,19 +45,26 @@ export const getUserData = () => {
   }
 };
 
-/** Save only the access token (+ update exp/iat on the stored user object). */
+/** Save only the access token (+ update roles and exp/iat on the stored user object). */
 export const saveAccessToken = (jwt) => {
   if (!jwt) return;
   localStorage.setItem("jwt_token", jwt);
 
-  // Update exp/iat in stored user without clobbering other fields
+  // Update the stored user from the new token without clobbering other fields. Roles come from the token
+  // too: a refreshed token carries roles granted since login (e.g. a student accepted as organizer/admin),
+  // and keeping the old ones showed the wrong dashboard.
   try {
     const decoded = jwtDecode(jwt);
     const stored = getUserData();
     if (stored) {
       localStorage.setItem(
         "user",
-        JSON.stringify({ ...stored, exp: decoded.exp, iat: decoded.iat }),
+        JSON.stringify({
+          ...stored,
+          ...(Array.isArray(decoded.roles) ? { roles: decoded.roles } : {}),
+          exp: decoded.exp,
+          iat: decoded.iat,
+        }),
       );
     }
   } catch {

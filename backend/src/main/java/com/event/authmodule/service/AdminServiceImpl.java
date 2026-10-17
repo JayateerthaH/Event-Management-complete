@@ -16,6 +16,8 @@ import com.event.authmodule.entitys.type.RoleType;
 import com.event.authmodule.repository.AdminRepository;
 import com.event.authmodule.repository.OnBoardDtoRepository;
 import com.event.authmodule.repository.OrganizerRepository;
+import com.event.authmodule.repository.StudentRepository;
+import com.event.authmodule.entitys.OnBoard;
 import com.event.authmodule.repository.UserInfoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,7 @@ public class AdminServiceImpl implements AdminService {
     private final OrganizerRepository organizerRepository;
     private final AdminRepository adminRepository;
     private final UserInfoRepository userInfoRepository;
+    private final StudentRepository studentRepository;
     private final ModelMapper modelMapper;
     private final OnBoardDtoRepository onBoardDtoRepository;
     private final DashboardApi dashboardApi;
@@ -63,6 +66,7 @@ public class AdminServiceImpl implements AdminService {
         user.getRoles().add(RoleType.ORGANIZER);
         user.getRoles().remove(RoleType.STUDENT);
         userInfoRepository.save(user);
+        studentRepository.deleteById(user.getUserId());   // organizer only: no student record either
 
         // ✅ Replace userClient.createOrganizer() with direct API call
         dashboardApi.initializeOrganizerDashboard(user.getUserId());
@@ -128,6 +132,36 @@ public class AdminServiceImpl implements AdminService {
                 .toList();
     }
 
+    @Transactional
+    @Override
+    public List<OnBoard> pendingRequests() {
+        List<OnBoard> pending = new ArrayList<>();
+        for (OnBoard request : onBoardDtoRepository.findAll()) {
+            UserInfo user = userInfoRepository.findByUsername(request.getUsername()).orElse(null);
+            // Stale: the account is gone, or already has the role (e.g. promoted directly)
+            if (user == null || (user.getRoles() != null && user.getRoles().contains(request.getRoleType()))) {
+                onBoardDtoRepository.delete(request);
+            } else {
+                pending.add(request);
+            }
+        }
+        return pending;
+    }
+
+    @Transactional
+    @Override
+    public int removeStaleStudentRecords() {
+        int removed = 0;
+        for (UserInfo user : userInfoRepository.findAll()) {
+            boolean student = user.getRoles() != null && user.getRoles().contains(RoleType.STUDENT);
+            if (!student && studentRepository.existsById(user.getUserId())) {
+                studentRepository.deleteById(user.getUserId());
+                removed++;
+            }
+        }
+        return removed;
+    }
+
     private static boolean contains(String value, String lowerCaseQuery) {
         return value != null && value.toLowerCase(Locale.ROOT).contains(lowerCaseQuery);
     }
@@ -149,6 +183,7 @@ public class AdminServiceImpl implements AdminService {
 
         user.getRoles().add(RoleType.ADMIN);
         user.getRoles().remove(RoleType.STUDENT);
+        studentRepository.deleteById(user.getUserId());
         userInfoRepository.save(user);
 
         // No dashboard call needed for Admin — same as your original code

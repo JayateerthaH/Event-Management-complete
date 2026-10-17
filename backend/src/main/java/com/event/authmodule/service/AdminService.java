@@ -19,4 +19,10 @@ public interface AdminService {
     /** Accounts whose email or profile name contains {@code query}, at most 50. */
     java.util.List<AdminUserDto> searchUsers(String query);
 
+    /** Organizer/admin requests still waiting; requests for a role the account already has (or for a deleted account) are removed. */
+    java.util.List<com.event.authmodule.entitys.OnBoard> pendingRequests();
+
+    /** Deletes the student record of accounts that are no longer students (organizers, admins); returns how many. */
+    int removeStaleStudentRecords();
+
 }

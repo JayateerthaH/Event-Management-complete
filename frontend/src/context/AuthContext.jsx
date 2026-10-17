@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, useRef, useCallback } f
 import { googleLogout } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { silentRefresh, isTokenExpiredOrExpiring } from '../utils/apiClient';
-import { AUTH_BASE_URL } from '../api/apiClient';
+import { AUTH_BASE_URL, getUserData } from '../api/apiClient';
 import { loginRequest, signupRequest } from '../api/authService';
 
 const AuthContext = createContext(null);
@@ -22,9 +22,18 @@ const revokeSession = () =>
   }).catch(() => {});
 
 export function AuthProvider({ children }) {
+  // Roles come from the saved token, not the saved user object, which can predate a role change
+  // (e.g. saved while still a student). Unreadable saved data counts as logged out instead of crashing.
   const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('user');
-    return stored ? JSON.parse(stored) : null;
+    const stored = getUserData();
+    const jwt = localStorage.getItem('jwt_token');
+    if (!stored || !jwt) return stored;
+    try {
+      const { roles } = jwtDecode(jwt);
+      return Array.isArray(roles) ? { ...stored, roles } : stored;
+    } catch {
+      return stored;
+    }
   });
 
   const [token, setToken] = useState(() => {

@@ -5,7 +5,10 @@ import com.event.authmodule.dtoPayload.AdminOverviewDto;
 import com.event.authmodule.dtoPayload.AdminUserDto;
 import com.event.authmodule.entitys.UserInfo;
 import com.event.authmodule.entitys.type.RoleType;
+import com.event.authmodule.entitys.OnBoard;
+import com.event.authmodule.repository.OnBoardDtoRepository;
 import com.event.authmodule.repository.OrganizerRepository;
+import com.event.authmodule.repository.StudentRepository;
 import com.event.authmodule.repository.UserInfoRepository;
 import com.event.authmodule.service.AdminServiceImpl;
 import com.event.eventmodule.api.EventApi;
@@ -21,9 +24,12 @@ import java.time.YearMonth;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +40,8 @@ class AdminServiceUsersTest {
     @Mock EventApi eventApi;
     @Mock OrganizerRepository organizers;
     @Mock DashboardApi dashboardApi;
+    @Mock StudentRepository students;
+    @Mock OnBoardDtoRepository requests;
     @InjectMocks AdminServiceImpl service;
 
     private static UserInfo user(long id, String email, LocalDateTime created, RoleType... roles) {
@@ -75,5 +83,31 @@ class AdminServiceUsersTest {
         AdminOverviewDto.MonthStat current = overview.systemAnalytics().get(5);
         assertThat(current.users()).isEqualTo(2);   // the account without a creation date isn't counted
         assertThat(current.events()).isEqualTo(4);
+    }
+
+    @Test
+    void requestsForRolesTheAccountAlreadyHasAreRemoved() {
+        OnBoard stale = new OnBoard("ada@example.com", RoleType.ADMIN);        // already an admin
+        OnBoard waiting = new OnBoard("sam@example.com", RoleType.ORGANIZER);  // still a student
+        OnBoard orphan = new OnBoard("gone@example.com", RoleType.ORGANIZER);  // account deleted
+        when(requests.findAll()).thenReturn(List.of(stale, waiting, orphan));
+        when(users.findByUsername("ada@example.com")).thenReturn(Optional.of(all.get(0)));
+        when(users.findByUsername("sam@example.com")).thenReturn(Optional.of(all.get(2)));
+        when(users.findByUsername("gone@example.com")).thenReturn(Optional.empty());
+
+        assertThat(service.pendingRequests()).containsExactly(waiting);
+        verify(requests).delete(stale);
+        verify(requests).delete(orphan);
+        verify(requests, never()).delete(waiting);
+    }
+
+    @Test
+    void organizersAndAdminsLoseTheirStudentRecord() {
+        when(users.findAll()).thenReturn(all);
+        when(students.existsById(1L)).thenReturn(true);   // admin with a leftover student record
+
+        assertThat(service.removeStaleStudentRecords()).isEqualTo(1);
+        verify(students).deleteById(1L);
+        verify(students, never()).deleteById(3L);         // still a student
     }
 }
