@@ -31,6 +31,7 @@ public class AchievementService {
     private final BuddyRequestRepository requestRepository;
     private final AchievementEarnedRepository earnedRepository;
     private final BuddyNotificationRepository notificationRepository;
+    private final com.event.socialmodule.settings.NotificationPrefsService prefs;
     private final Map<Long, Instant> lastChecked = new ConcurrentHashMap<>();
 
     public record AchievementView(String key, String name, String description, int progress, int target,
@@ -51,7 +52,7 @@ public class AchievementService {
             if (a.earned() && !recorded.containsKey(a.key())) {
                 AchievementEarned e = earnedRepository.save(new AchievementEarned(userId, a.key()));
                 recorded.put(a.key(), e);
-                notificationRepository.save(new BuddyNotification(userId, BuddyNotification.Type.ACHIEVEMENT, null, null,
+                if (prefs.allows(userId, BuddyNotification.Type.ACHIEVEMENT)) notificationRepository.save(new BuddyNotification(userId, BuddyNotification.Type.ACHIEVEMENT, null, null,
                         "You earned the \"" + a.name() + "\" badge: " + a.description().toLowerCase() + "."));
             }
         }

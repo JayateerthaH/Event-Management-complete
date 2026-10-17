@@ -38,6 +38,7 @@ public class BuddyService {
     private final BuddyNotificationRepository notificationRepository;
     private final EventApi eventApi;
     private final ProfileApi profileApi;
+    private final com.event.socialmodule.settings.NotificationPrefsService prefs;
     private final org.springframework.context.ApplicationEventPublisher activityPublisher;
 
     public enum Relation { NONE, REQUESTED, INCOMING, FRIENDS }
@@ -453,6 +454,7 @@ public class BuddyService {
     }
 
     private void notify(Long userId, BuddyNotification.Type type, Long actor, Long eventId, String message) {
+        if (!prefs.allows(userId, type)) return;
         String text = message.length() > 255 ? message.substring(0, 252) + "..." : message;
         notificationRepository.save(new BuddyNotification(userId, type, actor, eventId, text));
     }

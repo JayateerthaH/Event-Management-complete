@@ -14,6 +14,7 @@ const Signup = lazy(() => import("./pages/Signup"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Friends = lazy(() => import("./pages/Friends"));
 const Welcome = lazy(() => import("./pages/Welcome"));
+const Settings = lazy(() => import("./pages/Settings"));
 const EventsPage = lazy(() => import("./pages/EventsPage"));
 const EventDetailsPage = lazy(() => import("./pages/EventDetailsPage"));
 const EventManagePage = lazy(() => import("./pages/dashboard/organizer/EventManagePage"));
@@ -69,6 +70,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             }
           />

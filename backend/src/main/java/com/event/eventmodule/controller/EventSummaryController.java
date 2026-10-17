@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class EventSummaryController {
 
     private final EventSummaryService service;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
     private final EventsRepository eventsRepository;
 
     // Get summary list of all events (admin — includes unapproved)
@@ -42,8 +43,12 @@ public class EventSummaryController {
             @RequestAttribute("userRoles") String rolesHeader) {
         Events event = eventsRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + eventId));
+        boolean wasApproved = Boolean.TRUE.equals(event.getIsApproved());
         event.setIsApproved(true);
         eventsRepository.save(event);
+        if (!wasApproved) {
+            eventPublisher.publishEvent(new com.event.eventmodule.api.EventApprovedEvent(event.getId(), event.getOrganizerId()));
+        }
         return ResponseEntity.ok("Event approved successfully");
     }
 

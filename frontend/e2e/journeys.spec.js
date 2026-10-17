@@ -366,6 +366,43 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("student follows the organizer, hears about their next approved event, and can turn that off", async ({ browser }) => {
+    const copyName = `${eventName} (next term)`; // created by the duplicate journey, awaiting approval
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await gotoSettled(page, `/events/${eventId}`);
+      const org = page.locator(".follow-org");
+      await org.getByRole("button", { name: "Follow" }).click();
+      await expect(org.getByRole("button", { name: "Following" })).toBeVisible();
+      await expect(org).toContainText("1 follower");
+      await page.goto("/friends?tab=following");
+      await expect(page.locator(".following-list li").first()).toBeVisible();
+    });
+
+    await asUser(browser, ADMIN.email, ADMIN.password, async (page) => {
+      await openTab(page, "Events");
+      await page.getByPlaceholder(/Search by title/).fill(copyName);
+      const row = page.locator("tr", { hasText: copyName });
+      await row.locator('button[title="Approve Event"]').click();
+      await expect(row.locator('button[title="Approve Event"]')).toHaveCount(0);
+    });
+
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await page.locator("button[title=Notifications]").click();
+      await page.getByText(`: ${copyName}`).click();
+      await expect(page).toHaveURL(/\/events\/\d+$/);
+
+      // Notification settings: turn off new-event alerts; it sticks
+      await page.locator("button[title=Settings]").click();
+      await expect(page).toHaveURL(/\/settings$/);
+      const box = page.getByLabel(/New events from organizers you follow/);
+      await expect(box).toBeChecked();
+      await box.uncheck();
+      await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
+      await page.reload();
+      await expect(page.getByLabel(/New events from organizers you follow/)).not.toBeChecked();
+    });
+  });
+
   test("student gives feedback, then downloads the certificate", async ({ browser }) => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
       await openTab(page, "Pending Feedback");

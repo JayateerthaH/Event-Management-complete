@@ -106,6 +106,29 @@ public class EventApiImpl implements EventApi {
     }
 
     @Override
+    public Optional<Long> organizerOf(Long eventId) {
+        return eventsRepository.findById(eventId).map(Events::getOrganizerId);
+    }
+
+    @Override
+    public List<EventCard> upcomingByOrganizer(Long organizerId) {
+        Date now = new Date();
+        return eventsRepository.findByOrganizerId(organizerId).stream()
+                .filter(e -> Boolean.TRUE.equals(e.getIsApproved()) && e.getEventDate() != null && e.getEventDate().after(now))
+                .sorted(java.util.Comparator.comparing(Events::getEventDate))
+                .map(this::toCard).toList();
+    }
+
+    @Override
+    public Optional<String> latestOrganizedBy(Long organizerId) {
+        return eventsRepository.findByOrganizerId(organizerId).stream()
+                .filter(e -> e.getEventDetails() != null && e.getEventDetails().getOrganizedBy() != null
+                        && !e.getEventDetails().getOrganizedBy().isBlank())
+                .max(java.util.Comparator.comparing(Events::getId))
+                .map(e -> e.getEventDetails().getOrganizedBy().trim());
+    }
+
+    @Override
     public Participation participation(Long userId) {
         List<EventCard> attended = registerRepository.findAttendedByUserId(userId).stream()
                 .map(r -> toCard(r.getEventsDto())).toList();

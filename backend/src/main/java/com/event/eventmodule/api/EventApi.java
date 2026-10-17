@@ -40,6 +40,15 @@ public interface EventApi {
     /** Public page content of any event (approved or not; callers check {@link EventProfile#approved()}). */
     Optional<EventProfile> eventProfile(Long eventId);
 
+    /** Who created the event (the organizer students can follow). */
+    Optional<Long> organizerOf(Long eventId);
+
+    /** Approved upcoming events by this organizer, soonest first. */
+    List<EventCard> upcomingByOrganizer(Long organizerId);
+
+    /** The club/department named on the organizer's most recent event ("Organized by"), if any. */
+    Optional<String> latestOrganizedBy(Long organizerId);
+
     /** What a student has done so far, for achievements. */
     record Participation(List<EventCard> attended, int registrations, long feedbackGiven, int certificates) {}
 

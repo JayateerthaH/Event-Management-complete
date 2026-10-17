@@ -39,3 +39,11 @@ export const getStudentReports = () => data(api.get("/social/admin/reports"));
 export const resolveStudentReport = (id) => api.post(`/social/admin/reports/${id}/resolve`);
 
 export const getAchievements = () => data(api.get("/social/achievements"));
+
+export const getOrganizerForEvent = (eventId) => data(api.get(`/social/organizers/by-event/${eventId}`));
+export const followOrganizer = (organizerId) => data(api.post(`/social/follow/${organizerId}`));
+export const unfollowOrganizer = (organizerId) => data(api.delete(`/social/follow/${organizerId}`));
+export const getFollowing = () => data(api.get("/social/following"));
+
+export const getNotificationSettings = () => data(api.get("/social/notification-settings"));
+export const updateNotificationSettings = (body) => data(api.put("/social/notification-settings", body));

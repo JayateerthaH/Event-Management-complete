@@ -6,6 +6,7 @@ import { apiErrorMessage } from "../api/apiClient";
 import {
   getFriends, removeFriend, getRequests, ignoreRequest, cancelRequest,
   searchPeople, getAllInterests, getSocialSettings, updateSocialSettings, getBlocked, unblockUser,
+  getFollowing, unfollowOrganizer,
 } from "../api/socialService";
 import "../styles/Social.css";
 
@@ -13,6 +14,7 @@ const TABS = [
   { key: "friends", label: "Friends" },
   { key: "requests", label: "Requests" },
   { key: "find", label: "Find people" },
+  { key: "following", label: "Following" },
   { key: "settings", label: "Settings" },
 ];
 
@@ -53,6 +55,7 @@ export default function Friends() {
         {tab === "friends" && <FriendsTab />}
         {tab === "requests" && <RequestsTab onCount={setIncomingCount} />}
         {tab === "find" && <FindTab settings={settings} onSettings={setSettings} />}
+        {tab === "following" && <FollowingTab />}
         {tab === "settings" && <SettingsTab settings={settings} onSaved={setSettings} />}
       </main>
     </div>
@@ -272,6 +275,56 @@ function DiscoverPrompt({ settings, onSettings }) {
       {error && <p className="social-error" role="alert">{error}</p>}
       <button type="submit" className="pc-btn pc-btn--primary" disabled={busy || !name.trim()}>Let others find me</button>
     </form>
+  );
+}
+
+function FollowingTab() {
+  const [list, setList] = useState(null);
+  const [error, setError] = useState("");
+  const load = useCallback(() => {
+    getFollowing().then(setList).catch((e) => setError(apiErrorMessage(e)));
+  }, []);
+  useEffect(load, [load]);
+
+  if (error) return <p className="social-error" role="alert">{error}</p>;
+  if (!list) return <p className="social-muted">Loading…</p>;
+  if (list.length === 0) {
+    return (
+      <div className="social-empty">
+        <h2>Not following anyone yet</h2>
+        <p>Open any event and choose <b>Follow</b> next to its organizer. We'll tell you when they publish a new event.</p>
+        <Link className="pc-btn pc-btn--primary" to="/events">Browse events</Link>
+      </div>
+    );
+  }
+  return (
+    <ul className="following-list">
+      {list.map((o) => (
+        <li key={o.organizerId}>
+          <div className="following-list__head">
+            <div>
+              <b>{o.name}</b>
+              <br />
+              <span>{o.followers} follower{o.followers === 1 ? "" : "s"} · {o.upcomingCount} upcoming</span>
+            </div>
+            <button type="button" className="pc-btn pc-btn--ghost"
+              onClick={() => unfollowOrganizer(o.organizerId).then(load).catch((e) => setError(apiErrorMessage(e)))}>
+              Unfollow
+            </button>
+          </div>
+          {o.upcoming.length > 0 && (
+            <div className="friend__events">
+              <span className="eb__label">Coming up</span>
+              <ul>
+                {o.upcoming.map((e) => (
+                  <li key={e.id}><Link to={`/events/${e.id}`}>{e.name}</Link><span>{formatDate(e.eventDate)}</span></li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
   );
 }
 
