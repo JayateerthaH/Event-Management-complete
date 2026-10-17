@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Navbar from "../../../components/Navbar";
 import StudentReports from "../../../components/social/StudentReports";
+import EngagementPanel from "../../../components/admin/EngagementPanel";
 import {
   fetchAllAdminData,
   fetchAllEvents,
@@ -1351,6 +1352,7 @@ export default function AdminDashboard() {
       case "analytics":
         return (
           <>
+            <EngagementPanel />
             <section className="admin-card">
               <h2 className="admin-card__title">System Analytics</h2>
               {systemAnalytics.length > 0 ? (

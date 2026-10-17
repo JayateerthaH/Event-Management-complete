@@ -17,6 +17,7 @@ public class EventDuplicationController {
 
     private final EventDuplicationService duplicationService;
     private final EventAccessService eventAccessService;
+    private final org.springframework.context.ApplicationEventPublisher activityPublisher;
 
     public record DuplicateRequest(Date eventDate, String name) {}
 
@@ -33,6 +34,7 @@ public class EventDuplicationController {
         }
         Events copy = duplicationService.duplicate(eventId, Long.valueOf(userId),
                 body == null ? null : body.eventDate(), body == null ? null : body.name());
+        activityPublisher.publishEvent(new com.event.sharedmodule.UserActivityEvent(Long.valueOf(userId), "event_duplicated", copy.getId()));
         return Map.of("id", copy.getId(), "name", copy.getName(),
                 "message", "Duplicated. The new event is waiting for admin approval; add a cover image for it.");
     }

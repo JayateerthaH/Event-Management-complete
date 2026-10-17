@@ -27,6 +27,7 @@ public class InterestPickerCon {
     private final InterestsRepository interestsRepository;
     private final StudentService studentService;
     private final EventApi eventApi;
+    private final org.springframework.context.ApplicationEventPublisher activityPublisher;
 
     public record Picks(List<String> names) {}
 
@@ -63,6 +64,7 @@ public class InterestPickerCon {
             });
             ids.add(interest.getInterestId());
         }
+        activityPublisher.publishEvent(new com.event.sharedmodule.UserActivityEvent(Long.valueOf(userId), "interests_picked", null));
         return studentService.updateStudentInterests(Long.valueOf(userId), ids).stream()
                 .map(Interests::getInterestName).sorted(String.CASE_INSENSITIVE_ORDER).toList();
     }

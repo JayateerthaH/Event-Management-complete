@@ -46,6 +46,7 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final OnBoardDtoRepository onBoardDtoRepository;
     private final GoogleIdTokenVerifier googleIdTokenVerifier;
+    private final org.springframework.context.ApplicationEventPublisher activityPublisher;
 
     // Production with frontend and API on different sites needs COOKIE_SECURE=true and COOKIE_SAME_SITE=None,
     // otherwise the browser won't send the refresh cookie and users are logged out when the access token expires.
@@ -81,6 +82,7 @@ public class AuthService {
         addRefreshTokenCookie(response, refreshToken);
 
         log.info("Login successful for user: {}", userInfo.getUsername());
+        activityPublisher.publishEvent(new com.event.sharedmodule.UserActivityEvent(userInfo.getUserId(), "login", null));
         return new LoginResponseDto(accessToken, userInfo.getUserId());
     }
 
@@ -140,6 +142,7 @@ public class AuthService {
         dashboardApi.initializeStudentDashboard(userInfo.getUserId());
 
         log.info("Signup complete for user: {}", userInfo.getUsername());
+        activityPublisher.publishEvent(new com.event.sharedmodule.UserActivityEvent(userInfo.getUserId(), "signup", null));
         return userInfo;
     }
 
@@ -194,6 +197,7 @@ public class AuthService {
         RefreshToken refreshToken = authUtil.generateRefreshToken(accessToken, userInfo.getUsername());
         addRefreshTokenCookie(response, refreshToken);
         log.info("Google sign-in for user: {}", userInfo.getUsername());
+        activityPublisher.publishEvent(new com.event.sharedmodule.UserActivityEvent(userInfo.getUserId(), "login", null));
         return new LoginResponseDto(accessToken, userInfo.getUserId());
     }
 

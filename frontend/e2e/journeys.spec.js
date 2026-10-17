@@ -396,6 +396,19 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("admin sees engagement: active users and what people did", async ({ browser }) => {
+    await asUser(browser, ADMIN.email, ADMIN.password, async (page) => {
+      await openTab(page, "Analytics");
+      const panel = page.locator(".engagement");
+      await expect(panel.getByText("Active today")).toBeVisible();
+      const activeToday = panel.locator(".engagement__tiles > div", { hasText: "Active today" }).locator(".engagement__value");
+      await expect(activeToday).not.toHaveText("0");
+      for (const label of ["Signups", "Registrations", "Check-ins"]) {
+        await expect(panel.locator(".engagement__counts li", { hasText: label })).toBeVisible();
+      }
+    });
+  });
+
   test("an expiring session is refreshed with the HttpOnly cookie", async ({ browser }) => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
       const result = await page.evaluate(async (api) => {

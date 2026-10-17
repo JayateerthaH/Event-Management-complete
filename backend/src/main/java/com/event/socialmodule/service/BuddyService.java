@@ -38,6 +38,7 @@ public class BuddyService {
     private final BuddyNotificationRepository notificationRepository;
     private final EventApi eventApi;
     private final ProfileApi profileApi;
+    private final org.springframework.context.ApplicationEventPublisher activityPublisher;
 
     public enum Relation { NONE, REQUESTED, INCOMING, FRIENDS }
 
@@ -128,7 +129,10 @@ public class BuddyService {
     public EventBuddies optIn(Long me, Long eventId) {
         if (!eventApi.isRegistered(me, eventId)) throw bad("Register for the event first");
         requireName(me);
-        if (!optInRepository.existsByUserIdAndEventId(me, eventId)) optInRepository.save(new BuddyOptIn(me, eventId));
+        if (!optInRepository.existsByUserIdAndEventId(me, eventId)) {
+            optInRepository.save(new BuddyOptIn(me, eventId));
+            activityPublisher.publishEvent(new com.event.sharedmodule.UserActivityEvent(me, "buddy_opt_in", eventId));
+        }
         return eventBuddies(me, eventId);
     }
 
@@ -193,6 +197,7 @@ public class BuddyService {
                     "You've sent " + MAX_REQUESTS_PER_DAY + " requests today. Try again tomorrow.");
         }
         requestRepository.save(new BuddyRequest(me, to, eventId));
+        activityPublisher.publishEvent(new com.event.sharedmodule.UserActivityEvent(me, "buddy_request", eventId));
         String where = eventName(eventId).map(n -> " (" + n + ")").orElse("");
         notify(to, BuddyNotification.Type.BUDDY_REQUEST, me, eventId, nameOf(me) + " wants to connect" + where);
         return person(me, to);
@@ -217,6 +222,7 @@ public class BuddyService {
         r.setStatus(Status.ACCEPTED);
         r.setRespondedAt(LocalDateTime.now());
         requestRepository.save(r);
+        activityPublisher.publishEvent(new com.event.sharedmodule.UserActivityEvent(me, "buddy_accepted", r.getEventId()));
         notify(r.getFromUserId(), BuddyNotification.Type.BUDDY_ACCEPTED, me, r.getEventId(),
                 nameOf(me) + " accepted your request. You're now friends.");
         return person(me, r.getFromUserId());

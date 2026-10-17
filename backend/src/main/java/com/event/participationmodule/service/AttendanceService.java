@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
+    private final org.springframework.context.ApplicationEventPublisher activityPublisher;
     private final UserRepository userRepository;
     private final UserRequestRepository userRequestRepository;
     private final AttendanceNotificationAsyncService attendanceNotificationAsyncService;
@@ -75,6 +76,7 @@ public class AttendanceService {
         userRequestRepository.save(userRequest);
 
         attendanceNotificationAsyncService.sendNotificationAsync(userRequest);
+        activityPublisher.publishEvent(new com.event.sharedmodule.UserActivityEvent(userRequest.getUserId(), "attended", eventId));
 
         return "Attendance marked successfully for " + email + " for event " + eventId;
     }
