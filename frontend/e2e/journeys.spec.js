@@ -328,6 +328,24 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("organizer duplicates the completed event to a new date; the copy awaits approval", async ({ browser }) => {
+    const copyName = `${eventName} (next term)`;
+    await asUser(browser, organizerEmail, PASSWORD, async (page) => {
+      await openTab(page, "Manage Events");
+      const row = page.locator("tr", { hasText: eventName }).filter({ hasText: "Completed" }).first();
+      await row.getByRole("button", { name: `Duplicate ${eventName}` }).click();
+      const dialog = page.getByRole("dialog", { name: "Duplicate event" });
+      await dialog.getByLabel("Name").fill(copyName);
+      await dialog.getByLabel(/New date and time/).fill("2027-01-20T10:00");
+      await dialog.getByRole("button", { name: "Duplicate", exact: true }).click();
+      await expect(dialog.getByText(/waiting for admin approval/)).toBeVisible();
+      await dialog.getByRole("button", { name: "Done" }).click();
+      const copyRow = page.locator("tr", { hasText: copyName });
+      await expect(copyRow).toBeVisible();
+      await expect(copyRow).not.toContainText("Completed");
+    });
+  });
+
   test("student gives feedback, then downloads the certificate", async ({ browser }) => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
       await openTab(page, "Pending Feedback");

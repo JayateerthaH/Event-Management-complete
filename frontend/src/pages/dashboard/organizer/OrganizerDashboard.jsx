@@ -17,6 +17,7 @@ import {
   fetchEventFeedback,
 } from "../../../services/feedbackService";
 import AddCollaboratorModal from "../../../components/AddCollaboratorModal";
+import DuplicateEventModal from "../../../components/DuplicateEventModal";
 import { addFaq } from "../../../api/eventDetailsService";
 import { uploadEventImage } from "../../../api/imageService";
 import DescriptionHelper from "../../../components/ai/DescriptionHelper";
@@ -363,6 +364,7 @@ export default function OrganizerDashboard() {
 
   // -- Manage Events ---------------------------------------------------------
   const [myEvents, setMyEvents] = useState([]);
+  const [dupEvent, setDupEvent] = useState(null);
   const [eventsLoading, setEventsLoading] = useState(false);
 
   // -- Create Event form -----------------------------------------------------
@@ -1471,6 +1473,22 @@ export default function OrganizerDashboard() {
                       </button>
                       <button
                         className="od-action-btn"
+                        title="Duplicate"
+                        aria-label={`Duplicate ${ev.title}`}
+                        onClick={() => setDupEvent(ev)}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <rect x="9" y="9" width="13" height="13" rx="2" />
+                          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                        </svg>
+                      </button>
+                      <button
+                        className="od-action-btn"
                         title="Analytics"
                         onClick={() => setActiveTab("analytics")}
                       >
@@ -1545,6 +1563,22 @@ export default function OrganizerDashboard() {
                         >
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                           <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      </button>
+                      <button
+                        className="od-action-btn"
+                        title="Duplicate"
+                        aria-label={`Duplicate ${ev.title}`}
+                        onClick={() => setDupEvent(ev)}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <rect x="9" y="9" width="13" height="13" rx="2" />
+                          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
                         </svg>
                       </button>
                       <button
@@ -1673,6 +1707,13 @@ export default function OrganizerDashboard() {
                 eventId={collabModal}
                 onClose={() => setCollabModal(null)}
                 onSuccess={() => setCollabModal(null)}
+              />
+            )}
+            {dupEvent && (
+              <DuplicateEventModal
+                event={dupEvent}
+                onClose={() => setDupEvent(null)}
+                onDuplicated={loadMyEvents}
               />
             )}
           </>
