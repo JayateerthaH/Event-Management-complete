@@ -33,7 +33,6 @@ spring:
         # ddl-auto alone only creates tables and failed on an empty database.
         hbm2ddl:
           create_namespaces: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   sql:
     init:
