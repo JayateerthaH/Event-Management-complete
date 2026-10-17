@@ -365,6 +365,32 @@ export default function AdminDashboard() {
     };
   }, []);
 
+  // -- Overview: counts of items waiting for the admin ------------------------
+  const [attention, setAttention] = useState(null); // { organizers, admins, events } or null while loading
+  useEffect(() => {
+    if (activeTab !== "overview") return;
+    let cancelled = false;
+    (async () => {
+      const [reqRes, evRes] = await Promise.allSettled([
+        fetchOnboardRequests(),
+        fetchAllEvents(0, 9999),
+      ]);
+      if (cancelled) return;
+      const requests =
+        reqRes.status === "fulfilled" && Array.isArray(reqRes.value) ? reqRes.value : [];
+      const evData = evRes.status === "fulfilled" ? evRes.value : null;
+      const events = Array.isArray(evData) ? evData : toArray(evData?.content ?? evData?.data ?? evData?.items);
+      setAttention({
+        organizers: requests.filter((r) => r.roleType === "ORGANIZER").length,
+        admins: requests.filter((r) => r.roleType === "ADMIN").length,
+        events: events.map(normaliseEvent).filter((ev) => !ev.isApproved).length,
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab]);
+
   // -- Fetch pageable events when Events tab is active -----------------------
   useEffect(() => {
     if (activeTab !== "events") return;
@@ -1005,6 +1031,45 @@ export default function AdminDashboard() {
                   </span>
                 </div>
               </div>
+            </section>
+
+            <section className="ad-card ad-attention">
+              <h2 className="ad-card__title">Needs your attention</h2>
+              {attention === null ? (
+                <p className="ad-empty">Loading…</p>
+              ) : (
+                <>
+                  <div className="ad-attention__list">
+                    {[
+                      { key: "onboard-organizer", count: attention.organizers, label: "Organizer requests", hint: "Users asking to host events" },
+                      { key: "events", count: attention.events, label: "Events awaiting approval", hint: "Hidden from students until you approve them" },
+                      { key: "onboard-admin", count: attention.admins, label: "Admin requests", hint: "Users asking for admin access" },
+                    ].map((item) => (
+                      <div className="ad-attention__row" key={item.key}>
+                        <span className={`ad-attention__count${item.count ? "" : " ad-attention__count--zero"}`}>
+                          {item.count}
+                        </span>
+                        <span className="ad-attention__text">
+                          <span className="ad-attention__label">{item.label}</span>
+                          <span className="ad-attention__hint">{item.hint}</span>
+                        </span>
+                        <button
+                          type="button"
+                          className="ad-accept-btn ad-accept-btn--admin"
+                          onClick={() => setActiveTab(item.key)}
+                        >
+                          {item.count ? "Review" : "Open"}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {!attention.organizers && !attention.events && !attention.admins && (
+                    <p className="ad-attention__done">
+                      All caught up — nothing is waiting for review. New organizer requests and events will appear here.
+                    </p>
+                  )}
+                </>
+              )}
             </section>
           </>
         );

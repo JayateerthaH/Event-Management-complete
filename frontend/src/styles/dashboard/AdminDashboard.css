@@ -143,11 +143,13 @@ METRICS
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .ad-metrics {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* minmax(0, …) lets cards shrink below their content width (plain 1fr overflowed on phones) */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
 }
 
 .ad-metric-card {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 0.85rem;
@@ -174,7 +176,7 @@ METRICS
 .ad-metric-card__icon--purple { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
 .ad-metric-card__icon--amber  { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
 
-.ad-metric-card__info { display: flex; flex-direction: column; }
+.ad-metric-card__info { display: flex; flex-direction: column; min-width: 0; }
 .ad-metric-card__value { font-size: 1.6rem; font-weight: 800; color: #f1f5f9; line-height: 1.15; }
 .ad-metric-card__label { font-size: 0.72rem; color: #94a3b8; margin-top: 0.1rem; white-space: nowrap; }
 
@@ -255,7 +257,7 @@ CARD
 }
 
 /* â”€â”€ Responsive â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-@media (max-width: 1100px) { .ad-metrics { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 1100px) { .ad-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 @media (max-width: 860px) {
   .ad-layout { flex-direction: column; }
@@ -274,7 +276,12 @@ CARD
 }
 
 @media (max-width: 540px) {
-  .ad-metrics { grid-template-columns: 1fr 1fr; }
+  .ad-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+  .ad-metric-card { padding: 0.9rem; gap: 0.6rem; }
+  .ad-metric-card__icon { width: 36px; height: 36px; }
+  .ad-metric-card__value { font-size: 1.3rem; }
+  .ad-metric-card__label { white-space: normal; }
+  .ad-attention__row { flex-wrap: wrap; }
   .ad-welcome__title { font-size: 1.2rem; }
 }
 
@@ -592,3 +599,23 @@ PROFILE CONFIG — Sub-tabs, Actions, Modal, Form
   min-height: 60px;
 }
 
+
+/* ── Overview: items waiting for the admin ─────────────────────────────────── */
+.ad-attention { margin-top: 1.25rem; }
+.ad-attention__list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1rem; }
+.ad-attention__row {
+  display: flex; align-items: center; gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.14);
+  border-radius: 12px;
+}
+.ad-attention__count {
+  min-width: 2.4rem; text-align: center;
+  font-size: 1.25rem; font-weight: 800; color: #f1f5f9;
+}
+.ad-attention__count--zero { color: #64748b; }
+.ad-attention__text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ad-attention__label { font-size: 0.9rem; font-weight: 600; color: #e2e8f0; }
+.ad-attention__hint { font-size: 0.75rem; color: #94a3b8; }
+.ad-attention__done { color: #94a3b8; font-size: 0.85rem; margin: 0.9rem 0 0; }
