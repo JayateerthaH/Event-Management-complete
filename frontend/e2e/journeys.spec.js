@@ -178,6 +178,26 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("sharing: link previews carry the event's title and image; the Share menu offers WhatsApp", async ({ browser, request }) => {
+    // What WhatsApp/Telegram crawlers get (vercel.json routes them here)
+    const preview = await (await request.get(`${API}/public/share/events/${eventId}`)).text();
+    expect(preview).toContain(`<meta property="og:title" content="${eventName}">`);
+    expect(preview).toMatch(/<meta property="og:image" content="https?:\/\/[^"]+">/);
+    expect(preview).toContain(`/events/${eventId}"`);
+
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await gotoSettled(page, `/events/${eventId}`);
+      const share = page.locator(".ed-sidebar").getByRole("button", { name: "Share" });
+      await expect(share).toBeVisible();
+      if (test.info().project.name === "desktop") {
+        await page.evaluate(() => { delete Navigator.prototype.share; }); // desktop: no share sheet
+        await share.click();
+        const wa = page.getByRole("menuitem", { name: "Share on WhatsApp" });
+        await expect(wa).toHaveAttribute("href", new RegExp(`^https://wa\\.me/\\?text=.*%2Fevents%2F${eventId}$`));
+      }
+    });
+  });
+
   test("student can have their QR code emailed again", async ({ browser }) => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
       await page.goto(`/events/${eventId}`);

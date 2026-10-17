@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { downloadIcs } from "../../utils/calendar";
 import ResendQrButton from "../ResendQrButton";
 import SaveButton from "../engagement/SaveButton";
+import ShareButton from "../engagement/ShareButton";
 import "../../styles/EventDetails.css";
 
 const formatDate = (dateStr) => {
@@ -146,6 +147,7 @@ export default function SidebarCard({ event, details, onRegister, refetchEvent }
           </button>
 
           {!isRegistered && !isStarted && <SaveButton eventId={event.id ?? event.eventId} variant="full" />}
+          {!isStarted && <ShareButton event={event} />}
         </div>
 
         {/* ── Spots Left ── */}
