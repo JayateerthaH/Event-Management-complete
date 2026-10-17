@@ -237,9 +237,11 @@ export default function Signup() {
                     <div className="oauth-buttons">
                       <GoogleLogin
                         onSuccess={handleGoogle}
-                        onError={() => setErrors({ submit: "Google sign-up didn't complete. Please try again." })}
+                        onError={() => setErrors({ submit: "Google sign-up didn't complete. If no Google window opened, allow pop-ups for this site (or turn off pop-up blocking extensions) and try again." })}
                         text="signup_with"
                         width={320}
+                        use_fedcm_for_button
+                        /* Chrome's own account chooser instead of a popup window that blockers can stop; other browsers keep the popup */
                       />
                     </div>
                     <div className="auth-divider">
