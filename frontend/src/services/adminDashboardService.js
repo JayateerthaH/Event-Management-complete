@@ -123,3 +123,9 @@ export const rejectEvent = async (eventId) => {
   const { data } = await api.put(`/events/admin/reject/${eventId}`);
   return data;
 };
+
+/** GET /admin/users?q= — accounts whose email or profile name contains q: [{ id, email, name, roles[] }] */
+export const searchUsers = async (q) => {
+  const { data } = await api.get("/admin/users", { params: { q } });
+  return Array.isArray(data) ? data : [];
+};

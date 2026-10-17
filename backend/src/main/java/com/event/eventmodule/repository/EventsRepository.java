@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,4 +51,8 @@ public interface EventsRepository extends JpaRepository<Events, Long>, JpaSpecif
 
     @Query("SELECT DISTINCT e.category FROM Events e WHERE e.isApproved = true AND e.category IS NOT NULL ORDER BY e.category")
     List<String> findApprovedCategories();
+
+    @Query("select e.eventDate from Events e where e.eventDate >= :from and e.eventDate < :to")
+    List<Date> findEventDatesBetween(@org.springframework.data.repository.query.Param("from") Date from,
+                                     @org.springframework.data.repository.query.Param("to") Date to);
 }

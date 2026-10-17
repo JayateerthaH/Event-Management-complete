@@ -8,6 +8,7 @@ import {
   fetchOnboardRequests,
   fetchStudents,
   fetchOrganizers,
+  searchUsers,
   acceptOrganizer,
   acceptAdmin,
   approveEvent,
@@ -453,44 +454,8 @@ export default function AdminDashboard() {
     if (!query) return;
     setUserSearching(true);
     try {
-      const [stuRes, orgRes] = await Promise.allSettled([
-        fetchStudents(),
-        fetchOrganizers(),
-      ]);
-      const stuList = stuRes.status === "fulfilled" ? stuRes.value : [];
-      const orgList = orgRes.status === "fulfilled" ? orgRes.value : [];
-      const matchedStudents = stuList
-        .filter((s) => {
-          const email = (
-            s?.email ??
-            s?.userEmail ??
-            s?.emailAddress ??
-            ""
-          ).toLowerCase();
-          const name = [s?.firstName, s?.lastName, s?.name, s?.userName]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
-          return email.includes(query) || name.includes(query);
-        })
-        .map((s) => ({ ...s, _role: "STUDENT" }));
-      const matchedOrgs = orgList
-        .filter((o) => {
-          const email = (
-            o?.email ??
-            o?.userEmail ??
-            o?.emailAddress ??
-            o?.username ??
-            ""
-          ).toLowerCase();
-          const name = [o?.name, o?.firstName, o?.lastName, o?.userName]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
-          return email.includes(query) || name.includes(query);
-        })
-        .map((o) => ({ ...o, _role: "ORGANIZER" }));
-      setUserSearchResults([...matchedStudents, ...matchedOrgs]);
+      // One row per account, with every role it has (an organizer is usually a student too)
+      setUserSearchResults(await searchUsers(query));
     } catch (err) {
       console.error("[Admin UserSearch] error:", err);
       setUserSearchResults([]);
@@ -1138,32 +1103,24 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {userSearchResults.map((u, i) => {
-                      const id = u?.id ?? u?.Id ?? u?.userId ?? "--";
-                      const name = u?.firstName
-                        ? `${u.firstName} ${u?.lastName ?? ""}`.trim()
-                        : (u?.name ?? u?.userName ?? "--");
-                      const email =
-                        u?.email ??
-                        u?.userEmail ??
-                        u?.emailAddress ??
-                        u?.username ??
-                        "--";
-                      return (
-                        <tr key={id !== "--" ? id : i}>
-                          <td>{id}</td>
-                          <td>{name}</td>
-                          <td>{email}</td>
-                          <td>
+                    {userSearchResults.map((u) => (
+                      <tr key={u.id}>
+                        <td>{u.id}</td>
+                        <td>{u.name || "--"}</td>
+                        <td>{u.email}</td>
+                        <td>
+                          {(u.roles?.length ? u.roles : ["--"]).map((role) => (
                             <span
-                              className={`ad-badge ad-badge--${(u._role || "").toLowerCase()}`}
+                              key={role}
+                              className={`ad-badge ad-badge--${role.toLowerCase()}`}
+                              style={{ marginRight: 4 }}
                             >
-                              {u._role}
+                              {role}
                             </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                          ))}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -1484,6 +1441,7 @@ export default function AdminDashboard() {
                       <Area
                         type="monotone"
                         dataKey="users"
+                        name="New users"
                         stroke="#8b5cf6"
                         fill="url(#adGradUsers)"
                         strokeWidth={2}
@@ -1491,10 +1449,12 @@ export default function AdminDashboard() {
                       <Area
                         type="monotone"
                         dataKey="events"
+                        name="Events"
                         stroke="#06b6d4"
                         fill="url(#adGradEvents)"
                         strokeWidth={2}
                       />
+                      <Legend wrapperStyle={{ fontSize: 12 }} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>

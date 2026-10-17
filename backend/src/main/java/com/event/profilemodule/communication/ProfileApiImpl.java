@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -37,5 +39,14 @@ public class ProfileApiImpl implements ProfileApi {
         return studentRepository.findById(userId)
                 .map(p -> p.getDepartment())
                 .filter(d -> !d.isBlank());
+    }
+
+    @Override
+    public Map<Long, String> displayNames() {
+        Map<Long, String> names = new HashMap<>();
+        for (Object[] row : studentRepository.findIdAndName()) {
+            names.put((Long) row[0], ((String) row[1]).trim());
+        }
+        return names;
     }
 }

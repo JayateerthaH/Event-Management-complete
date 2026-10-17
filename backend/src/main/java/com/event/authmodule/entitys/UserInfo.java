@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,6 +43,11 @@ public class UserInfo implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private AuthProviderType providerType;
+
+    // Set on insert; null for accounts created before this column existed
+    @org.hibernate.annotations.CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     @CollectionTable(

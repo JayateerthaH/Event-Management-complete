@@ -44,6 +44,13 @@ public class AdminController {
         return adminService.getOverview();
     }
 
+    // Users whose email or profile name contains q, each once with all their roles
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/users")
+    public List<AdminUserDto> searchUsers(@RequestParam(defaultValue = "") String q) {
+        return adminService.searchUsers(q);
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/onboard")
     public List<OnBoard> getAllOnBoards(){

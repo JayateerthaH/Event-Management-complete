@@ -4,7 +4,9 @@ import com.event.eventmodule.dtoPayload.EventsDto;
 import com.event.eventmodule.entity.Events;
 import com.event.eventmodule.entity.analysis.MonthlyAttendanceCount;
 
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface EventApi {
@@ -37,4 +39,7 @@ public interface EventApi {
 
     /** Public page content of any event (approved or not; callers check {@link EventProfile#approved()}). */
     Optional<EventProfile> eventProfile(Long eventId);
+
+    /** Number of events per month (by event date) from {@code from} to {@code to}, inclusive; months without events are 0. */
+    Map<YearMonth, Long> eventsPerMonth(YearMonth from, YearMonth to);
 }

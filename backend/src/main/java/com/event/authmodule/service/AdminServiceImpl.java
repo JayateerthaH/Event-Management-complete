@@ -4,6 +4,8 @@ import com.event.eventmodule.api.EventApi;
 import com.event.authmodule.dtoPayload.AdminOverviewDto;
 import com.event.analyticsmodule.communication.DashboardApi;
 import com.event.authmodule.dtoPayload.AdminResponseDto;
+import com.event.authmodule.dtoPayload.AdminUserDto;
+import com.event.profilemodule.communication.ProfileApi;
 import com.event.authmodule.dtoPayload.OnBoardAdminRequestDto;
 import com.event.authmodule.dtoPayload.OnBoardOrganizerRequestDto;
 import com.event.authmodule.dtoPayload.OrganizerResponseDto;
@@ -21,6 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,6 +42,7 @@ public class AdminServiceImpl implements AdminService {
     private final ModelMapper modelMapper;
     private final OnBoardDtoRepository onBoardDtoRepository;
     private final DashboardApi dashboardApi;
+    private final ProfileApi profileApi;
     private final EventApi eventApi;  // ← add this, remove UserClient
 
     @Override
@@ -65,11 +76,60 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminOverviewDto getOverview() {
+        List<UserInfo> users = userInfoRepository.findAll();
+
+        List<AdminOverviewDto.RoleCount> roles = List.of(
+                new AdminOverviewDto.RoleCount("Students", countWithRole(users, RoleType.STUDENT)),
+                new AdminOverviewDto.RoleCount("Organizers", countWithRole(users, RoleType.ORGANIZER)),
+                new AdminOverviewDto.RoleCount("Admins", countWithRole(users, RoleType.ADMIN)));
+
+        // Last 6 months including the current one
+        YearMonth now = YearMonth.now();
+        YearMonth from = now.minusMonths(5);
+        Map<YearMonth, Long> events = eventApi.eventsPerMonth(from, now);
+        DateTimeFormatter label = DateTimeFormatter.ofPattern("MMM yyyy", Locale.ENGLISH);
+        List<AdminOverviewDto.MonthStat> months = new ArrayList<>();
+        for (YearMonth m = from; !m.isAfter(now); m = m.plusMonths(1)) {
+            YearMonth month = m;
+            long created = users.stream()
+                    .filter(u -> u.getCreatedAt() != null && YearMonth.from(u.getCreatedAt()).equals(month))
+                    .count();
+            months.add(new AdminOverviewDto.MonthStat(m.format(label), created, events.getOrDefault(m, 0L)));
+        }
+
         return new AdminOverviewDto(
-                userInfoRepository.count(),
+                users.size(),
                 eventApi.countAllEvents(),
                 organizerRepository.count(),
-                dashboardApi.totalPlatformRevenue());
+                dashboardApi.totalPlatformRevenue(),
+                roles,
+                months);
+    }
+
+    private static long countWithRole(List<UserInfo> users, RoleType role) {
+        return users.stream().filter(u -> u.getRoles() != null && u.getRoles().contains(role)).count();
+    }
+
+    @Override
+    public List<AdminUserDto> searchUsers(String query) {
+        String q = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+        if (q.isEmpty()) return List.of();
+        Map<Long, String> names = profileApi.displayNames();
+        return userInfoRepository.findAll().stream()
+                .filter(u -> contains(u.getUsername(), q) || contains(names.get(u.getUserId()), q))
+                .sorted(Comparator.comparing(UserInfo::getUsername, String.CASE_INSENSITIVE_ORDER))
+                .limit(50)
+                .map(u -> new AdminUserDto(
+                        u.getUserId(),
+                        u.getUsername(),
+                        names.get(u.getUserId()),
+                        u.getRoles() == null ? List.of()
+                                : u.getRoles().stream().sorted().map(Enum::name).toList()))   // ADMIN, ORGANIZER, STUDENT
+                .toList();
+    }
+
+    private static boolean contains(String value, String lowerCaseQuery) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(lowerCaseQuery);
     }
 
     @Transactional

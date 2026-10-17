@@ -1,6 +1,10 @@
 package com.event.eventmodule.api;
 
+import java.time.Instant;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
 import com.event.eventmodule.repository.FeedBackRepository;
@@ -95,6 +99,21 @@ public class EventApiImpl implements EventApi {
     @Override
     public long countAllEvents() {
         return eventsRepository.count();
+    }
+
+    @Override
+    public java.util.Map<YearMonth, Long> eventsPerMonth(YearMonth from, YearMonth to) {
+        ZoneId zone = ZoneId.systemDefault();
+        java.util.Map<YearMonth, Long> counts = new LinkedHashMap<>();
+        for (YearMonth m = from; !m.isAfter(to); m = m.plusMonths(1)) counts.put(m, 0L);
+        Date start = Date.from(from.atDay(1).atStartOfDay(zone).toInstant());
+        Date end = Date.from(to.plusMonths(1).atDay(1).atStartOfDay(zone).toInstant());
+        for (Date d : eventsRepository.findEventDatesBetween(start, end)) {
+            // getTime() works for java.sql.Date too, whose toInstant() throws
+            YearMonth m = YearMonth.from(Instant.ofEpochMilli(d.getTime()).atZone(zone));
+            counts.computeIfPresent(m, (k, v) -> v + 1);
+        }
+        return counts;
     }
 
     @Override
