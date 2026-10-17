@@ -913,9 +913,9 @@ export default function AdminDashboard() {
       case "overview":
         return (
           <>
-            <section className="ad-metrics">
-              <div className="ad-metric-card">
-                <span className="ad-metric-card__icon ad-metric-card__icon--blue">
+            <section className="admin-metrics">
+              <div className="admin-metric-card">
+                <span className="admin-metric-card__icon admin-metric-card__icon--blue">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -928,13 +928,13 @@ export default function AdminDashboard() {
                     <path d="M16 3.13a4 4 0 010 7.75" />
                   </svg>
                 </span>
-                <div className="ad-metric-card__info">
-                  <span className="ad-metric-card__value">{totalUsers}</span>
-                  <span className="ad-metric-card__label">Total Users</span>
+                <div className="admin-metric-card__info">
+                  <span className="admin-metric-card__value">{totalUsers}</span>
+                  <span className="admin-metric-card__label">Total Users</span>
                 </div>
               </div>
-              <div className="ad-metric-card">
-                <span className="ad-metric-card__icon ad-metric-card__icon--green">
+              <div className="admin-metric-card">
+                <span className="admin-metric-card__icon admin-metric-card__icon--green">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -947,13 +947,13 @@ export default function AdminDashboard() {
                     <line x1="3" y1="10" x2="21" y2="10" />
                   </svg>
                 </span>
-                <div className="ad-metric-card__info">
-                  <span className="ad-metric-card__value">{totalEvents}</span>
-                  <span className="ad-metric-card__label">Total Events</span>
+                <div className="admin-metric-card__info">
+                  <span className="admin-metric-card__value">{totalEvents}</span>
+                  <span className="admin-metric-card__label">Total Events</span>
                 </div>
               </div>
-              <div className="ad-metric-card">
-                <span className="ad-metric-card__icon ad-metric-card__icon--purple">
+              <div className="admin-metric-card">
+                <span className="admin-metric-card__icon admin-metric-card__icon--purple">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -964,17 +964,17 @@ export default function AdminDashboard() {
                     <circle cx="12" cy="7" r="4" />
                   </svg>
                 </span>
-                <div className="ad-metric-card__info">
-                  <span className="ad-metric-card__value">
+                <div className="admin-metric-card__info">
+                  <span className="admin-metric-card__value">
                     {activeOrganizers}
                   </span>
-                  <span className="ad-metric-card__label">
+                  <span className="admin-metric-card__label">
                     Active Organizers
                   </span>
                 </div>
               </div>
-              <div className="ad-metric-card">
-                <span className="ad-metric-card__icon ad-metric-card__icon--amber">
+              <div className="admin-metric-card">
+                <span className="admin-metric-card__icon admin-metric-card__icon--amber">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -985,42 +985,42 @@ export default function AdminDashboard() {
                     <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                   </svg>
                 </span>
-                <div className="ad-metric-card__info">
-                  <span className="ad-metric-card__value">
+                <div className="admin-metric-card__info">
+                  <span className="admin-metric-card__value">
                     {typeof platformRevenue === "number"
                       ? `₹${platformRevenue.toLocaleString("en-IN")}`
                       : platformRevenue}
                   </span>
-                  <span className="ad-metric-card__label">
+                  <span className="admin-metric-card__label">
                     Platform Revenue
                   </span>
                 </div>
               </div>
             </section>
 
-            <section className="ad-card ad-attention">
-              <h2 className="ad-card__title">Needs your attention</h2>
+            <section className="admin-card admin-attention">
+              <h2 className="admin-card__title">Needs your attention</h2>
               {attention === null ? (
-                <p className="ad-empty">Loading…</p>
+                <p className="admin-empty">Loading…</p>
               ) : (
                 <>
-                  <div className="ad-attention__list">
+                  <div className="admin-attention__list">
                     {[
                       { key: "onboard-organizer", count: attention.organizers, label: "Organizer requests", hint: "Users asking to host events" },
                       { key: "events", count: attention.events, label: "Events awaiting approval", hint: "Hidden from students until you approve them" },
                       { key: "onboard-admin", count: attention.admins, label: "Admin requests", hint: "Users asking for admin access" },
                     ].map((item) => (
-                      <div className="ad-attention__row" key={item.key}>
-                        <span className={`ad-attention__count${item.count ? "" : " ad-attention__count--zero"}`}>
+                      <div className="admin-attention__row" key={item.key}>
+                        <span className={`admin-attention__count${item.count ? "" : " admin-attention__count--zero"}`}>
                           {item.count}
                         </span>
-                        <span className="ad-attention__text">
-                          <span className="ad-attention__label">{item.label}</span>
-                          <span className="ad-attention__hint">{item.hint}</span>
+                        <span className="admin-attention__text">
+                          <span className="admin-attention__label">{item.label}</span>
+                          <span className="admin-attention__hint">{item.hint}</span>
                         </span>
                         <button
                           type="button"
-                          className="ad-accept-btn ad-accept-btn--admin"
+                          className="admin-accept-btn admin-accept-btn--admin"
                           onClick={() => setActiveTab(item.key)}
                         >
                           {item.count ? "Review" : "Open"}
@@ -1029,7 +1029,7 @@ export default function AdminDashboard() {
                     ))}
                   </div>
                   {!attention.organizers && !attention.events && !attention.admins && (
-                    <p className="ad-attention__done">
+                    <p className="admin-attention__done">
                       All caught up — nothing is waiting for review. New organizer requests and events will appear here.
                     </p>
                   )}
@@ -1041,10 +1041,10 @@ export default function AdminDashboard() {
 
       case "users":
         return (
-          <section className="ad-card">
-            <h2 className="ad-card__title">Search Users</h2>
+          <section className="admin-card">
+            <h2 className="admin-card__title">Search Users</h2>
             <form
-              className="ad-search-form"
+              className="admin-search-form"
               onSubmit={handleUserSearch}
               style={{
                 display: "flex",
@@ -1083,7 +1083,7 @@ export default function AdminDashboard() {
               </div>
               <button
                 type="submit"
-                className="ad-accept-btn"
+                className="admin-accept-btn"
                 disabled={userSearching || !userSearchEmail.trim()}
                 style={{ padding: "0.6rem 1.5rem", whiteSpace: "nowrap" }}
               >
@@ -1092,8 +1092,8 @@ export default function AdminDashboard() {
             </form>
 
             {userSearchResults.length > 0 ? (
-              <div className="ad-table-wrap">
-                <table className="ad-table">
+              <div className="admin-table-wrap">
+                <table className="admin-table">
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -1112,7 +1112,7 @@ export default function AdminDashboard() {
                           {(u.roles?.length ? u.roles : ["--"]).map((role) => (
                             <span
                               key={role}
-                              className={`ad-badge ad-badge--${role.toLowerCase()}`}
+                              className={`admin-badge admin-badge--${role.toLowerCase()}`}
                               style={{ marginRight: 4 }}
                             >
                               {role}
@@ -1125,11 +1125,11 @@ export default function AdminDashboard() {
                 </table>
               </div>
             ) : userSearchEmail.trim() && !userSearching ? (
-              <p className="ad-empty">
+              <p className="admin-empty">
                 No users found matching &ldquo;{userSearchEmail}&rdquo;.
               </p>
             ) : (
-              <p className="ad-empty">
+              <p className="admin-empty">
                 Enter an email or name to search for students and organizers.
               </p>
             )}
@@ -1155,8 +1155,8 @@ export default function AdminDashboard() {
         );
 
         return (
-          <section className="ad-card">
-            <h2 className="ad-card__title">All Events</h2>
+          <section className="admin-card">
+            <h2 className="admin-card__title">All Events</h2>
 
             <div
               style={{
@@ -1200,11 +1200,11 @@ export default function AdminDashboard() {
             </div>
 
             {eventsLoading ? (
-              <p className="ad-empty">Loading events…</p>
+              <p className="admin-empty">Loading events…</p>
             ) : pageEvents.length > 0 ? (
               <>
-                <div className="ad-table-wrap">
-                  <table className="ad-table">
+                <div className="admin-table-wrap">
+                  <table className="admin-table">
                     <thead>
                       <tr>
                         <th>Event</th>
@@ -1218,10 +1218,10 @@ export default function AdminDashboard() {
                       {pageEvents.map((ev, i) => (
                         <tr key={ev?.id ?? i}>
                           <td>{ev?.title ?? "--"}</td>
-                          <td className="ad-date-cell">{ev?.date ?? "--"}</td>
+                          <td className="admin-date-cell">{ev?.date ?? "--"}</td>
                           <td>
                             <span
-                              className={`ad-badge ad-badge--${(ev?.status || "").toLowerCase()}`}
+                              className={`admin-badge admin-badge--${(ev?.status || "").toLowerCase()}`}
                             >
                               {ev?.status ?? "--"}
                             </span>
@@ -1229,14 +1229,14 @@ export default function AdminDashboard() {
                           <td>
                             {ev?.isApproved ? (
                               <span
-                                className="ad-badge ad-badge--completed"
+                                className="admin-badge admin-badge--completed"
                                 style={{ fontSize: "0.75rem" }}
                               >
                                 Approved
                               </span>
                             ) : (
                               <span
-                                className="ad-badge ad-badge--upcoming"
+                                className="admin-badge admin-badge--upcoming"
                                 style={{ fontSize: "0.75rem" }}
                               >
                                 Pending
@@ -1254,7 +1254,7 @@ export default function AdminDashboard() {
                               {!ev?.isApproved && (
                                 <>
                                   <button
-                                    className="ad-edit-btn"
+                                    className="admin-edit-btn"
                                     style={{
                                       background: "rgba(34,197,94,0.15)",
                                       color: "#22c55e",
@@ -1276,7 +1276,7 @@ export default function AdminDashboard() {
                                     Approve
                                   </button>
                                   <button
-                                    className="ad-edit-btn"
+                                    className="admin-edit-btn"
                                     style={{
                                       background: "rgba(239,68,68,0.15)",
                                       color: "#ef4444",
@@ -1301,7 +1301,7 @@ export default function AdminDashboard() {
                                 </>
                               )}
                               <button
-                                className="ad-edit-btn"
+                                className="admin-edit-btn"
                                 onClick={() =>
                                   navigate(`/dashboard/manage-event/${ev.id}`, {
                                     state: { event: ev },
@@ -1329,15 +1329,15 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
-                <div className="ad-pagination">
+                <div className="admin-pagination">
                   <button
-                    className="ad-pagination__btn"
+                    className="admin-pagination__btn"
                     disabled={safePage === 0}
                     onClick={() => setEventsPage((p) => Math.max(0, p - 1))}
                   >
                     ‹ Previous
                   </button>
-                  <span className="ad-pagination__info">
+                  <span className="admin-pagination__info">
                     Page {safePage + 1} of {totalPgs}
                     {q && (
                       <>
@@ -1348,7 +1348,7 @@ export default function AdminDashboard() {
                     )}
                   </span>
                   <button
-                    className="ad-pagination__btn"
+                    className="admin-pagination__btn"
                     disabled={safePage + 1 >= totalPgs}
                     onClick={() => setEventsPage((p) => p + 1)}
                   >
@@ -1357,7 +1357,7 @@ export default function AdminDashboard() {
                 </div>
               </>
             ) : (
-              <p className="ad-empty">
+              <p className="admin-empty">
                 {q
                   ? `No events matching "${eventSearch}".`
                   : "No events found."}
@@ -1369,10 +1369,10 @@ export default function AdminDashboard() {
       case "analytics":
         return (
           <>
-            <section className="ad-card">
-              <h2 className="ad-card__title">System Analytics</h2>
+            <section className="admin-card">
+              <h2 className="admin-card__title">System Analytics</h2>
               {systemAnalytics.length > 0 ? (
-                <div className="ad-chart-wrap">
+                <div className="admin-chart-wrap">
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={systemAnalytics}>
                       <defs>
@@ -1459,14 +1459,14 @@ export default function AdminDashboard() {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="ad-empty">No system analytics data yet.</p>
+                <p className="admin-empty">No system analytics data yet.</p>
               )}
             </section>
 
-            <section className="ad-card">
-              <h2 className="ad-card__title">User Role Distribution</h2>
+            <section className="admin-card">
+              <h2 className="admin-card__title">User Role Distribution</h2>
               {roleDistribution.length > 0 ? (
-                <div className="ad-chart-wrap">
+                <div className="admin-chart-wrap">
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
@@ -1502,7 +1502,7 @@ export default function AdminDashboard() {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="ad-empty">No role distribution data yet.</p>
+                <p className="admin-empty">No role distribution data yet.</p>
               )}
             </section>
           </>
@@ -1510,11 +1510,11 @@ export default function AdminDashboard() {
 
       case "reports":
         return (
-          <section className="ad-card">
-            <h2 className="ad-card__title">Reports / Flags</h2>
+          <section className="admin-card">
+            <h2 className="admin-card__title">Reports / Flags</h2>
             {reports.length > 0 ? (
-              <div className="ad-table-wrap">
-                <table className="ad-table">
+              <div className="admin-table-wrap">
+                <table className="admin-table">
                   <thead>
                     <tr>
                       <th>Type</th>
@@ -1531,7 +1531,7 @@ export default function AdminDashboard() {
                         <td>{r?.date ?? "--"}</td>
                         <td>
                           <span
-                            className={`ad-badge ad-badge--${(r?.status || "").toLowerCase()}`}
+                            className={`admin-badge admin-badge--${(r?.status || "").toLowerCase()}`}
                           >
                             {r?.status ?? "--"}
                           </span>
@@ -1542,7 +1542,7 @@ export default function AdminDashboard() {
                 </table>
               </div>
             ) : (
-              <p className="ad-empty">No reports or flags.</p>
+              <p className="admin-empty">No reports or flags.</p>
             )}
           </section>
         );
@@ -1552,13 +1552,13 @@ export default function AdminDashboard() {
           (r) => r.roleType === "ORGANIZER",
         );
         return (
-          <section className="ad-card">
-            <h2 className="ad-card__title">Pending Organizer Requests</h2>
+          <section className="admin-card">
+            <h2 className="admin-card__title">Pending Organizer Requests</h2>
             {onboardLoading ? (
-              <p className="ad-empty">Loading requests…</p>
+              <p className="admin-empty">Loading requests…</p>
             ) : orgRequests.length > 0 ? (
-              <div className="ad-table-wrap">
-                <table className="ad-table">
+              <div className="admin-table-wrap">
+                <table className="admin-table">
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -1577,7 +1577,7 @@ export default function AdminDashboard() {
                           <td>{rid ?? "--"}</td>
                           <td>
                             <span
-                              className={`ad-badge ad-badge--${(req.roleType || "").toLowerCase()}`}
+                              className={`admin-badge admin-badge--${(req.roleType || "").toLowerCase()}`}
                             >
                               {req.roleType ?? "--"}
                             </span>
@@ -1585,7 +1585,7 @@ export default function AdminDashboard() {
                           <td>{remail || "--"}</td>
                           <td>
                             <button
-                              className="ad-accept-btn"
+                              className="admin-accept-btn"
                               disabled={acceptingId === rid}
                               onClick={() => handleAcceptOrganizer(remail, rid)}
                             >
@@ -1601,7 +1601,7 @@ export default function AdminDashboard() {
                 </table>
               </div>
             ) : (
-              <p className="ad-empty">No pending organizer requests.</p>
+              <p className="admin-empty">No pending organizer requests.</p>
             )}
           </section>
         );
@@ -1612,13 +1612,13 @@ export default function AdminDashboard() {
           (r) => r.roleType === "ADMIN",
         );
         return (
-          <section className="ad-card">
-            <h2 className="ad-card__title">Pending Admin Requests</h2>
+          <section className="admin-card">
+            <h2 className="admin-card__title">Pending Admin Requests</h2>
             {onboardLoading ? (
-              <p className="ad-empty">Loading requests…</p>
+              <p className="admin-empty">Loading requests…</p>
             ) : adminRequests.length > 0 ? (
-              <div className="ad-table-wrap">
-                <table className="ad-table">
+              <div className="admin-table-wrap">
+                <table className="admin-table">
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -1637,7 +1637,7 @@ export default function AdminDashboard() {
                           <td>{rid ?? "--"}</td>
                           <td>
                             <span
-                              className={`ad-badge ad-badge--${(req.roleType || "").toLowerCase()}`}
+                              className={`admin-badge admin-badge--${(req.roleType || "").toLowerCase()}`}
                             >
                               {req.roleType ?? "--"}
                             </span>
@@ -1645,7 +1645,7 @@ export default function AdminDashboard() {
                           <td>{remail || "--"}</td>
                           <td>
                             <button
-                              className="ad-accept-btn ad-accept-btn--admin"
+                              className="admin-accept-btn admin-accept-btn--admin"
                               disabled={acceptingId === rid}
                               onClick={() => handleAcceptAdmin(remail, rid)}
                             >
@@ -1661,7 +1661,7 @@ export default function AdminDashboard() {
                 </table>
               </div>
             ) : (
-              <p className="ad-empty">No pending admin requests.</p>
+              <p className="admin-empty">No pending admin requests.</p>
             )}
           </section>
         );
@@ -1683,9 +1683,9 @@ export default function AdminDashboard() {
               ))}
             </div>
 
-            <section className="ad-card">
-              <div className="ad-card__header">
-                <h2 className="ad-card__title">
+            <section className="admin-card">
+              <div className="admin-card__header">
+                <h2 className="admin-card__title">
                   {PC_SECTIONS.find((s) => s.key === pcSection)?.label}
                 </h2>
                 <div className="pc-actions">
@@ -1764,10 +1764,10 @@ export default function AdminDashboard() {
               {pcError && <p className="pc-error">{pcError}</p>}
 
               {pcLoading ? (
-                <p className="ad-empty">Loading…</p>
+                <p className="admin-empty">Loading…</p>
               ) : pcItems.length > 0 ? (
-                <div className="ad-table-wrap">
-                  <table className="ad-table">
+                <div className="admin-table-wrap">
+                  <table className="admin-table">
                     <thead>
                       <tr>
                         {PC_COLUMNS[pcSection].map((col) => (
@@ -1837,7 +1837,7 @@ export default function AdminDashboard() {
                   </table>
                 </div>
               ) : (
-                <p className="ad-empty">No items found for this section yet.</p>
+                <p className="admin-empty">No items found for this section yet.</p>
               )}
             </section>
 
@@ -1932,20 +1932,20 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="ad-page">
+    <div className="admin-page">
       <Navbar />
-      <div className="ad-layout">
-        <aside className="ad-sidebar">
-          <div className="ad-sidebar__profile">
-            <div className="ad-sidebar__avatar">{initials}</div>
-            <h3 className="ad-sidebar__name">{fullName}</h3>
-            <p className="ad-sidebar__role">Administrator</p>
+      <div className="admin-layout">
+        <aside className="admin-sidebar">
+          <div className="admin-sidebar__profile">
+            <div className="admin-sidebar__avatar">{initials}</div>
+            <h3 className="admin-sidebar__name">{fullName}</h3>
+            <p className="admin-sidebar__role">Administrator</p>
           </div>
-          <nav className="ad-sidebar__nav">
+          <nav className="admin-sidebar__nav">
             {SIDEBAR_TABS.map((tab) => (
               <button
                 key={tab.key}
-                className={`ad-sidebar__tab ${activeTab === tab.key ? "ad-sidebar__tab--active" : ""}`}
+                className={`admin-sidebar__tab ${activeTab === tab.key ? "admin-sidebar__tab--active" : ""}`}
                 onClick={() => setActiveTab(tab.key)}
               >
                 <TabIcon type={tab.icon} />
@@ -1955,11 +1955,11 @@ export default function AdminDashboard() {
           </nav>
         </aside>
 
-        <main className="ad-content">
-          <section className="ad-welcome">
-            <div className="ad-welcome__text">
-              <h1 className="ad-welcome__title">Admin Dashboard</h1>
-              <p className="ad-welcome__sub">
+        <main className="admin-content">
+          <section className="admin-welcome">
+            <div className="admin-welcome__text">
+              <h1 className="admin-welcome__title">Admin Dashboard</h1>
+              <p className="admin-welcome__sub">
                 Platform overview &amp; management
               </p>
             </div>
