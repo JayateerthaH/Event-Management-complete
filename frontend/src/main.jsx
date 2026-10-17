@@ -40,3 +40,22 @@ window.addEventListener('vite:preloadError', (event) => {
     /* storage blocked: let the error boundary show the error */
   }
 })
+
+// Installable app: the service worker keeps the app shell and the tickets page available offline.
+// Once it controls the page, load the tickets page code so it's cached before the student needs it.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then(() => {
+        const warm = () => {
+          const loaded = performance.getEntriesByType('resource').map((r) => r.name).filter((u) => u.includes('/assets/'))
+          navigator.serviceWorker.controller?.postMessage({ type: 'cache-assets', urls: loaded })
+          import('./pages/Tickets.jsx').catch(() => {})
+        }
+        if (navigator.serviceWorker.controller) warm()
+        else navigator.serviceWorker.addEventListener('controllerchange', warm, { once: true })
+      })
+      .catch(() => {})
+  })
+}

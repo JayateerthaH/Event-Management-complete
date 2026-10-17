@@ -15,6 +15,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Friends = lazy(() => import("./pages/Friends"));
 const Welcome = lazy(() => import("./pages/Welcome"));
 const Settings = lazy(() => import("./pages/Settings"));
+const Tickets = lazy(() => import("./pages/Tickets"));
 const EventsPage = lazy(() => import("./pages/EventsPage"));
 const EventDetailsPage = lazy(() => import("./pages/EventDetailsPage"));
 const EventManagePage = lazy(() => import("./pages/dashboard/organizer/EventManagePage"));
@@ -73,6 +74,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          {/* Not behind the login redirect: it must open offline from the saved copy */}
+          <Route path="/tickets" element={<Tickets />} />
           <Route
             path="/settings"
             element={

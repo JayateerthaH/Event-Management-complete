@@ -294,6 +294,34 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("installable app: the QR ticket is on the tickets page and still opens offline", async ({ browser, request }) => {
+    const manifest = await (await request.get("/manifest.webmanifest")).json();
+    expect(manifest.display).toBe("standalone");
+    expect(manifest.icons.map((i) => i.sizes)).toEqual(expect.arrayContaining(["192x192", "512x512"]));
+
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await gotoSettled(page, "/tickets");
+      const ticket = page.locator(".ticket-card", { hasText: eventName });
+      await expect(ticket.getByRole("img", { name: `QR ticket for ${eventName}` })).toBeVisible();
+      // Same code as the emailed QR
+      const codes = await page.evaluate(async (api) => {
+        const res = await fetch(`${api}/attendance/my-tickets`, { headers: { Authorization: `Bearer ${localStorage.getItem("jwt_token")}` } });
+        return (await res.json()).map((t) => t.code);
+      }, API);
+      expect(codes).toContain(await readQrCode(studentEmail, eventId));
+
+      if (test.info().project.name !== "iphone") { // service workers: Chromium projects
+        await page.waitForFunction(() => navigator.serviceWorker?.controller != null, null, { timeout: 15_000 });
+        await page.waitForTimeout(1500); // let the worker cache what the page loaded
+        await page.context().setOffline(true);
+        await page.reload();
+        await expect(page.getByText("You're offline. Showing tickets saved on this phone")).toBeVisible();
+        await expect(page.locator(".ticket-card", { hasText: eventName }).getByRole("img")).toBeVisible();
+        await page.context().setOffline(false);
+      }
+    });
+  });
+
   test("organizer scans the student's QR code with the camera", async () => {
     const qrCode = await readQrCode(studentEmail, eventId);
     const video = path.join(os.tmpdir(), `qr-${run}.y4m`);

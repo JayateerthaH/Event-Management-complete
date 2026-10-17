@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Navbar from "../../../components/Navbar";
 import QRCode from "qrcode";
@@ -616,6 +616,7 @@ export default function StudentDashboard() {
                   </svg>
                   Upcoming Registered Events
                 </h2>
+                <Link to="/tickets" className="sd-tickets-link">My tickets (works offline)</Link>
                 <button
                   className="sd-link-btn"
                   onClick={() => setActiveTab("upcoming")}

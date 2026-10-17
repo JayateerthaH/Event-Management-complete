@@ -9,4 +9,5 @@ public interface UserRequestRepository extends JpaRepository<UserRequest, Long> 
     Optional<UserRequest> findByEmailAndEventId(String email, Long eventId);
 
     Optional<UserRequest> findFirstByUserIdAndEventId(Long userId, Long eventId);
+    java.util.List<UserRequest> findByUserId(Long userId);
 }

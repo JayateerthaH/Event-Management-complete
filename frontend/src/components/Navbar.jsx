@@ -358,6 +358,26 @@ export default function Navbar() {
                   </svg>
                   Profile
                 </button>
+                <button
+                  className="nav-dropdown__item"
+                  onClick={() => {
+                    setDropdownOpen(false);
+                    navigate("/tickets");
+                  }}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                    <path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h3v-3" />
+                  </svg>
+                  My tickets
+                </button>
                 <div className="nav-dropdown__divider" />
                 <button
                   className="nav-dropdown__item nav-dropdown__item--logout"

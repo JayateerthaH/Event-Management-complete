@@ -65,3 +65,19 @@
   background: none; border: none; font: inherit; cursor: pointer; min-height: 42px;
 }
 .share__menu a:hover, .share__menu button:hover, .share__menu a:focus-visible, .share__menu button:focus-visible { background: rgba(139, 92, 246, 0.15); }
+
+/* Tickets page */
+.tickets-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+.tickets-offline { margin: 0; padding: 0.7rem 0.9rem; border-radius: 10px; background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.35); color: #fde68a; }
+.tickets { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+.ticket-card { display: grid; gap: 0.75rem; justify-items: center; text-align: center; padding: 1.25rem; border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(139, 92, 246, 0.25); }
+.ticket-card__info { display: grid; gap: 0.3rem; justify-items: center; }
+.ticket-card__info h2 { margin: 0; font-size: 1.1rem; color: #f8fafc; overflow-wrap: anywhere; }
+.ticket-card__info p { margin: 0; color: #94a3b8; font-size: 0.9rem; }
+.ticket-card__qr { background: #fff; border-radius: 14px; padding: 10px; min-width: 240px; min-height: 240px; display: grid; place-items: center; }
+.ticket-card__qr img { display: block; width: 220px; height: 220px; image-rendering: pixelated; }
+.ticket-card__hint { margin: 0; color: #64748b; font-size: 0.8rem; }
+.install-app { display: grid; gap: 0.4rem; justify-items: end; }
+.install-app__help { margin: 0; color: #cbd5e1; font-size: 0.85rem; max-width: 260px; text-align: right; }

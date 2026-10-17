@@ -1085,3 +1085,5 @@
   border-radius: 9px; padding: 0.5rem 0.9rem; font-weight: 600; min-height: 38px; display: inline-flex; align-items: center; }
 .interest-nudge__close { background: none; border: 1px solid rgba(148, 163, 184, 0.3); color: #cbd5e1; border-radius: 9px;
   padding: 0.5rem 0.9rem; font: inherit; cursor: pointer; min-height: 38px; }
+.sd-tickets-link { color: #c4b5fd; font-size: 0.85rem; font-weight: 600; text-decoration: none; }
+.sd-tickets-link:hover { text-decoration: underline; }
