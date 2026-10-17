@@ -180,6 +180,63 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("event buddies: two attendees opt in, say hi, accept, and see each other as friends", async ({ browser, request }) => {
+    // A second attendee, created and registered through the API
+    const buddyEmail = `buddy.${run}@example.com`;
+    await request.post(`${API}/auth/signup`, { data: { username: buddyEmail, password: PASSWORD, roles: ["STUDENT"] } });
+    const login = await request.post(`${API}/auth/login`, { data: { username: buddyEmail, password: PASSWORD } });
+    const token = (await login.json()).jwt;
+    const reg = await request.post(`${API}/event/${eventId}/register`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: { name: "Bud Dy", email: buddyEmail, phone: "9876500000", department: "CSE", yearOfStudy: "2" },
+    });
+    expect(reg.status()).toBe(201);
+
+    const setName = async (page, name) => {
+      await page.goto("/friends?tab=settings");
+      await page.locator("#set-name").fill(name);
+      await page.getByRole("button", { name: "Save settings" }).click();
+      await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
+    };
+
+    await asUser(browser, buddyEmail, PASSWORD, async (page) => {
+      await setName(page, `Buddy ${run}`);
+      await page.goto(`/events/${eventId}`);
+      await page.getByRole("button", { name: "I'm open to meeting people" }).click();
+      await expect(page.getByText("Nobody else has opted in yet")).toBeVisible();
+    });
+
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await page.goto(`/events/${eventId}`);
+      // A name is required before opting in
+      await expect(page.getByRole("button", { name: "I'm open to meeting people" })).toBeDisabled();
+      await setName(page, `Stu ${run}`);
+      await page.goto(`/events/${eventId}`);
+      await page.getByRole("button", { name: "I'm open to meeting people" }).click();
+      const card = page.locator(".pc").filter({ hasText: `Buddy ${run}` });
+      await expect(card).toBeVisible();
+      await card.getByRole("button", { name: "Say hi" }).click();
+      await expect(card.getByText("Requested")).toBeVisible();
+    });
+
+    await asUser(browser, buddyEmail, PASSWORD, async (page) => {
+      await page.locator("button[title=Notifications]").click();
+      await page.getByText(`Stu ${run} wants to connect`).click();
+      await expect(page).toHaveURL(/\/friends\?tab=requests/);
+      await page.locator(".pc").filter({ hasText: `Stu ${run}` }).getByRole("button", { name: "Accept request" }).click();
+      await page.getByRole("tab", { name: "Friends" }).click();
+      await expect(page.locator(".pc").filter({ hasText: `Stu ${run}` }).getByText("Friend", { exact: true })).toBeVisible();
+      // The event page lists friends who are going
+      await page.goto(`/events/${eventId}`);
+      await expect(page.locator(".eb__chips").getByText(`Stu ${run}`)).toBeVisible();
+    });
+
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await page.locator("button[title=Notifications]").click();
+      await expect(page.getByText(`Buddy ${run} accepted your request`)).toBeVisible();
+    });
+  });
+
   test("organizer scans the student's QR code with the camera", async () => {
     const qrCode = await readQrCode(studentEmail, eventId);
     const video = path.join(os.tmpdir(), `qr-${run}.y4m`);

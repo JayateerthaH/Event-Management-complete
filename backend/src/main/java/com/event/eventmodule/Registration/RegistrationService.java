@@ -23,6 +23,7 @@ public class RegistrationService {
     private final EventsRepository eventsRepository;
     private final UserRegistrationRepository userRegistrationRepository;
     private final AsyncService asyncService;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ResponseEntity<?> save(Long userId,Long eventId, Register register) throws Exception {
@@ -53,6 +54,7 @@ public class RegistrationService {
             userRegistrationRepository.save(userRegistration);
 
             asyncService.sendNotificationAsync(new UserRequest(register.getEmail(), userId, eventId));
+            eventPublisher.publishEvent(new com.event.eventmodule.api.EventRegisteredEvent(userId, eventId));
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Registration successful!");

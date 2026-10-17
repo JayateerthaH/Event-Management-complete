@@ -99,7 +99,8 @@ public class AuthService {
 
         // 2. Save onboarding requests. Requested roles are only granted later by an admin
         //    (AdminServiceImpl), so the user starts out as a STUDENT either way.
-        for (RoleType role : signupRequestDto.getRoles()) {
+        Set<RoleType> requested = signupRequestDto.getRoles() == null ? Set.of() : signupRequestDto.getRoles();
+        for (RoleType role : requested) {
             if (role == RoleType.ORGANIZER) {
                 onBoardDtoRepository.save(
                         new OnBoard(signupRequestDto.getUsername(), RoleType.ORGANIZER)

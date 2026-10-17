@@ -18,4 +18,13 @@ public interface ProfileApi {
 
     /** Name from the profile of every user who filled one in, keyed by user id. */
     Map<Long, String> displayNames();
+
+    /** What other students may see of a profile: name, department, year and interests (no contact details). */
+    record PublicProfile(String name, String department, String yearOfStudy, List<String> interests) {}
+
+    /** Public profile of each of these users who has one, keyed by user id. */
+    Map<Long, PublicProfile> publicProfiles(java.util.Collection<Long> userIds);
+
+    /** Every interest students can pick, alphabetically. */
+    List<String> allInterestNames();
 }

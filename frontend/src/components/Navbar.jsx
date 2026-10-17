@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { resolveRole } from "../utils/roleResolver";
 import { fetchUserAnnouncements } from "../api/announcementService";
 import { fetchCollaboratorEvents } from "../services/dashboardService";
+import { getBuddyNotifications, markBuddyNotificationsRead } from "../api/socialService";
 import "../styles/Home.css";
 
 const getInitials = (name) => {
@@ -11,6 +12,12 @@ const getInitials = (name) => {
   const parts = name.split(" ");
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
   return name.substring(0, 2).toUpperCase();
+};
+
+const BUDDY_TITLES = {
+  BUDDY_REQUEST: "New friend request",
+  BUDDY_ACCEPTED: "Request accepted",
+  FRIEND_GOING: "Your friend is going",
 };
 
 const timeAgo = (dateStr) => {
@@ -71,8 +78,22 @@ export default function Navbar() {
     if (!user) return;
     setNotifLoading(true);
     try {
-      const announcementData = await fetchUserAnnouncements();
-      setNotifications(Array.isArray(announcementData) ? announcementData : []);
+      const [announcementData, buddyData] = await Promise.all([
+        fetchUserAnnouncements().catch(() => []),
+        getBuddyNotifications().catch(() => []),
+      ]);
+      const announcements = (Array.isArray(announcementData) ? announcementData : []).map((n) => ({
+        key: `a-${n.id}`, title: n.title, message: n.announcement, createdAt: n.createdAt, unread: true,
+      }));
+      const buddies = (Array.isArray(buddyData) ? buddyData : []).map((n) => ({
+        key: `b-${n.id}`, title: BUDDY_TITLES[n.type] || "Friends", message: n.message, createdAt: n.createdAt,
+        unread: !n.read,
+        to: n.type === "FRIEND_GOING" && n.eventId ? `/events/${n.eventId}`
+          : n.type === "BUDDY_REQUEST" ? "/friends?tab=requests" : "/friends",
+      }));
+      setNotifications(
+        [...buddies, ...announcements].sort((x, y) => new Date(y.createdAt || 0) - new Date(x.createdAt || 0)),
+      );
     } catch {
       setNotifications([]);
     } finally {
@@ -89,8 +110,15 @@ export default function Navbar() {
     const opening = !notifOpen;
     setNotifOpen(opening);
     setDropdownOpen(false);
-    if (opening) loadNotifications();
+    if (opening) {
+      loadNotifications().then(() => markBuddyNotificationsRead().catch(() => {}));
+    } else {
+      // Friend notifications seen in the panel stop counting towards the badge.
+      setNotifications((list) => list.map((n) => (n.key.startsWith("b-") ? { ...n, unread: false } : n)));
+    }
   };
+
+  const badgeCount = notifications.filter((n) => n.unread).length;
 
   const handleLogout = () => {
     setDropdownOpen(false);
@@ -128,6 +156,12 @@ export default function Navbar() {
                 Dashboard
               </Link>
               <Link
+                to="/friends"
+                className={`nav-link ${location.pathname === "/friends" ? "active" : ""}`}
+              >
+                Friends
+              </Link>
+              <Link
                 to="/profile"
                 className={`nav-link ${location.pathname === "/profile" ? "active" : ""}`}
               >
@@ -163,9 +197,9 @@ export default function Navbar() {
                 d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
               />
             </svg>
-            {notifications.length > 0 && (
+            {badgeCount > 0 && (
               <span className="notification-badge">
-                {notifications.length > 99 ? "99+" : notifications.length}
+                {badgeCount > 99 ? "99+" : badgeCount}
               </span>
             )}
           </button>
@@ -206,11 +240,20 @@ export default function Navbar() {
                   </div>
                 ) : (
                   notifications.map((n) => (
-                    <div key={n.id} className="notif-item">
+                    <div
+                      key={n.key}
+                      className={`notif-item${n.to ? " notif-item--link" : ""}${n.unread && n.to ? " notif-item--unread" : ""}`}
+                      {...(n.to && {
+                        role: "link",
+                        tabIndex: 0,
+                        onClick: () => { setNotifOpen(false); navigate(n.to); },
+                        onKeyDown: (e) => { if (e.key === "Enter") { setNotifOpen(false); navigate(n.to); } },
+                      })}
+                    >
                       <div className="notif-item__dot" />
                       <div className="notif-item__body">
                         <p className="notif-item__title">{n.title}</p>
-                        <p className="notif-item__msg">{n.announcement}</p>
+                        <p className="notif-item__msg">{n.message}</p>
                         {n.createdAt && (
                           <span className="notif-item__time">
                             {timeAgo(n.createdAt)}

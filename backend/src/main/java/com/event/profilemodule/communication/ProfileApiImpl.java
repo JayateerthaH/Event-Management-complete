@@ -19,6 +19,7 @@ import java.util.Optional;
 public class ProfileApiImpl implements ProfileApi {
 
     private final HelperStudentRepository studentRepository;
+    private final com.event.profilemodule.Repository.InterestsRepository interestsRepository;
 
     @Override
     public List<String> interestNames(Long userId) {
@@ -48,5 +49,28 @@ public class ProfileApiImpl implements ProfileApi {
             names.put((Long) row[0], ((String) row[1]).trim());
         }
         return names;
+    }
+
+    @Override
+    public Map<Long, PublicProfile> publicProfiles(java.util.Collection<Long> userIds) {
+        Map<Long, PublicProfile> profiles = new HashMap<>();
+        if (userIds == null || userIds.isEmpty()) return profiles;
+        for (var p : studentRepository.findAllById(userIds)) {
+            List<String> interests = p.getInterests() == null ? List.of()
+                    : p.getInterests().stream().map(Interests::getInterestName).filter(Objects::nonNull).sorted().toList();
+            profiles.put(p.getId(), new PublicProfile(blankToNull(p.getName()), blankToNull(p.getDepartment()),
+                    blankToNull(p.getYearOfStudy()), interests));
+        }
+        return profiles;
+    }
+
+    @Override
+    public List<String> allInterestNames() {
+        return interestsRepository.findAll().stream().map(Interests::getInterestName)
+                .filter(n -> n != null && !n.isBlank()).distinct().sorted(String.CASE_INSENSITIVE_ORDER).toList();
+    }
+
+    private static String blankToNull(String s) {
+        return s == null || s.isBlank() ? null : s.trim();
     }
 }

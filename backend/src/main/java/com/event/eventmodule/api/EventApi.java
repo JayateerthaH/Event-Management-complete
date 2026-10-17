@@ -40,6 +40,9 @@ public interface EventApi {
     /** Public page content of any event (approved or not; callers check {@link EventProfile#approved()}). */
     Optional<EventProfile> eventProfile(Long eventId);
 
+    /** Whether the user has registered for the event. */
+    boolean isRegistered(Long userId, Long eventId);
+
     /** Number of events per month (by event date) from {@code from} to {@code to}, inclusive; months without events are 0. */
     Map<YearMonth, Long> eventsPerMonth(YearMonth from, YearMonth to);
 }

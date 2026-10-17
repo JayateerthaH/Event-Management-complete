@@ -189,6 +189,8 @@ const ALLOWED_API_PREFIXES = [
   "/attendance",
   "/user",
   "/ai",
+  "/social",
+  "/public",
 ];
 
 const isFrontendRoute = (url = "") => {

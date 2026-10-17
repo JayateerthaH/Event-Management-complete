@@ -42,6 +42,7 @@ import java.util.Optional;
 public class EventApiImpl implements EventApi {
 
     private final RegistrationService registrationService;
+    private final com.event.eventmodule.Registration.UserRegistrationRepository userRegistrationRepository;
     private final RegisterRepository registerRepository;
     private final EventsRepository eventsRepository;
     private final CollaboratorsRepository collaboratorsRepository;
@@ -99,6 +100,11 @@ public class EventApiImpl implements EventApi {
     @Override
     public long countAllEvents() {
         return eventsRepository.count();
+    }
+
+    @Override
+    public boolean isRegistered(Long userId, Long eventId) {
+        return userId != null && eventId != null && userRegistrationRepository.existsByUserIdAndEventId(userId, eventId);
     }
 
     @Override

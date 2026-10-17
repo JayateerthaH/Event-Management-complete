@@ -1,0 +1,39 @@
+import api from "./apiClient";
+
+/** Event buddies, friends, people search, safety and friend notifications (/social). */
+const data = (p) => p.then((r) => r.data);
+
+export const getSocialSettings = () => data(api.get("/social/settings"));
+export const updateSocialSettings = (body) => data(api.put("/social/settings", body));
+export const getAllInterests = () => data(api.get("/social/interests"));
+
+export const getEventBuddies = (eventId) => data(api.get(`/social/events/${eventId}/buddies`));
+export const optInToEvent = (eventId) => data(api.post(`/social/events/${eventId}/opt-in`));
+export const optOutOfEvent = (eventId) => data(api.delete(`/social/events/${eventId}/opt-in`));
+
+export const searchPeople = (q, interests = []) => {
+  const params = new URLSearchParams();
+  if (q) params.set("q", q);
+  interests.forEach((i) => params.append("interest", i));
+  return data(api.get(`/social/search?${params}`));
+};
+
+export const sayHi = (userId, eventId) => data(api.post("/social/requests", { userId, eventId: eventId ?? null }));
+export const getRequests = () => data(api.get("/social/requests"));
+export const acceptRequest = (id) => data(api.post(`/social/requests/${id}/accept`));
+export const ignoreRequest = (id) => api.post(`/social/requests/${id}/ignore`);
+export const cancelRequest = (id) => api.delete(`/social/requests/${id}`);
+
+export const getFriends = () => data(api.get("/social/friends"));
+export const removeFriend = (userId) => api.delete(`/social/friends/${userId}`);
+
+export const getBlocked = () => data(api.get("/social/blocks"));
+export const blockUser = (userId) => api.post(`/social/blocks/${userId}`);
+export const unblockUser = (userId) => api.delete(`/social/blocks/${userId}`);
+export const reportUser = (userId, reason) => data(api.post("/social/reports", { userId, reason }));
+
+export const getBuddyNotifications = () => data(api.get("/social/notifications"));
+export const markBuddyNotificationsRead = () => api.post("/social/notifications/read");
+
+export const getStudentReports = () => data(api.get("/social/admin/reports"));
+export const resolveStudentReport = (id) => api.post(`/social/admin/reports/${id}/resolve`);

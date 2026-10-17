@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Navbar from "../../../components/Navbar";
+import StudentReports from "../../../components/social/StudentReports";
 import {
   fetchAllAdminData,
   fetchAllEvents,
@@ -286,18 +287,6 @@ const normaliseEvent = (ev) => {
     isApproved: ev?.isApproved ?? ev?.approved ?? false,
   };
 };
-
-/* Normalise one report/flag object */
-const normaliseReport = (r) => ({
-  id: pick(r, "id", "reportId", "flagId"),
-  type: pick(r, "type", "reportType", "flagType", "category") ?? "--",
-  description:
-    pick(r, "description", "details", "content", "message", "reason") ?? "--",
-  date:
-    pick(r, "date", "reportDate", "createdAt", "created_at", "reportedAt") ??
-    "--",
-  status: pick(r, "status", "reportStatus", "flagStatus") ?? "--",
-});
 
 /* Normalise one analytics entry */
 const normaliseAnalytics = (a) => ({
@@ -886,13 +875,6 @@ export default function AdminDashboard() {
   //     data?.eventList ??
   //     data?.eventRequests,
   // ).map(normaliseEvent);
-  const reports = toArray(
-    data?.reports ??
-      data?.flags ??
-      data?.report_list ??
-      data?.reportList ??
-      data?.flagList,
-  ).map(normaliseReport);
   const systemAnalytics = toArray(
     data?.systemAnalytics ??
       data?.analytics ??
@@ -1509,43 +1491,7 @@ export default function AdminDashboard() {
         );
 
       case "reports":
-        return (
-          <section className="admin-card">
-            <h2 className="admin-card__title">Reports / Flags</h2>
-            {reports.length > 0 ? (
-              <div className="admin-table-wrap">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Type</th>
-                      <th>Description</th>
-                      <th>Date</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reports.map((r, i) => (
-                      <tr key={r?.id ?? i}>
-                        <td>{r?.type ?? "--"}</td>
-                        <td>{r?.description ?? "--"}</td>
-                        <td>{r?.date ?? "--"}</td>
-                        <td>
-                          <span
-                            className={`admin-badge admin-badge--${(r?.status || "").toLowerCase()}`}
-                          >
-                            {r?.status ?? "--"}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="admin-empty">No reports or flags.</p>
-            )}
-          </section>
-        );
+        return <StudentReports />;
 
       case "onboard-organizer": {
         const orgRequests = onboardRequests.filter(
