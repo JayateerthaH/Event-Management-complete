@@ -23,6 +23,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(loginRequestDto,response));
     }
 
+    // Sign in (or sign up) with the credential from Google's sign-in button
+    @PostMapping("/google")
+    public ResponseEntity<?> google(@RequestBody com.event.authmodule.dtoPayload.GoogleLoginRequestDto body, HttpServletResponse response) {
+        return ResponseEntity.ok(authService.loginWithGoogle(body.credential(), body.roles(), response));
+    }
+
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignUpRequestDto signupRequestDto){
         return (authService.signup(signupRequestDto));

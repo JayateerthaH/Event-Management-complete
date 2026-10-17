@@ -45,6 +45,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final OnBoardDtoRepository onBoardDtoRepository;
+    private final GoogleIdTokenVerifier googleIdTokenVerifier;
 
     // Production with frontend and API on different sites needs COOKIE_SECURE=true and COOKIE_SAME_SITE=None,
     // otherwise the browser won't send the refresh cookie and users are logged out when the access token expires.
@@ -159,6 +160,42 @@ public class AuthService {
     // OAUTH2 LOGIN / SIGNUP
     // ─────────────────────────────────────────────
     @Transactional
+    /**
+     * Sign in with the ID token from Google's button. Finds the account by Google id, else by the (Google-verified)
+     * email — so an existing email/password account can also sign in with Google — else creates one.
+     */
+    public LoginResponseDto loginWithGoogle(String credential, Set<RoleType> requestedRoles, HttpServletResponse response) {
+        if (!googleIdTokenVerifier.isConfigured()) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "Google sign-in isn't set up on this server");
+        }
+        org.springframework.security.oauth2.jwt.Jwt token = googleIdTokenVerifier.verify(credential);
+        String googleId = token.getSubject();
+        String rawEmail = token.getClaimAsString("email");
+        if (rawEmail == null || rawEmail.isBlank() || !Boolean.TRUE.equals(token.getClaimAsBoolean("email_verified"))) {
+            throw new BadCredentialsException("Your Google account's email address isn't verified");
+        }
+        String email = rawEmail.trim().toLowerCase();
+
+        // Accounts signed up with email keep the address as typed, so try it as Google sends it too
+        UserInfo userInfo = userInfoRepository.findByProviderIdAndProviderType(googleId, AuthProviderType.GOOGLE)
+                .or(() -> userInfoRepository.findByUsername(email))
+                .or(() -> userInfoRepository.findByUsername(rawEmail.trim()))
+                .orElse(null);
+        if (userInfo == null) {
+            Set<RoleType> roles = new HashSet<>(requestedRoles == null ? Set.of() : requestedRoles);
+            roles.remove(RoleType.ADMIN);   // admin access is never requested through Google sign-up
+            roles.add(RoleType.STUDENT);
+            userInfo = signUpInternal(new SignUpRequestDto(email, null, roles), AuthProviderType.GOOGLE, googleId);
+        }
+
+        String accessToken = authUtil.generateAccessToken(userInfo);
+        RefreshToken refreshToken = authUtil.generateRefreshToken(accessToken, userInfo.getUsername());
+        addRefreshTokenCookie(response, refreshToken);
+        log.info("Google sign-in for user: {}", userInfo.getUsername());
+        return new LoginResponseDto(accessToken, userInfo.getUserId());
+    }
+
     public ResponseEntity<LoginResponseDto> handleOAuth2loginRequest(OAuth2User oAuth2User,
                                                                      String registrationId,
                                                                      HttpServletResponse response) {

@@ -14,6 +14,28 @@ const authAxios = axios.create({
 });
 
 /**
+ * Sign in (or sign up) with the credential from Google's sign-in button. The backend verifies it with Google
+ * and, like a normal login, sets the refresh cookie. `roles` only matters for a new account (e.g. ORGANIZER
+ * files an organizer request). Returns { userData, jwt }
+ */
+export const googleLoginRequest = async (credential, roles) => {
+  let res;
+  try {
+    res = await authAxios.post('/auth/google', { credential, roles });
+  } catch (err) {
+    throw new Error(apiErrorMessage(err, 'Google sign-in failed. Please try again.'));
+  }
+  const jwt = res.data?.accessToken || res.data?.jwt || res.data?.token;
+  const userId = res.data?.userId;
+  if (!jwt || !userId) throw new Error('Google sign-in failed: the server did not return a session');
+  const decoded = jwtDecode(jwt);
+  const userData = { userId, email: decoded.sub, roles: decoded.roles || [], ...decoded };
+  saveAccessToken(jwt);
+  localStorage.setItem('user', JSON.stringify(userData));
+  return { userData, jwt };
+};
+
+/**
  * Login with email + password.
  * The backend sets the refresh token as an HttpOnly cookie automatically.
  * Returns { userData, jwt }

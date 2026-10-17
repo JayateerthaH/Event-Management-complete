@@ -130,7 +130,7 @@ Never commit real values.
 | `JWT_SECRET` | yes | HMAC key for signing JWTs, ≥ 32 characters (`openssl rand -hex 32`) |
 | `INTERNAL_SECRET` | yes | any random string |
 | `BREVO_API_KEY`, `PERSONAL_EMAIL` | for email | Brevo API key and sender address. Without them emails fail and are logged; the app keeps working |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | no | Google OAuth client (must match the frontend's `VITE_GOOGLE_CLIENT_ID`) |
+| `GOOGLE_CLIENT_ID` | no | Enables "Sign in with Google": the backend verifies Google's ID token against this client ID. Must equal the frontend's `VITE_GOOGLE_CLIENT_ID`; no client secret is needed |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | no | GitHub OAuth (server-side redirect flow) |
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | no | default `jdbc:postgresql://localhost:5432/eventdb`, `admin` / `admin` |
 | `CORS_ALLOWED_ORIGINS` | no | frontend origin(s), comma-separated; default `http://localhost:5173` |
@@ -232,6 +232,6 @@ Optional: `SHOW_SQL=true` logs SQL; `BREVO_URL` points email at a test server.
 
 ## Known limitations
 
-- Google sign-in is not implemented yet (the button is hidden in the UI); GitHub OAuth is optional and untested.
+- Google sign-in appears only when `VITE_GOOGLE_CLIENT_ID` (frontend, at build time) and `GOOGLE_CLIENT_ID` (backend) are set to a real OAuth client ID, with the site's URL under *Authorized JavaScript origins*. A Google-verified email that already has an account signs into that account. GitHub OAuth is optional and untested.
 - There is no password-reset flow.
 - Emails require a Brevo account.

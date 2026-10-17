@@ -4,17 +4,20 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 import './index.css'
 import App from './App.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
+import { GOOGLE_CLIENT_ID, GOOGLE_ENABLED } from './config/google'
 
-// Replace the value below with your actual Google OAuth Client ID
-// from https://console.cloud.google.com/
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      {/* Google's script is only loaded when sign-in with Google is configured (VITE_GOOGLE_CLIENT_ID) */}
+      {GOOGLE_ENABLED ? (
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+          <App />
+        </GoogleOAuthProvider>
+      ) : (
         <App />
-      </GoogleOAuthProvider>
+      )}
     </ErrorBoundary>
   </StrictMode>,
 )

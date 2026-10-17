@@ -4,7 +4,7 @@ import { googleLogout } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { silentRefresh, isTokenExpiredOrExpiring } from '../utils/apiClient';
 import { AUTH_BASE_URL, getUserData } from '../api/apiClient';
-import { loginRequest, signupRequest } from '../api/authService';
+import { loginRequest, signupRequest, googleLoginRequest } from '../api/authService';
 
 const AuthContext = createContext(null);
 
@@ -164,36 +164,13 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Login with Google OAuth
-  const loginWithGoogle = async (credentialResponse) => {
-    try {
-      const decoded = jwtDecode(credentialResponse.credential);
-      
-      // You can send this to your backend to verify and get your own JWT
-      // For now, storing Google auth data
-      const userData = {
-        name: decoded.name,
-        email: decoded.email,
-        picture: decoded.picture,
-        sub: decoded.sub,
-        authProvider: 'google'
-      };
-      
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('google_token', credentialResponse.credential);
-
-      // Optionally, send to backend to create/login user and get your own JWT
-      // const response = await fetch(`${API_URL}/auth/google`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ token: credentialResponse.credential })
-      // });
-      
-    } catch (error) {
-      console.error('Google login error:', error);
-      throw error;
-    }
+  // Sign in with Google: the backend verifies Google's credential and starts a normal session
+  const loginWithGoogle = async (credentialResponse, roles) => {
+    const { userData, jwt } = await googleLoginRequest(credentialResponse?.credential, roles);
+    setToken(jwt);
+    setUser(userData);
+    scheduleRefresh(jwt);
+    return userData;
   };
 
   const logout = () => {

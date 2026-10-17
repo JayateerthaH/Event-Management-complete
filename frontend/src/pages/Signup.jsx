@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
+import { GOOGLE_ENABLED } from '../config/google';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Auth.css';
 
 export default function Signup() {
-  const { user, signup } = useAuth();
+  const { user, signup, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -126,6 +127,18 @@ export default function Signup() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Signing up with Google uses the role chosen above: Organizer files an organizer request
+  const handleGoogle = async (credentialResponse) => {
+    setErrors({});
+    try {
+      const roles = formData.role === 'STUDENT' ? ['STUDENT'] : [formData.role, 'STUDENT'];
+      await loginWithGoogle(credentialResponse, roles);
+      navigate('/dashboard');
+    } catch (error) {
+      setErrors({ submit: error.message });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -188,21 +201,6 @@ export default function Signup() {
             <h2 className="form-title">Create Your Account</h2>
             <p className="form-subtitle">Fill in your details to get started</p>
 
-            {/* Temporarily hidden until Google OAuth is configured
-            <div className="oauth-buttons">
-              <GoogleLogin
-                onSuccess={}
-                onError={() => console.error('Signup failed')}
-                text="signup_with"
-                width="100%"
-              />
-            </div>
-
-            <div className="auth-divider">
-              <span>Or sign up with email</span>
-            </div>
-            */}
-
             <h3 className="form-section-title">Create your account</h3>
 
             <form onSubmit={handleSubmit} className="auth-form">
@@ -233,6 +231,22 @@ export default function Signup() {
                   </div>
                 </div>
               </div>
+
+                {GOOGLE_ENABLED && (
+                  <>
+                    <div className="oauth-buttons">
+                      <GoogleLogin
+                        onSuccess={handleGoogle}
+                        onError={() => setErrors({ submit: "Google sign-up didn't complete. Please try again." })}
+                        text="signup_with"
+                        width={320}
+                      />
+                    </div>
+                    <div className="auth-divider">
+                      <span>Or sign up with email</span>
+                    </div>
+                  </>
+                )}
 
               {/* Email */}
               <div className="form-group">

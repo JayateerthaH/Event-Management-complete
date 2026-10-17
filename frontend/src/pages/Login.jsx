@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
+import { GOOGLE_ENABLED } from '../config/google';
 import { useAuth } from '../context/AuthContext';
 import '../styles/Auth.css';
 
 export default function Login() {
-  const { user, login } = useAuth();
+  const { user, login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -50,6 +51,16 @@ export default function Login() {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleGoogle = async (credentialResponse) => {
+    setErrors({});
+    try {
+      await loginWithGoogle(credentialResponse);
+      navigate('/dashboard');
+    } catch (error) {
+      setErrors({ submit: error.message });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -104,20 +115,21 @@ export default function Login() {
             <h2 className="form-title">Login to Your Account</h2>
             <p className="form-subtitle">Enter your credentials to access your dashboard</p>
 
-            {/* Temporarily hidden until Google OAuth is configured
-            <div className="oauth-buttons">
-              <GoogleLogin
-                onSuccess={}
-                onError={() => console.error('Login failed')}
-                text="continue_with"
-                width="100%"
-              />
-            </div>
-
-            <div className="auth-divider">
-              <span>Or login with email</span>
-            </div>
-            */}
+            {GOOGLE_ENABLED && (
+              <>
+                <div className="oauth-buttons">
+                  <GoogleLogin
+                    onSuccess={handleGoogle}
+                    onError={() => setErrors({ submit: "Google sign-in didn't complete. Please try again." })}
+                    text="continue_with"
+                    width={320}
+                  />
+                </div>
+                <div className="auth-divider">
+                  <span>Or login with email</span>
+                </div>
+              </>
+            )}
 
             <h3 className="form-section-title">Login with your credentials</h3>
 
