@@ -1,6 +1,7 @@
 import { useState, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { imageVariant, imageSrcSet } from "../api/apiClient";
+import SaveButton from "./engagement/SaveButton";
 import "../styles/EventCard.css";
 
 const CATEGORY_COLORS = {
@@ -140,6 +141,7 @@ const EventCard = memo(
             onError={handleImageError}
             loading="lazy"
           />
+          <SaveButton eventId={id} />
           {(isHot || isTrending) && (
             <span className={`event-badge ${isHot ? "hot" : "trending"}`}>
               {isHot ? "HOT" : "Trending"}

@@ -194,6 +194,28 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("student saves an event, finds it on the dashboard, and removes it", async ({ browser, request }) => {
+    // Another upcoming event (from an earlier run) than the one the student registered for
+    const res = await request.post(`${API}/events/filter`, { data: { page: 0, size: 10, search: "E2E Tech Talk" } });
+    const other = (await res.json()).content.find((e) => e.id !== eventId && new Date(e.eventDate) > new Date());
+    expect(other, "an upcoming test event to save").toBeTruthy();
+
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await gotoSettled(page, `/events/${other.id}`);
+      const sidebar = page.locator(".ed-sidebar");
+      await sidebar.getByRole("button", { name: "Save this event" }).click();
+      await expect(sidebar.getByRole("button", { name: "Remove from saved events" })).toBeVisible();
+
+      await page.goto("/dashboard");
+      const saved = page.locator(".saved-events");
+      await expect(saved.getByRole("link", { name: other.name })).toBeVisible();
+      await saved.locator("li", { hasText: other.name }).getByRole("button", { name: "Remove from saved events" }).click();
+      await expect(saved.getByRole("link", { name: other.name })).toHaveCount(0);
+      await page.reload();
+      await expect(page.locator(".saved-events").getByRole("link", { name: other.name })).toHaveCount(0);
+    });
+  });
+
   test("event buddies: two attendees opt in, say hi, accept, and see each other as friends", async ({ browser, request }) => {
     // A second attendee, created and registered through the API
     const buddyEmail = `buddy.${run}@example.com`;
@@ -238,6 +260,7 @@ test.describe.serial("CampusEvents journeys", () => {
       await page.getByText(`Stu ${run} wants to connect`).click();
       await expect(page).toHaveURL(/\/friends\?tab=requests/);
       await page.locator(".pc").filter({ hasText: `Stu ${run}` }).getByRole("button", { name: "Accept request" }).click();
+      await expect(page.locator(".pc").filter({ hasText: `Stu ${run}` })).toHaveCount(0); // accepted: leaves the list
       await page.getByRole("tab", { name: "Friends" }).click();
       await expect(page.locator(".pc").filter({ hasText: `Stu ${run}` }).getByText("Friend", { exact: true })).toBeVisible();
       // The event page lists friends who are going

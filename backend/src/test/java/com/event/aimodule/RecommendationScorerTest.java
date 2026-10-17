@@ -84,4 +84,17 @@ class RecommendationScorerTest {
                 .mapToObj(i -> event(i, "E" + i, "Seminar", null, (int) i, null, 0, "0")).toList();
         assertThat(scorer.rank(many, new StudentSignals(List.of(), null, List.of()), NOW, 3)).hasSize(3);
     }
+
+    @Test
+    void savedEventsBoostTheirCategoryAndAreNotSuggestedAgain() {
+        EventCard savedTalk = event(1, "Cloud Talk", "Talk", null, 10, 100L, 5, "0");
+        EventCard otherTalk = event(2, "Security Talk", "Talk", null, 20, 100L, 5, "0");
+        EventCard workshop = event(3, "Pottery", "Workshop", null, 20, 100L, 5, "0");
+
+        List<RecommendedEvent> ranked = scorer.rank(List.of(savedTalk, otherTalk, workshop),
+                new StudentSignals(List.of(), null, List.of(), List.of(savedTalk)), NOW, 10);
+
+        assertThat(ranked).extracting(r -> r.event().id()).containsExactly(2L, 3L);
+        assertThat(ranked.get(0).reasons()).contains("Like events you saved");
+    }
 }

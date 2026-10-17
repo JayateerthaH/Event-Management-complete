@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.LinkedHashMap;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +44,7 @@ import java.util.Optional;
 public class EventApiImpl implements EventApi {
 
     private final RegistrationService registrationService;
+    private final com.event.eventmodule.saved.SavedEventRepository savedEventRepository;
     private final com.event.eventmodule.Registration.UserRegistrationRepository userRegistrationRepository;
     private final RegisterRepository registerRepository;
     private final EventsRepository eventsRepository;
@@ -100,6 +103,17 @@ public class EventApiImpl implements EventApi {
     @Override
     public long countAllEvents() {
         return eventsRepository.count();
+    }
+
+    @Override
+    public List<EventCard> savedEvents(Long userId) {
+        List<Long> ids = savedEventRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
+                .map(com.event.eventmodule.saved.SavedEvent::getEventId).toList();
+        Map<Long, Events> byId = new HashMap<>();
+        eventsRepository.findAllById(ids).forEach(e -> byId.put(e.getId(), e));
+        return ids.stream().map(byId::get)
+                .filter(e -> e != null && Boolean.TRUE.equals(e.getIsApproved()))
+                .map(this::toCard).toList();
     }
 
     @Override

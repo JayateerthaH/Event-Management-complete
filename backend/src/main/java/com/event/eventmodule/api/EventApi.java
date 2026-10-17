@@ -40,6 +40,9 @@ public interface EventApi {
     /** Public page content of any event (approved or not; callers check {@link EventProfile#approved()}). */
     Optional<EventProfile> eventProfile(Long eventId);
 
+    /** Approved events the user saved ("Interested"), most recently saved first. */
+    List<EventCard> savedEvents(Long userId);
+
     /** Whether the user has registered for the event. */
     boolean isRegistered(Long userId, Long eventId);
 

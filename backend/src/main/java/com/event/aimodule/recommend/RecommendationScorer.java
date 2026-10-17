@@ -13,16 +13,17 @@ import java.util.*;
  * interest match   +3 per matched interest (max 2 counted)  "Matches your interest in AI"
  * past categories  +3 x share of your registrations in this category x confidence
  *                  (confidence = registrations / 3, capped at 1: one past event is weak evidence)
+ * saved categories +1.5 when you saved another event in this category   "Like events you saved"
  * department       +1.5 when the event's field is your department
  * popularity       up to +1 (how full the event is)
  * soon             +1 within 7 days, +0.5 within 30 days
  * free             +0.25
  * </pre>
- * Already registered, full and past events are excluded.
+ * Already registered or saved, full and past events are excluded.
  */
 public class RecommendationScorer {
 
-    static final double INTEREST = 3.0, HISTORY = 3.0, DEPARTMENT = 1.5, POPULARITY = 1.0;
+    static final double INTEREST = 3.0, HISTORY = 3.0, SAVED = 1.5, DEPARTMENT = 1.5, POPULARITY = 1.0;
 
     public List<RecommendedEvent> rank(List<EventCard> candidates, StudentSignals signals, Instant now, int limit) {
         Set<Long> registered = new HashSet<>();
@@ -32,12 +33,17 @@ public class RecommendationScorer {
             if (e.category() != null) categoryCounts.merge(e.category().toLowerCase(Locale.ROOT), 1, Integer::sum);
         }
         int historySize = signals.history().size();
+        Set<String> savedCategories = new HashSet<>();
+        for (EventCard e : signals.saved()) {
+            registered.add(e.id());   // already on the student's list
+            if (e.category() != null) savedCategories.add(e.category().toLowerCase(Locale.ROOT));
+        }
 
         List<RecommendedEvent> scored = new ArrayList<>();
         for (EventCard e : candidates) {
             if (registered.contains(e.id()) || e.isFull()
                     || e.eventDate() == null || !e.eventDate().toInstant().isAfter(now)) continue;
-            scored.add(score(e, signals, categoryCounts, historySize, now));
+            scored.add(score(e, signals, categoryCounts, historySize, savedCategories, now));
         }
         scored.sort(Comparator.comparingDouble(RecommendedEvent::score).reversed()
                 .thenComparing(r -> r.event().eventDate()));
@@ -45,7 +51,7 @@ public class RecommendationScorer {
     }
 
     private RecommendedEvent score(EventCard e, StudentSignals s, Map<String, Integer> categoryCounts,
-                                   int historySize, Instant now) {
+                                   int historySize, Set<String> savedCategories, Instant now) {
         double score = 0;
         List<String> reasons = new ArrayList<>();
         String text = String.join(" ", Objects.toString(e.name(), ""), Objects.toString(e.description(), ""),
@@ -68,6 +74,11 @@ public class RecommendationScorer {
                 score += HISTORY * count / historySize * confidence;
                 reasons.add("You've registered for " + count + " " + e.category() + " event" + (count > 1 ? "s" : ""));
             }
+        }
+
+        if (e.category() != null && savedCategories.contains(e.category().toLowerCase(Locale.ROOT))) {
+            score += SAVED;
+            reasons.add("Like events you saved");
         }
 
         if (s.department() != null && e.field() != null && e.field().equalsIgnoreCase(s.department().trim())) {

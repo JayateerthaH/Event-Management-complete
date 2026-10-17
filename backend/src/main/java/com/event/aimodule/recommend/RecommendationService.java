@@ -30,7 +30,8 @@ public class RecommendationService implements AiApi {
                 eventApi.upcomingOpenEvents(),
                 new StudentSignals(profileApi.interestNames(userId),
                         profileApi.department(userId).orElse(null),
-                        eventApi.registeredEvents(userId)),
+                        eventApi.registeredEvents(userId),
+                        eventApi.savedEvents(userId)),
                 Instant.now(),
                 Math.max(1, Math.min(limit, 20)));
     }

@@ -19,6 +19,7 @@ import FeedbackForm from "../../../components/FeedbackForm";
 import ResendQrButton from "../../../components/ResendQrButton";
 import RecommendedEvents from "../../../components/ai/RecommendedEvents";
 import InterestNudge from "../../../components/engagement/InterestNudge";
+import SavedEvents from "../../../components/engagement/SavedEvents";
 import {
   BarChart,
   Bar,
@@ -592,6 +593,7 @@ export default function StudentDashboard() {
 
             <InterestNudge />
             <RecommendedEvents limit={6} />
+            <SavedEvents />
 
             {/* Upcoming Registered Events */}
             <section className="sd-card">
