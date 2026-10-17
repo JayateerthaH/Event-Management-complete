@@ -45,6 +45,11 @@ public class FileService {
         return fileName;
     }
 
+    /** Whether a stored file is still on disk. */
+    public boolean exists(String fileName) {
+        return fileName != null && Files.isRegularFile(Paths.get(uploadFolder).toAbsolutePath().normalize().resolve(fileName));
+    }
+
     /**
      * Deletes a file from the uploads folder. Does nothing if the file does not exist.
      */

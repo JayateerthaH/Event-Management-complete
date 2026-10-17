@@ -37,7 +37,12 @@ public class Events {
     private String venue;
     private Long maxPeople;
     private String costOfRegistration;
+    /** Cover image shown on event cards and the event page ("thumbnail"); the URL of coverImageId's image. */
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
+
+    /** Gallery image chosen as the cover (EventImage id); null when there is none. */
+    private Long coverImageId;
 
     private Boolean isFeatured=false;
 

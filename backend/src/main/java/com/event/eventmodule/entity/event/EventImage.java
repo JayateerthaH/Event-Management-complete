@@ -29,4 +29,17 @@ public class EventImage {
 
     @Column(name = "uploaded_at")
     private LocalDateTime uploadedAt;
+
+    /** Where the image is served from: a Cloudinary URL, or null for images on disk (/images/{fileName}). */
+    @Column(columnDefinition = "TEXT")
+    private String url;
+
+    /** Cloudinary's id, used to delete the image there; null for images on disk. */
+    private String publicId;
+
+    /** URL to show: the stored one, or the disk path the frontend prefixes with the API URL. */
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public String displayUrl() {
+        return url != null && !url.isBlank() ? url : "/images/" + fileName;
+    }
 }

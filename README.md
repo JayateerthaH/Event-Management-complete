@@ -130,6 +130,7 @@ Never commit real values.
 | `JWT_SECRET` | yes | HMAC key for signing JWTs, ≥ 32 characters (`openssl rand -hex 32`) |
 | `INTERNAL_SECRET` | yes | any random string |
 | `BREVO_API_KEY`, `PERSONAL_EMAIL` | for email | Brevo API key and sender address. Without them emails fail and are logged; the app keeps working |
+| `CLOUDINARY_URL` | no | Stores event images on Cloudinary (`cloudinary://API_KEY:API_SECRET@CLOUD_NAME`, from the Cloudinary dashboard) so they survive restarts, served resized for each screen. Without it, images go to `APP_IMAGES_FOLDER` on disk |
 | `GOOGLE_CLIENT_ID` | no | Enables "Sign in with Google": the backend verifies Google's ID token against this client ID. Must equal the frontend's `VITE_GOOGLE_CLIENT_ID`; no client secret is needed |
 | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | no | GitHub OAuth (server-side redirect flow) |
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | no | default `jdbc:postgresql://localhost:5432/eventdb`, `admin` / `admin` |

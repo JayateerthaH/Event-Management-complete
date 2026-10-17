@@ -22,6 +22,7 @@ public class TextColumnMigration implements ApplicationRunner {
 
     private static final List<String[]> COLUMNS = List.of(
             new String[]{"events", "events", "description"},
+            new String[]{"events", "events", "image_url"},
             new String[]{"events", "about_event", "about"},
             new String[]{"events", "announcement", "announcement"},
             new String[]{"events", "event_category", "small_description"},

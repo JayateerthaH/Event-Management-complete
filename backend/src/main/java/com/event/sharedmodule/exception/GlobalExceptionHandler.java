@@ -97,6 +97,12 @@ public class GlobalExceptionHandler {
         return build(ex.getReason() != null ? ex.getReason() : status.getReasonPhrase(), status);
     }
 
+    // Upload over spring.servlet.multipart.max-file-size (config/events.yml); event images are limited further
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiError> handleTooLarge(org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
+        return build("The file is too large to upload", HttpStatus.CONTENT_TOO_LARGE);
+    }
+
     // A text field longer than its column (FieldLengthCheck); the message names the field and the limit
     @ExceptionHandler(FieldTooLongException.class)
     public ResponseEntity<ApiError> handleFieldTooLong(FieldTooLongException ex) {

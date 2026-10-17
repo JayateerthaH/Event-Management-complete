@@ -2,7 +2,6 @@ package com.event.eventmodule.image;
 
 import com.event.eventmodule.config.EventAccessService;
 import com.event.eventmodule.config.RequiresEventAccess;
-import com.event.eventmodule.entity.event.EventImage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,7 @@ public class ImageController {
         log.info("[ImageController] Uploading image for event {} - file: {} ({} bytes)",
                 eventId, file.getOriginalFilename(), file.getSize());
         // Validation failures (IllegalArgumentException) become a 400 ApiError via GlobalExceptionHandler
-        EventImage saved = eventImageService.uploadImage(eventId, file);
+        EventImageService.ImageView saved = eventImageService.uploadImage(eventId, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
@@ -47,8 +46,24 @@ public class ImageController {
      * GET /event/images/{eventId}
      */
     @GetMapping("/{eventId}")
-    public ResponseEntity<List<EventImage>> getImages(@PathVariable Long eventId) {
+    public ResponseEntity<List<EventImageService.ImageView>> getImages(@PathVariable Long eventId) {
         return ResponseEntity.ok(eventImageService.getImagesForEvent(eventId));
+    }
+
+    /**
+     * Make a gallery image the event's cover (shown on event cards and the event page).
+     * PUT /event/images/{imageId}/cover
+     */
+    @PutMapping("/{imageId}/cover")
+    public ResponseEntity<EventImageService.ImageView> setCover(@PathVariable Long imageId,
+                                                               @RequestAttribute(value = "userId", required = false) String userId,
+                                                               @RequestAttribute(value = "userRoles", required = false) String roles,
+                                                               @RequestAttribute(value = "username", required = false) String email) {
+        Long eventId = eventImageService.getEventIdForImage(imageId);
+        if (!eventAccessService.isAllowed(eventId, userId, roles, email)) {
+            throw new AccessDeniedException("Only creator or collaborator is allowed");
+        }
+        return ResponseEntity.ok(eventImageService.setCover(imageId));
     }
 
     /**
