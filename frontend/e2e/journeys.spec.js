@@ -454,6 +454,7 @@ test.describe.serial("CampusEvents journeys", () => {
   });
 
   test("admin sees engagement: active users and what people did", async ({ browser }) => {
+    test.setTimeout(150_000); // the digest run walks every student in the test database
     await asUser(browser, ADMIN.email, ADMIN.password, async (page) => {
       await openTab(page, "Analytics");
       const panel = page.locator(".engagement");
@@ -463,6 +464,9 @@ test.describe.serial("CampusEvents journeys", () => {
       for (const label of ["Signups", "Registrations", "Check-ins"]) {
         await expect(panel.locator(".engagement__counts li", { hasText: label })).toBeVisible();
       }
+      // Weekly digest can be sent on demand (never twice in a week per student)
+      await panel.getByRole("button", { name: "Send this week's digest now" }).click();
+      await expect(panel.getByRole("status")).toContainText(/Sent \d+ digest/, { timeout: 90_000 });
     });
   });
 

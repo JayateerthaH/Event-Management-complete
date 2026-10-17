@@ -26,8 +26,13 @@ public class RecommendationService implements AiApi {
 
     @Override
     public List<RecommendedEvent> recommendationsFor(Long userId, int limit) {
+        return recommendationsFor(userId, limit, eventApi.upcomingOpenEvents());
+    }
+
+    @Override
+    public List<RecommendedEvent> recommendationsFor(Long userId, int limit, List<com.event.eventmodule.api.EventCard> candidates) {
         return scorer.rank(
-                eventApi.upcomingOpenEvents(),
+                candidates,
                 new StudentSignals(profileApi.interestNames(userId),
                         profileApi.department(userId).orElse(null),
                         eventApi.registeredEvents(userId),

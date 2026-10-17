@@ -13,6 +13,22 @@ const pct = (v) => (v == null ? "—" : `${Math.round(v * 100)}%`);
 export default function EngagementPanel() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const [digest, setDigest] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const sendDigest = async () => {
+    setSending(true);
+    setDigest("");
+    try {
+      const { data: r } = await api.post("/admin/digest/run");
+      setDigest(`Sent ${r.sent} digest${r.sent === 1 ? "" : "s"} (${r.emailed} by email). Skipped: ${r.skippedNothingNew} with nothing this week, `
+        + `${r.skippedAlreadySent} already sent this week, ${r.skippedTurnedOff} turned off.`);
+    } catch (e) {
+      setDigest(apiErrorMessage(e));
+    } finally {
+      setSending(false);
+    }
+  };
 
   useEffect(() => {
     api.get("/admin/engagement").then((r) => setData(r.data)).catch((e) => setError(apiErrorMessage(e)));
@@ -66,6 +82,17 @@ export default function EngagementPanel() {
           <text x={W} y={H + 14} fill="currentColor" fillOpacity="0.6" fontSize="11" textAnchor="end">today · peak {max}</text>
         </svg>
       </div>
+
+      <div className="engagement__digest">
+        <div>
+          <h3 className="engagement__h3">Weekly digest</h3>
+          <p className="engagement__since">Goes out automatically on Mondays at 9:00. Each student gets it at most once a week.</p>
+        </div>
+        <button type="button" className="admin-accept-btn" onClick={sendDigest} disabled={sending}>
+          {sending ? "Sending…" : "Send this week's digest now"}
+        </button>
+      </div>
+      {digest && <p className="engagement__since" role="status">{digest}</p>}
 
       <h3 className="engagement__h3">What people did, last 30 days</h3>
       {counts.length === 0 ? <p className="admin-empty">No activity yet.</p> : (

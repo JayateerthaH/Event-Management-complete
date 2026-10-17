@@ -93,7 +93,7 @@ export default function Navbar() {
         unread: !n.read,
         to: n.type === "FRIEND_GOING" && n.eventId ? `/events/${n.eventId}`
           : n.type === "BUDDY_REQUEST" ? "/friends?tab=requests"
-          : n.type === "ACHIEVEMENT" ? "/dashboard"
+          : n.type === "ACHIEVEMENT" || n.type === "DIGEST" ? "/dashboard"
           : n.type === "NEW_EVENT" && n.eventId ? `/events/${n.eventId}` : "/friends",
       }));
       setNotifications(
