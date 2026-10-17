@@ -67,6 +67,8 @@ export const fetchFilteredEvents = async ({
   search = "",
   category = "",
   venue = "",
+  categories = [],
+  venues = [],
   department = "",
   dateRange = "",
   costType = "",
@@ -80,6 +82,9 @@ export const fetchFilteredEvents = async ({
     search: normalizeLocal(search),
     category: normalizeLocal(category),
     venue: normalizeLocal(venue),
+    // Several categories/venues are matched by the backend (any of them), so every filter is server-side
+    categories: categories.map(normalizeLocal).filter(Boolean),
+    venues: venues.map(normalizeLocal).filter(Boolean),
     eventField: normalizeLocal(department),
     dateRange: normalizeLocal(dateRange),
     costType: normalizeLocal(costType),
@@ -103,59 +108,23 @@ export const fetchFilteredEvents = async ({
  * This removes hardcoded dummy categories/venues/departments in the sidebar.
  */
 export const fetchFilterOptions = async () => {
-  const sampleSize = 300;
-  // Public, approved-only endpoint (GET /events/summary/all is admin-only and includes unapproved events)
-  const data = await fetchFilteredEvents({ page: 0, size: sampleSize });
-  const list = Array.isArray(data.content) ? data.content : [];
+  // Counted by the backend over approved events (this used to download up to 300 events to count them here)
+  const { data } = await api.get("/events/filter-options");
 
-  const categoryMap = new Map();
-  const venueMap = new Map();
-  const departmentMap = new Map();
+  const categories = (data?.categories || [])
+    .map((c) => ({ id: String(c.value).toLowerCase(), label: toTitleCase(c.value), count: Number(c.count) || 0 }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 
-  list.forEach((ev) => {
-    const catRaw = normalizeValue(ev?.category);
-    const venueRaw = normalizeValue(ev?.venue);
-    const deptRaw = normalizeValue(ev?.eventField || ev?.field || ev?.department);
-
-    if (catRaw) {
-      const key = catRaw.toLowerCase();
-      const prev = categoryMap.get(key) || {
-        id: key,
-        label: toTitleCase(catRaw),
-        count: 0,
-      };
-      prev.count += 1;
-      categoryMap.set(key, prev);
+  const unique = (values, label) => {
+    const map = new Map();
+    for (const raw of values || []) {
+      const value = normalizeValue(raw);
+      if (value && !map.has(value.toLowerCase())) map.set(value.toLowerCase(), { id: value.toLowerCase(), label: label(value) });
     }
-
-    if (venueRaw) {
-      const key = venueRaw.toLowerCase();
-      const prev = venueMap.get(key) || { id: key, label: venueRaw };
-      venueMap.set(key, prev);
-    }
-
-    if (deptRaw) {
-      const key = deptRaw.toLowerCase();
-      const prev = departmentMap.get(key) || {
-        id: key,
-        label: toTitleCase(deptRaw),
-      };
-      departmentMap.set(key, prev);
-    }
-  });
-
-  const categories = Array.from(categoryMap.values()).sort(
-    (a, b) => b.count - a.count || a.label.localeCompare(b.label),
-  );
-  const venues = Array.from(venueMap.values()).sort((a, b) =>
-    a.label.localeCompare(b.label),
-  );
-  const departments = [
-    { id: "all", label: "All Departments" },
-    ...Array.from(departmentMap.values()).sort((a, b) =>
-      a.label.localeCompare(b.label),
-    ),
-  ];
+    return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
+  };
+  const venues = unique(data?.venues, (v) => v);
+  const departments = [{ id: "all", label: "All Departments" }, ...unique(data?.departments, toTitleCase)];
 
   return { categories, venues, departments };
 };

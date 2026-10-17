@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+# Signed-in areas have nothing for search engines
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /scan
+Disallow: /api/

@@ -1,22 +1,28 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollToTop from "./components/ScrollToTop";
-import RoleBasedRoute from "./components/dashboard/RoleBasedRoute";
+import PageLoader from "./components/PageLoader";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Profile from "./pages/Profile";
-import EventsPage from "./pages/EventsPage";
-import EventDetailsPage from "./pages/EventDetailsPage";
-import EventManagePage from "./pages/dashboard/organizer/EventManagePage";
-import QRScanner from "./components/QRScanner";
+
+// Every page except the landing page is downloaded when first opened, so a phone loading the home page
+// doesn't fetch the dashboards, charts and QR scanner too (one 1.3 MB bundle before)
+const RoleBasedRoute = lazy(() => import("./components/dashboard/RoleBasedRoute"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const Profile = lazy(() => import("./pages/Profile"));
+const EventsPage = lazy(() => import("./pages/EventsPage"));
+const EventDetailsPage = lazy(() => import("./pages/EventDetailsPage"));
+const EventManagePage = lazy(() => import("./pages/dashboard/organizer/EventManagePage"));
+const QRScanner = lazy(() => import("./components/QRScanner"));
 
 export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
       <AuthProvider>
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<Home />} />
@@ -66,6 +72,7 @@ export default function App() {
           />
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   );

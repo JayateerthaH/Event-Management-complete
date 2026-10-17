@@ -1,9 +1,12 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { resolveRole } from '../../utils/roleResolver';
-import StudentDashboard from '../../pages/dashboard/student/StudentDashboard';
-import OrganizerDashboard from '../../pages/dashboard/organizer/OrganizerDashboard';
-import AdminDashboard from '../../pages/dashboard/admin/AdminDashboard';
+import { lazy } from 'react';
+
+// Each role downloads only its own dashboard (App.jsx's Suspense shows the loader meanwhile)
+const StudentDashboard = lazy(() => import('../../pages/dashboard/student/StudentDashboard'));
+const OrganizerDashboard = lazy(() => import('../../pages/dashboard/organizer/OrganizerDashboard'));
+const AdminDashboard = lazy(() => import('../../pages/dashboard/admin/AdminDashboard'));
 
 /**
  * Reads the user from AuthContext, resolves the highest-priority role,

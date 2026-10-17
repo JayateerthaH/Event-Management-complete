@@ -24,9 +24,6 @@ const useEvents = (initialPage = 0, pageSize = 6) => {
     return "";
   };
 
-  const normalize = (value) =>
-    typeof value === "string" ? value.trim().toLowerCase() : "";
-
   const fetchEvents = useCallback(
     async (page, activeFilters = {}) => {
       setLoading(true);
@@ -45,96 +42,22 @@ const useEvents = (initialPage = 0, pageSize = 6) => {
             ? ""
             : activeFilters.department;
 
-        const hasActiveFilters = Boolean(
-          (activeFilters.search || "").trim() ||
-            selectedCategories.length ||
-            selectedVenues.length ||
-            (activeFilters.date || "").trim() ||
-            (activeFilters.fee || "").trim() ||
-            department,
-        );
-
-        // When multiple categories/venues are selected the backend cannot
-        // filter for them in one request (it only accepts a single value).
-        // In that case we fetch a large result-set with the other server-side
-        // filters and apply category/venue/department filtering on the client,
-        // then paginate the filtered list ourselves.
-        const needsClientFilter = hasActiveFilters;
-
-        let content, totalPagesVal, totalElementsVal, currentPageVal;
-
-        if (hasActiveFilters && needsClientFilter) {
-          // Fetch a large batch — utilize server side filtering as much as possible
-          const bulk = await fetchFilteredEvents({
-            page: 0,
-            size: 9999,
-            search: activeFilters.search || "",
-            // If only one category/venue selected, pass it to backend.
-            // If multiple, pass empty string and filter on client.
-            category: selectedCategories.length === 1 ? selectedCategories[0] : "",
-            venue: selectedVenues.length === 1 ? selectedVenues[0] : "",
-            department: department, // Pass department to backend
-            dateRange: activeFilters.date || "",
-            costType: mapCostFilter(activeFilters.fee),
-          });
-
-          let all = Array.isArray(bulk.content) ? bulk.content : [];
-
-          // Optimization: Only apply client-side filtering for multi-selects
-          // or fields not handled by backend. Trust backend for single values.
-
-          // 1. Search (Optional refinement, but backend LIKE should suffice)
-          const searchTerm = normalize(activeFilters.search);
-          if (searchTerm) {
-            // Keep lightweight client search just in case
-            all = all.filter((ev) => {
-              const haystack = [
-                ev?.name,
-                ev?.title,
-                ev?.description,
-                ev?.category,
-                ev?.venue,
-                ev?.eventField,
-                ev?.field,
-                ev?.department,
-              ]
-                .filter(Boolean)
-                .join(" ")
-                .toLowerCase();
-              return haystack.includes(searchTerm);
-            });
-          }
-
-          // 2. Categories (Only if multiple selected, otherwise backend handled it)
-          if (selectedCategories.length > 1) {
-            const set = new Set(selectedCategories.map(normalize));
-            all = all.filter((ev) => set.has(normalize(ev?.category)));
-          }
-
-          // 3. Venues (Only if multiple selected)
-          if (selectedVenues.length > 1) {
-            const set = new Set(selectedVenues.map(normalize));
-            all = all.filter((ev) => set.has(normalize(ev?.venue)));
-          }
-
-          // 4. Department - SKIP client filter (Backend handles single select correctly)
-          // 5. Date - SKIP client filter (Backend handles normalization correctly)
-          // 6. Fee - SKIP client filter (Backend handles FREE/PAID logic)
-
-          // Client-side pagination
-          totalElementsVal = all.length;
-          totalPagesVal = Math.ceil(totalElementsVal / pageSize) || 1;
-          currentPageVal = Math.min(page, totalPagesVal - 1);
-          const start = currentPageVal * pageSize;
-          content = all.slice(start, start + pageSize);
-        } else {
-          // Public listing: approved events only
-          const result = await fetchFilteredEvents({ page, size: pageSize });
-          content = Array.isArray(result.content) ? result.content : [];
-          totalPagesVal = result.totalPages;
-          totalElementsVal = result.totalElements;
-          currentPageVal = result.currentPage;
-        }
+        // One page at a time from the server, with every filter applied there (several categories/venues
+        // included). This used to download all events (size 9999) and filter/paginate in the browser.
+        const result = await fetchFilteredEvents({
+          page,
+          size: pageSize,
+          search: activeFilters.search || "",
+          categories: selectedCategories,
+          venues: selectedVenues,
+          department,
+          dateRange: activeFilters.date || "",
+          costType: mapCostFilter(activeFilters.fee),
+        });
+        const content = Array.isArray(result.content) ? result.content : [];
+        const totalPagesVal = result.totalPages;
+        const totalElementsVal = result.totalElements;
+        const currentPageVal = result.currentPage;
 
         setEvents(content);
         setTotalPages(totalPagesVal);
