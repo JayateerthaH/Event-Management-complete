@@ -1,7 +1,7 @@
 brevo:
   api-key: ${BREVO_API_KEY}
   sender-email: ${PERSONAL_EMAIL:govindkh888@gmail.com}
-  sender-name: My App
+  sender-name: ${SENDER_NAME:CampusEvents}
   url: ${BREVO_URL:https://api.brevo.com/v3/smtp/email}
 
 spring:
