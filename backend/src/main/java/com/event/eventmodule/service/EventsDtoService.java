@@ -70,9 +70,15 @@ public class EventsDtoService {
     }
 
     public List<OrganizerEventDto> getEvents(Long id) {
-        return eventsRepository.findByOrganizerId(id)
-                .stream()
-                .map(event -> OrganizerEventDto.from(event, registerRepository.countRegistrationsByEventId(event.getId())))
+        var events = eventsRepository.findByOrganizerId(id);
+        java.util.Map<Long, Long> counts = new java.util.HashMap<>();
+        if (!events.isEmpty()) {
+            for (Object[] row : registerRepository.countRegistrationsByEventIds(events.stream().map(e -> e.getId()).toList())) {
+                counts.put((Long) row[0], ((Number) row[1]).longValue());
+            }
+        }
+        return events.stream()
+                .map(event -> OrganizerEventDto.from(event, counts.getOrDefault(event.getId(), 0L)))
                 .toList();
     }
 

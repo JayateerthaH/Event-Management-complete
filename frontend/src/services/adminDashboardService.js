@@ -36,6 +36,12 @@ export const fetchAllEvents = async (page = 0, size = 6) => {
   return data; // expects Spring Page<EventSummaryDto>
 };
 
+/** GET /events/admin/pending-count — { count } of events waiting for approval */
+export const fetchPendingEventCount = async () => {
+  const { data } = await api.get("/events/admin/pending-count");
+  return data?.count ?? 0;
+};
+
 // ─── Students & Organizers ──────────────────────────────────────────────────
 
 /** GET /admin/students — list all students (StudentDto: id, firstName, lastName) */

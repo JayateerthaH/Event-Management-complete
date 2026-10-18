@@ -8,6 +8,7 @@ import EngagementPanel from "../../../components/admin/EngagementPanel";
 import {
   fetchAllAdminData,
   fetchAllEvents,
+  fetchPendingEventCount,
   fetchOnboardRequests,
   fetchStudents,
   fetchOrganizers,
@@ -366,17 +367,15 @@ export default function AdminDashboard() {
     (async () => {
       const [reqRes, evRes] = await Promise.allSettled([
         fetchOnboardRequests(),
-        fetchAllEvents(0, 9999),
+        fetchPendingEventCount(),
       ]);
       if (cancelled) return;
       const requests =
         reqRes.status === "fulfilled" && Array.isArray(reqRes.value) ? reqRes.value : [];
-      const evData = evRes.status === "fulfilled" ? evRes.value : null;
-      const events = Array.isArray(evData) ? evData : toArray(evData?.content ?? evData?.data ?? evData?.items);
       setAttention({
         organizers: requests.filter((r) => r.roleType === "ORGANIZER").length,
         admins: requests.filter((r) => r.roleType === "ADMIN").length,
-        events: events.map(normaliseEvent).filter((ev) => !ev.isApproved).length,
+        events: evRes.status === "fulfilled" ? evRes.value : 0,
       });
     })();
     return () => {

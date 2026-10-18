@@ -394,12 +394,14 @@
 
 /* Dashboard card headers: title on its own line and the links under it, instead of a three-line squeeze */
 @media (max-width: 540px) {
-  :root .sd-card__header {
+  :root .sd-card__header,
+  :root .od-card__header {
     flex-wrap: wrap;
     row-gap: 0.4rem;
   }
 
-  :root .sd-card__header .sd-card__title {
+  :root .sd-card__header .sd-card__title,
+  :root .od-card__header .od-card__title {
     flex: 1 1 100%;
   }
 }

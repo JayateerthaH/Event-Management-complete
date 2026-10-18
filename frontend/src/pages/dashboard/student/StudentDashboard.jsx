@@ -23,6 +23,7 @@ import InterestNudge from "../../../components/engagement/InterestNudge";
 import SavedEvents from "../../../components/engagement/SavedEvents";
 import Achievements from "../../../components/engagement/Achievements";
 import SemesterGoal from "../../../components/engagement/SemesterGoal";
+import LazyMount from "../../../components/LazyMount";
 import PlanMyWeek from "../../../components/ai/PlanMyWeek";
 import PushNudge from "../../../components/engagement/PushNudge";
 import TicketSoon from "../../../components/engagement/TicketSoon";
@@ -711,11 +712,11 @@ export default function StudentDashboard() {
             <PushNudge />
             <PlanMyWeek />
             <RecommendedEvents limit={6} />
-            <TrendingEvents limit={3} />
+            <LazyMount><TrendingEvents limit={3} /></LazyMount>
             <SavedEvents />
             <SemesterGoal />
             <Achievements onSummary={handleBadgeSummary} />
-            <DepartmentLeaderboard />
+            <LazyMount><DepartmentLeaderboard /></LazyMount>
 
             {/* Recent Certificates */}
             <section className="sd-card">

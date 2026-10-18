@@ -48,12 +48,6 @@
 			<version>1.0.10</version>
 		</dependency>
 
-		<!-- PLAYWRIGHT — third party, version kept here -->
-		<dependency>
-			<groupId>com.microsoft.playwright</groupId>
-			<artifactId>playwright</artifactId>
-			<version>1.49.0</version>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>

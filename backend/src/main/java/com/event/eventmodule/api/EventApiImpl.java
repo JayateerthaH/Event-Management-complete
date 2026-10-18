@@ -116,7 +116,7 @@ public class EventApiImpl implements EventApi {
         return eventsRepository.findByOrganizerId(organizerId).stream()
                 .filter(e -> Boolean.TRUE.equals(e.getIsApproved()) && e.getEventDate() != null && e.getEventDate().after(now))
                 .sorted(java.util.Comparator.comparing(Events::getEventDate))
-                .map(this::toCard).toList();
+                .collect(java.util.stream.Collectors.collectingAndThen(java.util.stream.Collectors.toList(), this::toCards));
     }
 
     @Override
@@ -130,8 +130,8 @@ public class EventApiImpl implements EventApi {
 
     @Override
     public Participation participation(Long userId) {
-        List<EventCard> attended = registerRepository.findAttendedByUserId(userId).stream()
-                .map(r -> toCard(r.getEventsDto())).toList();
+        List<EventCard> attended = toCards(registerRepository.findAttendedByUserId(userId).stream()
+                .map(r -> r.getEventsDto()).toList());
         return new Participation(attended, userRegistrationRepository.findByUserId(userId).size(),
                 feedBackRepository.countByUserId(userId), registerRepository.findEligibleCertificates(userId).size());
     }
@@ -147,7 +147,7 @@ public class EventApiImpl implements EventApi {
                 .values().stream()
                 .sorted(java.util.Comparator.comparing(Events::getEventDate,
                         java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())))
-                .map(e -> new AttendedEvent(toCard(e),
+                .map(e -> new AttendedEvent(toCard(e, registrationCounts(List.of(e.getId())).getOrDefault(e.getId(), 0L)),
                         e.getEventDetails() == null || e.getEventDetails().getOrganizedBy() == null
                                 || e.getEventDetails().getOrganizedBy().isBlank() ? null : e.getEventDetails().getOrganizedBy().trim(),
                         withCertificate.contains(e.getId())))
@@ -160,9 +160,8 @@ public class EventApiImpl implements EventApi {
                 .map(com.event.eventmodule.saved.SavedEvent::getEventId).toList();
         Map<Long, Events> byId = new HashMap<>();
         eventsRepository.findAllById(ids).forEach(e -> byId.put(e.getId(), e));
-        return ids.stream().map(byId::get)
-                .filter(e -> e != null && Boolean.TRUE.equals(e.getIsApproved()))
-                .map(this::toCard).toList();
+        return toCards(ids.stream().map(byId::get)
+                .filter(e -> e != null && Boolean.TRUE.equals(e.getIsApproved())).toList());
     }
 
     @Override
@@ -201,13 +200,28 @@ public class EventApiImpl implements EventApi {
 
     @Override
     public List<EventCard> trendingEvents(int limit) {
+        int n = Math.max(1, Math.min(limit, 12));
+        TrendingCache cached = trendingCache;
+        if (cached != null && cached.at().isAfter(java.time.Instant.now().minusSeconds(60))) {
+            return cached.cards().stream().limit(n).toList();
+        }
+        List<EventCard> top = computeTrending();
+        trendingCache = new TrendingCache(java.time.Instant.now(), top);
+        return top.stream().limit(n).toList();
+    }
+
+    /** Trending is the same for everyone and shows on Home, Events and the dashboard: recomputed at most once a minute. */
+    private record TrendingCache(java.time.Instant at, List<EventCard> cards) {}
+    private volatile TrendingCache trendingCache;
+
+    private List<EventCard> computeTrending() {
         Map<Long, Long> saves = new HashMap<>();
         for (Object[] row : savedEventRepository.savesSince(java.time.LocalDateTime.now().minusDays(7))) saves.put((Long) row[0], (Long) row[1]);
         return upcomingOpenEvents().stream()
                 .filter(e -> !e.isFull())
                 .sorted(java.util.Comparator.comparingDouble((EventCard e) -> -(saves.getOrDefault(e.id(), 0L) * 2 + e.registeredCount())))
                 .filter(e -> saves.getOrDefault(e.id(), 0L) + e.registeredCount() > 0)
-                .limit(Math.max(1, Math.min(limit, 12))).toList();
+                .limit(12).toList();
     }
 
     @Override
@@ -260,29 +274,29 @@ public class EventApiImpl implements EventApi {
 
     @Override
     public List<EventCard> upcomingOpenEvents() {
-        return eventsRepository.findByIsApprovedTrueAndEventDateAfterOrderByEventDateAsc(new Date()).stream()
+        return toCards(eventsRepository.findByIsApprovedTrueAndEventDateAfterOrderByEventDateAsc(new Date()).stream()
                 .filter(e -> !Boolean.TRUE.equals(e.getIsCompleted()))
-                .map(this::toCard)
-                .toList();
+                .toList());
     }
 
     @Override
     public List<EventCard> registeredEvents(Long userId) {
-        return java.util.stream.Stream.concat(
+        return toCards(java.util.stream.Stream.concat(
                         registrationService.getUpcomingEventsForUser(userId).stream(),
                         registrationService.getPastEventsForUser(userId).stream())
-                .map(this::toCard)
-                .toList();
+                .toList());
     }
 
     @Override
     public List<EventCard> searchEvents(EventSearchCriteria c, int limit) {
-        return eventService.filterEvents(c.category(), c.keywords(), c.venue(), c.department(), c.dateRange(),
+        var found = eventService.filterEvents(c.category(), c.keywords(), c.venue(), c.department(), c.dateRange(),
                         c.costType(), PageRequest.of(0, Math.max(1, limit), Sort.by("eventDate").ascending()))
-                .getContent().stream()
+                .getContent();
+        Map<Long, Long> counts = registrationCounts(found.stream().map(s -> s.getId()).toList());
+        return found.stream()
                 .map(s -> new EventCard(s.getId(), s.getName(), s.getDescription(), s.getCategory(), s.getField(),
                         s.getEventDate(), s.getVenue(), s.getMaxPeople(), s.getCostOfRegistration(), s.getImageUrl(),
-                        registerRepository.countRegistrationsByEventId(s.getId())))
+                        counts.getOrDefault(s.getId(), 0L)))
                 .toList();
     }
 
@@ -356,9 +370,27 @@ public class EventApiImpl implements EventApi {
     }
 
     private EventCard toCard(Events e) {
+        return toCard(e, registerRepository.countRegistrationsByEventId(e.getId()));
+    }
+
+    private static EventCard toCard(Events e, long registered) {
         return new EventCard(e.getId(), e.getName(), e.getDescription(), e.getCategory(), e.getEventField(),
-                e.getEventDate(), e.getVenue(), e.getMaxPeople(), e.getCostOfRegistration(), e.getImageUrl(),
-                registerRepository.countRegistrationsByEventId(e.getId()));
+                e.getEventDate(), e.getVenue(), e.getMaxPeople(), e.getCostOfRegistration(), e.getImageUrl(), registered);
+    }
+
+    /** Cards for many events with one count query, instead of one query per event (keeps the order). */
+    private List<EventCard> toCards(List<Events> events) {
+        Map<Long, Long> counts = registrationCounts(events.stream().map(Events::getId).toList());
+        return events.stream().map(e -> toCard(e, counts.getOrDefault(e.getId(), 0L))).toList();
+    }
+
+    private Map<Long, Long> registrationCounts(java.util.Collection<Long> eventIds) {
+        Map<Long, Long> counts = new HashMap<>();
+        if (eventIds.isEmpty()) return counts;
+        for (Object[] row : registerRepository.countRegistrationsByEventIds(new java.util.HashSet<>(eventIds))) {
+            counts.put((Long) row[0], ((Number) row[1]).longValue());
+        }
+        return counts;
     }
 
     private EventsDto convertToDto(Events e) {

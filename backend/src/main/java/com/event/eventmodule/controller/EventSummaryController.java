@@ -35,6 +35,13 @@ public class EventSummaryController {
         return service.getPaginatedEventSummaries(PageRequest.of(page, size));
     }
 
+    /** Admin overview: how many events wait for approval (instead of downloading every event to count them). */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/pending-count")
+    public java.util.Map<String, Long> pendingApprovalCount() {
+        return java.util.Map.of("count", eventsRepository.countByIsApprovedFalseOrIsApprovedIsNull());
+    }
+
     // Approve an event (admin only)
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/approve/{eventId}")

@@ -28,6 +28,15 @@ public interface RegisterRepository extends JpaRepository<Register, Long> {
     """)
     Long countRegistrationsByEventId(@Param("eventId") Long eventId);
 
+    /** Registrations per event for many events in one query: rows of [eventId, count]. */
+    @Query("""
+        SELECT r.eventsDto.id, COUNT(r)
+        FROM Register r
+        WHERE r.eventsDto.id IN :eventIds
+        GROUP BY r.eventsDto.id
+    """)
+    List<Object[]> countRegistrationsByEventIds(@Param("eventIds") java.util.Collection<Long> eventIds);
+
     @Query("""
         SELECT COUNT(DISTINCT r.userId)
         FROM Register r

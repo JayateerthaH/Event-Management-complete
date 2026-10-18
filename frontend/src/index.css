@@ -20,3 +20,5 @@ main, .tab-fade { animation: page-in 0.22s ease-out; }
 @keyframes page-in { from { opacity: 0; transform: translateY(6px); } }
 @keyframes page-loader-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { main, .tab-fade { animation: none; } }
+/* The tab wrapper must lay its children out like the dashboard column it sits in, or their spacing is lost */
+.tab-fade { display: flex; flex-direction: column; gap: inherit; min-width: 0; }

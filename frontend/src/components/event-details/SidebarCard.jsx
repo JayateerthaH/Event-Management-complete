@@ -20,14 +20,17 @@ const formatDate = (dateStr) => {
 };
 
 export default function SidebarCard({ event, details, onRegister, onJoinWaitlist, refetchEvent }) {
-  // Poll for real-time registration count updates every 15 seconds
+  // Keep the seat count fresh: once a minute while the page is on screen (not in background tabs),
+  // and right away when the person comes back to the tab
   const intervalRef = useRef(null);
   useEffect(() => {
     if (!refetchEvent) return;
     intervalRef.current = setInterval(() => {
-      refetchEvent();
-    }, 15000);
-    return () => clearInterval(intervalRef.current);
+      if (document.visibilityState === "visible") refetchEvent();
+    }, 60000);
+    const onVisible = () => { if (document.visibilityState === "visible") refetchEvent(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { clearInterval(intervalRef.current); document.removeEventListener("visibilitychange", onVisible); };
   }, [refetchEvent]);
 
   // Phones: the card sits below the event content, so a slim bar at the bottom carries the main action.

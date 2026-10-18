@@ -65,4 +65,6 @@ public interface EventsRepository extends JpaRepository<Events, Long>, JpaSpecif
     @Query("select e.eventDate from Events e where e.eventDate >= :from and e.eventDate < :to")
     List<Date> findEventDatesBetween(@org.springframework.data.repository.query.Param("from") Date from,
                                      @org.springframework.data.repository.query.Param("to") Date to);
+
+    long countByIsApprovedFalseOrIsApprovedIsNull();
 }
