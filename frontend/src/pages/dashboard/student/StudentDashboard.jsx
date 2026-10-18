@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import useTabScroll from "../../../hooks/useTabScroll";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Navbar from "../../../components/Navbar";
@@ -350,6 +351,7 @@ export default function StudentDashboard() {
     const tab = new URLSearchParams(window.location.search).get("tab");
     return SIDEBAR_TABS.some((t) => t.key === tab) ? tab : "overview";
   });
+  useTabScroll(activeTab, ".sd-sidebar__nav");
   const [badgeCount, setBadgeCount] = useState(null);
   const handleBadgeSummary = useCallback((s) => setBadgeCount(s.earned), []);
   const [userInfo, setUserInfo] = useState(null);
@@ -605,16 +607,6 @@ export default function StudentDashboard() {
             </section>
 
             <TicketSoon />
-            <InterestNudge />
-            <PushNudge />
-            <PlanMyWeek />
-            <RecommendedEvents limit={6} />
-            <TrendingEvents limit={3} />
-            <SavedEvents />
-            <SemesterGoal />
-            <Achievements onSummary={handleBadgeSummary} />
-            <DepartmentLeaderboard />
-
             {/* Upcoming Registered Events */}
             <section className="sd-card">
               <div className="sd-card__header">
@@ -630,9 +622,9 @@ export default function StudentDashboard() {
                     <line x1="8" y1="2" x2="8" y2="6" />
                     <line x1="3" y1="10" x2="21" y2="10" />
                   </svg>
-                  Upcoming Registered Events
+                  Your upcoming events
                 </h2>
-                <Link to="/tickets" className="sd-tickets-link">My tickets (works offline)</Link>
+                <Link to="/tickets" className="sd-tickets-link" title="Your QR tickets, also without internet">My tickets</Link>
                 <button
                   className="sd-link-btn"
                   onClick={() => setActiveTab("upcoming")}
@@ -714,6 +706,16 @@ export default function StudentDashboard() {
                 <p className="sd-empty">No upcoming registered events.</p>
               )}
             </section>
+
+            <InterestNudge />
+            <PushNudge />
+            <PlanMyWeek />
+            <RecommendedEvents limit={6} />
+            <TrendingEvents limit={3} />
+            <SavedEvents />
+            <SemesterGoal />
+            <Achievements onSummary={handleBadgeSummary} />
+            <DepartmentLeaderboard />
 
             {/* Recent Certificates */}
             <section className="sd-card">
@@ -1384,7 +1386,7 @@ export default function StudentDashboard() {
             <div className="sd-sidebar__avatar">{initials}</div>
             <h3 className="sd-sidebar__name">{fullName}</h3>
             <p className="sd-sidebar__dept">
-              {department}, {yearOfStudy}
+              {[department, yearOfStudy].filter((v) => v && v !== "--").join(", ")}
             </p>
           </div>
 
@@ -1403,7 +1405,7 @@ export default function StudentDashboard() {
         </aside>
 
         {/* ── Main Content ── */}
-        <main className="sd-content">
+        <main className="sd-content" data-tab={activeTab}>
           {/* Welcome bar */}
           <section className="sd-welcome">
             <div className="sd-welcome__text">

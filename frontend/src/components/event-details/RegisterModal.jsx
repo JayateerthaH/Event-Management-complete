@@ -186,7 +186,7 @@ export default function RegisterModal({ event, onClose, onSuccess, mode = 'regis
 
           {/* Full Name */}
           <label className="ed-form__label">
-            Full Name <span className="reg-form__req">*</span>
+            <span>Full Name <span className="reg-form__req">*</span></span>
             <input
               className="ed-form__input"
               type="text"
@@ -200,7 +200,7 @@ export default function RegisterModal({ event, onClose, onSuccess, mode = 'regis
 
           {/* Email */}
           <label className="ed-form__label">
-            Email <span className="reg-form__req">*</span>
+            <span>Email <span className="reg-form__req">*</span></span>
             <input
               className="ed-form__input"
               type="email"
@@ -214,7 +214,7 @@ export default function RegisterModal({ event, onClose, onSuccess, mode = 'regis
 
           {/* Phone */}
           <label className="ed-form__label">
-            Phone Number <span className="reg-form__req">*</span>
+            <span>Phone Number <span className="reg-form__req">*</span></span>
             <input
               className="ed-form__input"
               type="tel"
@@ -228,7 +228,7 @@ export default function RegisterModal({ event, onClose, onSuccess, mode = 'regis
 
           {/* Department */}
           <label className="ed-form__label">
-            Department <span className="reg-form__req">*</span>
+            <span>Department <span className="reg-form__req">*</span></span>
             <div className="reg-form__select-wrap">
               <select
                 className="ed-form__input reg-form__select"
@@ -247,7 +247,7 @@ export default function RegisterModal({ event, onClose, onSuccess, mode = 'regis
 
           {/* Year of Study */}
           <label className="ed-form__label">
-            Year of Study <span className="reg-form__req">*</span>
+            <span>Year of Study <span className="reg-form__req">*</span></span>
             <div className="reg-form__select-wrap">
               <select
                 className="ed-form__input reg-form__select"

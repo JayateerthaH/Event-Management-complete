@@ -29,7 +29,7 @@
 /* Navigation Bar */
 .home-navbar {
   position: relative;
-  z-index: 10;
+  z-index: 60; /* its menus open above sticky tab bars (20-30) and the event page's bottom bar (50), below modals (100) */
   display: flex;
   justify-content: space-between;
   align-items: center;

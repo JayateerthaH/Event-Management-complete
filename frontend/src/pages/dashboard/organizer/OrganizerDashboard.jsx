@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import useTabScroll from "../../../hooks/useTabScroll";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Navbar from "../../../components/Navbar";
@@ -358,6 +359,7 @@ export default function OrganizerDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
+  useTabScroll(activeTab, ".od-sidebar__nav");
 
   // -- Overview data ---------------------------------------------------------
   const [data, setData] = useState(null);

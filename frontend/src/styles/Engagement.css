@@ -151,3 +151,13 @@
 .dept-board__bar span { display: block; height: 100%; background: linear-gradient(90deg, #8b5cf6, #22c55e); }
 .dept-board__list b { color: #f8fafc; font-variant-numeric: tabular-nums; }
 @media (max-width: 600px) { .dept-board__list li { grid-template-columns: 1.4rem minmax(0, 1fr) auto; } .dept-board__bar { display: none; } }
+
+/* Phones: badges two per row and compact, so eight of them don't fill several screens */
+@media (max-width: 600px) {
+  .achievements__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+  .badge-tile { padding: 0.7rem; gap: 0.3rem; }
+  .badge-tile__icon { width: 32px; height: 32px; }
+  .badge-tile__icon svg { width: 18px; height: 18px; }
+  .badge-tile__name { font-size: 0.9rem; }
+  .badge-tile__desc { font-size: 0.74rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}

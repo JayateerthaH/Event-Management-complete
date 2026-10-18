@@ -218,21 +218,29 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  /* Phones: shorter image and the category/date on one line, so a card is about half a screen */
   .event-card-image-container {
-    height: 200px;
+    height: 150px;
   }
-  
+
   .event-card-content {
-    padding: 16px;
+    padding: 14px 16px 16px;
   }
-  
+
   .event-title {
     font-size: 1.1rem;
   }
-  
+
   .event-card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 10px;
+  }
+
+  .event-description {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
   }
 }

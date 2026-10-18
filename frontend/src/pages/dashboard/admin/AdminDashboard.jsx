@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import useTabScroll from "../../../hooks/useTabScroll";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Navbar from "../../../components/Navbar";
@@ -306,6 +307,7 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
+  useTabScroll(activeTab, ".admin-sidebar__nav");
   const [data, setData] = useState(null);
 
   // -- Pageable events state -------------------------------------------------
@@ -1903,7 +1905,7 @@ export default function AdminDashboard() {
           </nav>
         </aside>
 
-        <main className="admin-content">
+        <main className="admin-content" data-tab={activeTab}>
           <section className="admin-welcome">
             <div className="admin-welcome__text">
               <h1 className="admin-welcome__title">Admin Dashboard</h1>

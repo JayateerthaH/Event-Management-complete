@@ -282,7 +282,16 @@ button.ai-chip:hover:not(:disabled) { background: rgba(139, 92, 246, 0.2); borde
   .ai-panel { padding: 1rem; }
   .ai-search__form { flex-direction: column; }
   .ai-insights__cols { grid-template-columns: minmax(0, 1fr); }
-  .ai-tiles { grid-template-columns: minmax(0, 1fr); }
+  /* Phones: a swipeable row (one and a bit cards visible) instead of a tall stack */
+  .ai-tiles {
+    display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0.75rem;
+    margin: 0 -1rem; padding: 0 1rem 0.35rem; scroll-padding: 0 1rem; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+  }
+  .ai-tiles::-webkit-scrollbar { display: none; }
+  .ai-tiles > * { flex: 0 0 78%; scroll-snap-align: start; }
+  .ai-tile__image { height: 104px; }
+  .ai-tile:hover { transform: none; }
   .ai-msg { max-width: 95%; }
 }
 

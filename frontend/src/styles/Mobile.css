@@ -319,3 +319,87 @@
     font-size: 1.5rem;
   }
 }
+
+/* Card tables: a row of action buttons wraps instead of squeezing each label to one letter per line */
+@media (max-width: 640px) {
+  :root table.rt-cards td > .od-actions,
+  :root table.rt-cards td > div {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  :root table.rt-cards td button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+/* Dashboards on phones: the tabs are one swipeable row that stays at the top while scrolling, without
+   the name card above them (the avatar is in the navbar); the welcome banner only on Overview */
+@media (max-width: 860px) {
+  :root .sd-sidebar,
+  :root .od-sidebar,
+  :root .admin-sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding: 0.5rem 0;
+    gap: 0;
+    background: rgba(11, 16, 32, 0.96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  :root .sd-sidebar__profile,
+  :root .od-sidebar__profile,
+  :root .od-sidebar__divider,
+  :root .admin-sidebar__profile {
+    display: none;
+  }
+
+  :root .sd-sidebar__nav,
+  :root .od-sidebar__nav,
+  :root .admin-sidebar__nav {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+    width: 100%;
+    padding: 0 1rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding: 0 1rem;
+  }
+
+  :root .sd-sidebar__nav::-webkit-scrollbar,
+  :root .od-sidebar__nav::-webkit-scrollbar,
+  :root .admin-sidebar__nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  :root .sd-sidebar__tab,
+  :root .od-sidebar__tab,
+  :root .admin-sidebar__tab {
+    flex: none;
+    white-space: nowrap;
+    min-height: 38px;
+    width: auto;
+  }
+
+  :root .sd-content:not([data-tab="overview"]) .sd-welcome,
+  :root .admin-content:not([data-tab="overview"]) .admin-welcome {
+    display: none;
+  }
+}
+
+/* Dashboard card headers: title on its own line and the links under it, instead of a three-line squeeze */
+@media (max-width: 540px) {
+  :root .sd-card__header {
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+  }
+
+  :root .sd-card__header .sd-card__title {
+    flex: 1 1 100%;
+  }
+}
