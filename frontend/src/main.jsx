@@ -28,13 +28,26 @@ startResponsiveTables()
 
 // After a redeploy, a page that was already open asks for page code that no longer exists. Reload once to
 // get the new version instead of showing an error (at most once a minute, so it can't loop).
+// Leaving a page also cancels its pending page-code downloads (Safari reports those as preload errors);
+// that must not reload the page being left, so ignore errors while leaving and let a navigation win.
+let leaving = false
+window.addEventListener('beforeunload', () => { leaving = true })
+window.addEventListener('pagehide', () => { leaving = true })
+window.addEventListener('pageshow', () => { leaving = false })
 window.addEventListener('vite:preloadError', (event) => {
+  if (leaving) {
+    event.preventDefault()
+    return
+  }
   try {
     const last = Number(sessionStorage.getItem('chunk-reload-at') || 0)
     if (Date.now() - last > 60_000) {
-      sessionStorage.setItem('chunk-reload-at', String(Date.now()))
       event.preventDefault()
-      window.location.reload()
+      setTimeout(() => {
+        if (leaving) return
+        sessionStorage.setItem('chunk-reload-at', String(Date.now()))
+        window.location.reload()
+      }, 400)
     }
   } catch {
     /* storage blocked: let the error boundary show the error */

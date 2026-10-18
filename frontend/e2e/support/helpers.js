@@ -10,7 +10,7 @@ export const ADMIN = {
 
 /** Logs in through the real login form and waits for the dashboard. */
 export async function login(page, email, password = PASSWORD) {
-  await page.goto("/login");
+  await gotoSettled(page, "/login");
   await page.fill("#username", email);
   await page.fill("#password", password);
   await page.click("button[type=submit]");
@@ -62,19 +62,12 @@ export async function readQrCode(email, eventId) {
 }
 
 /**
- * page.goto that copes with WebKit (iPhone project) reporting a navigation as interrupted. Usually the page
- * did arrive: React Router's own history.replaceState on load is what WebKit counts as the interruption.
- * Navigating again in that state can crash Playwright's WebKit (an engine assertion), so only retry when
- * the page really isn't there.
+ * page.goto for the journeys. It waits for the new document to commit, then for "load", rather than
+ * letting goto wait for "load" itself: React Router's history.replaceState during load otherwise makes
+ * WebKit (iPhone project) report the navigation as interrupted, and navigating again from that state
+ * crashes Playwright's WebKit (an engine assertion).
  */
 export async function gotoSettled(page, url) {
-  try {
-    await page.goto(url);
-  } catch (e) {
-    if (!/interrupted by another navigation|Frame load interrupted/.test(e.message)) throw e;
-    await page.waitForLoadState("networkidle");
-    const want = new URL(url, page.url()), at = new URL(page.url());
-    if (at.pathname === want.pathname && at.search === want.search) return;
-    await page.goto(url);
-  }
+  await page.goto(url, { waitUntil: "commit" });
+  await page.waitForLoadState("load");
 }

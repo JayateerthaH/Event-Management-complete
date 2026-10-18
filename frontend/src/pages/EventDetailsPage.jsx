@@ -13,6 +13,7 @@ import RegisterModal from "../components/event-details/RegisterModal";
 import EventAssistant from "../components/ai/EventAssistant";
 import SimilarEvents from "../components/ai/SimilarEvents";
 import EventBuddies from "../components/social/EventBuddies";
+import DepartmentGoing from "../components/social/DepartmentGoing";
 import FollowOrganizer from "../components/social/FollowOrganizer";
 import { getEventImages, getImageUrl } from "../api/imageService";
 import { fetchEventAnnouncements } from "../api/announcementService";
@@ -364,6 +365,7 @@ export default function EventDetailsPage() {
         <main className="ed-main">
           {renderTab()}
           {user && <FollowOrganizer eventId={eventId} />}
+          {user && <DepartmentGoing eventId={eventId} />}
           {user && <EventBuddies eventId={eventId} isRegistered={isRegistered} />}
           <EventAssistant key={eventId} eventId={eventId} eventName={event.name} />
         </main>

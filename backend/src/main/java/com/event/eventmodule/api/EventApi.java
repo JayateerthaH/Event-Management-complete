@@ -63,6 +63,15 @@ public interface EventApi {
     /** Approved events the user saved ("Interested"), most recently saved first. */
     List<EventCard> savedEvents(Long userId);
 
+    /** Other students from this department registered for the event (a count only; no names). */
+    long registeredFromDepartment(Long eventId, String department, Long excludeUserId);
+
+    /** The department the student gave on their most recent registration form, if any. */
+    Optional<String> lastRegistrationDepartment(Long userId);
+
+    /** Students who attended (QR-verified) an earlier event by this event's organizer and haven't registered for it. */
+    List<Long> pastAttendeesToInvite(Long eventId);
+
     /** Whether the user has registered for the event. */
     boolean isRegistered(Long userId, Long eventId);
 

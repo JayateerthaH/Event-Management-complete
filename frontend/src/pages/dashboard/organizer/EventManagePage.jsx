@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Navbar from "../../../components/Navbar";
+import InvitePastAttendees from "../../../components/social/InvitePastAttendees";
 import {
   fetchAboutEvent,
   fetchEventById,
@@ -1447,6 +1448,8 @@ export default function EventManagePage() {
           </div>
         </div>
       </header>
+
+      <InvitePastAttendees eventId={eventId} />
 
       {/* ── Tab navigation ── */}
       <nav className="em-tabs">

@@ -166,6 +166,23 @@ public class EventApiImpl implements EventApi {
     }
 
     @Override
+    public long registeredFromDepartment(Long eventId, String department, Long excludeUserId) {
+        if (department == null || department.isBlank()) return 0;
+        return registerRepository.countFromDepartment(eventId, department, excludeUserId == null ? -1L : excludeUserId);
+    }
+
+    @Override
+    public Optional<String> lastRegistrationDepartment(Long userId) {
+        return registerRepository.departmentsUsedBy(userId, PageRequest.of(0, 1)).stream()
+                .filter(d -> !d.isBlank()).findFirst().map(String::trim);
+    }
+
+    @Override
+    public List<Long> pastAttendeesToInvite(Long eventId) {
+        return organizerOf(eventId).map(org -> registerRepository.pastAttendeesNotRegistered(org, eventId)).orElse(List.of());
+    }
+
+    @Override
     public boolean isRegistered(Long userId, Long eventId) {
         return userId != null && eventId != null && userRegistrationRepository.existsByUserIdAndEventId(userId, eventId);
     }

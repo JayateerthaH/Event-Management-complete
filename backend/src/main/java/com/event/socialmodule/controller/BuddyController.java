@@ -42,6 +42,12 @@ public class BuddyController {
         return buddyService.eventBuddies(id(userId), eventId);
     }
 
+    @GetMapping("/events/{eventId}/department-going")
+    public ResponseEntity<DepartmentGoing> departmentGoing(@RequestAttribute("userId") String userId, @PathVariable Long eventId) {
+        return buddyService.departmentGoing(id(userId), eventId).map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
     @PostMapping("/events/{eventId}/opt-in")
     public EventBuddies optIn(@RequestAttribute("userId") String userId, @PathVariable Long eventId) {
         return buddyService.optIn(id(userId), eventId);

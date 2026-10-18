@@ -28,6 +28,28 @@ public interface RegisterRepository extends JpaRepository<Register, Long> {
     """)
     Long countRegistrationsByEventId(@Param("eventId") Long eventId);
 
+    @Query("""
+        SELECT COUNT(DISTINCT r.userId)
+        FROM Register r
+        WHERE r.eventsDto.id = :eventId
+          AND LOWER(TRIM(r.department)) = LOWER(TRIM(:department))
+          AND (r.userId IS NULL OR r.userId <> :excludeUserId)
+    """)
+    long countFromDepartment(@Param("eventId") Long eventId, @Param("department") String department,
+                             @Param("excludeUserId") Long excludeUserId);
+
+    /** Students who checked in at another of this organizer's events and haven't registered for this one. */
+    @Query("""
+        SELECT DISTINCT r.userId FROM Register r
+        WHERE r.eventsDto.organizerId = :organizerId AND r.isAttended = true
+          AND r.eventsDto.id <> :eventId AND r.userId IS NOT NULL
+          AND r.userId NOT IN (SELECT r2.userId FROM Register r2 WHERE r2.eventsDto.id = :eventId AND r2.userId IS NOT NULL)
+    """)
+    List<Long> pastAttendeesNotRegistered(@Param("organizerId") Long organizerId, @Param("eventId") Long eventId);
+
+    @Query("SELECT r.department FROM Register r WHERE r.userId = :userId AND r.department IS NOT NULL ORDER BY r.id DESC")
+    List<String> departmentsUsedBy(@Param("userId") Long userId, org.springframework.data.domain.Pageable page);
+
     @Query("SELECT r FROM Register r JOIN FETCH r.eventsDto e WHERE e.organizerId = :organizerId ORDER BY e.eventDate DESC, r.id")
     List<Register> findByEventOrganizer(@Param("organizerId") Long organizerId);
 

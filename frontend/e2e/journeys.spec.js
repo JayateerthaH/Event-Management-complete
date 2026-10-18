@@ -33,11 +33,11 @@ test.describe.serial("CampusEvents journeys", () => {
 
   test("visitor can browse home, events and an event page without logging in", async ({ browser }) => {
     await asUser(browser, null, null, async (page) => {
-      await page.goto("/home");
+      await gotoSettled(page, "/home");
       await expect(page.locator(".stat-value").first()).not.toHaveText("...");
       await expect(page.locator(".stat-value").first()).not.toHaveText("0");
 
-      await page.goto("/events");
+      await gotoSettled(page, "/events");
       await expect(page.locator(".event-card").first()).toBeVisible();
       await expect(page).toHaveURL(/\/events$/); // not bounced to /login
 
@@ -53,7 +53,7 @@ test.describe.serial("CampusEvents journeys", () => {
 
   test("protected pages redirect to login, and a wrong password shows an error", async ({ browser }) => {
     await asUser(browser, null, null, async (page) => {
-      await page.goto("/dashboard");
+      await gotoSettled(page, "/dashboard");
       await expect(page).toHaveURL(/\/login$/);
 
       // Field icons sit beside the inputs, never on top of the typed text
@@ -74,7 +74,7 @@ test.describe.serial("CampusEvents journeys", () => {
 
   test("organizer signs up, admin accepts the request", async ({ browser }) => {
     await asUser(browser, null, null, async (page) => {
-      await page.goto("/signup");
+      await gotoSettled(page, "/signup");
       await page.locator(".role-option", { hasText: "Organizer" }).click();
       await page.fill('input[name="username"]', organizerEmail);
       await page.fill('input[name="password"]', PASSWORD);
@@ -133,7 +133,7 @@ test.describe.serial("CampusEvents journeys", () => {
 
   test("student signs up and registers for the approved event", async ({ browser }) => {
     await asUser(browser, null, null, async (page) => {
-      await page.goto("/signup");
+      await gotoSettled(page, "/signup");
       await page.fill('input[name="username"]', studentEmail);
       await page.fill('input[name="password"]', PASSWORD);
       await page.fill('input[name="confirmPassword"]', PASSWORD);
@@ -153,7 +153,7 @@ test.describe.serial("CampusEvents journeys", () => {
       expect(saved).toEqual([topic]);
       await dashboardLoaded(page);
 
-      await page.goto(`/events/${eventId}`);
+      await gotoSettled(page, `/events/${eventId}`);
       await page.getByText("Register Now").first().click();
       const modal = page.locator(".reg-modal");
       await modal.getByPlaceholder("Enter your full name").fill("Stu Dent");
@@ -200,7 +200,7 @@ test.describe.serial("CampusEvents journeys", () => {
 
   test("student can have their QR code emailed again", async ({ browser }) => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
-      await page.goto(`/events/${eventId}`);
+      await gotoSettled(page, `/events/${eventId}`);
       const button = page.locator(".ed-sidebar").getByRole("button", { name: "Resend QR code" });
       const message = page.locator(".ed-sidebar .resend-qr__msg");
       await button.click();
@@ -229,7 +229,7 @@ test.describe.serial("CampusEvents journeys", () => {
       expect((await savedRes).ok()).toBe(true);
       await expect(sidebar.getByRole("button", { name: "Remove from saved events" })).toBeVisible();
 
-      await page.goto("/dashboard");
+      await gotoSettled(page, "/dashboard");
       const saved = page.locator(".saved-events");
       await expect(saved.getByRole("link", { name: other.name })).toBeVisible();
       await saved.locator("li", { hasText: other.name }).getByRole("button", { name: "Remove from saved events" }).click();
@@ -260,17 +260,17 @@ test.describe.serial("CampusEvents journeys", () => {
 
     await asUser(browser, buddyEmail, PASSWORD, async (page) => {
       await setName(page, `Buddy ${run}`);
-      await page.goto(`/events/${eventId}`);
+      await gotoSettled(page, `/events/${eventId}`);
       await page.getByRole("button", { name: "I'm open to meeting people" }).click();
       await expect(page.getByText("Nobody else has opted in yet")).toBeVisible();
     });
 
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
-      await page.goto(`/events/${eventId}`);
+      await gotoSettled(page, `/events/${eventId}`);
       // A name is required before opting in
       await expect(page.getByRole("button", { name: "I'm open to meeting people" })).toBeDisabled();
       await setName(page, `Stu ${run}`);
-      await page.goto(`/events/${eventId}`);
+      await gotoSettled(page, `/events/${eventId}`);
       await page.getByRole("button", { name: "I'm open to meeting people" }).click();
       const card = page.locator(".pc").filter({ hasText: `Buddy ${run}` });
       await expect(card).toBeVisible();
@@ -287,7 +287,7 @@ test.describe.serial("CampusEvents journeys", () => {
       await page.getByRole("tab", { name: "Friends" }).click();
       await expect(page.locator(".pc").filter({ hasText: `Stu ${run}` }).getByText("Friend", { exact: true })).toBeVisible();
       // The event page lists friends who are going
-      await page.goto(`/events/${eventId}`);
+      await gotoSettled(page, `/events/${eventId}`);
       await expect(page.locator(".eb__chips").getByText(`Stu ${run}`)).toBeVisible();
     });
 
@@ -339,7 +339,7 @@ test.describe.serial("CampusEvents journeys", () => {
       const context = await camBrowser.newContext({ baseURL, viewport, isMobile, hasTouch, deviceScaleFactor, userAgent, permissions: ["camera"] });
       const page = await context.newPage();
       await login(page, organizerEmail);
-      await page.goto(`/scan/${eventId}`);
+      await gotoSettled(page, `/scan/${eventId}`);
       await page.getByRole("button", { name: "Start Scanner" }).click();
       await expect(page.locator(".qr-result.success")).toContainText("Attendance marked successfully", { timeout: 20_000 });
 
@@ -405,7 +405,7 @@ test.describe.serial("CampusEvents journeys", () => {
       await org.getByRole("button", { name: "Follow" }).click();
       await expect(org.getByRole("button", { name: "Following" })).toBeVisible();
       await expect(org).toContainText("1 follower");
-      await page.goto("/friends?tab=following");
+      await gotoSettled(page, "/friends?tab=following");
       await expect(page.locator(".following-list li").first()).toBeVisible();
     });
 
@@ -608,6 +608,46 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("department count on the event page, and the organizer invites past attendees to a new event", async ({ browser, request }) => {
+    const jwt = async (username) => (await (await request.post(`${API}/auth/login`, { data: { username, password: PASSWORD } })).json()).jwt;
+    const auth = (t) => ({ Authorization: `Bearer ${t}` });
+    const when = new Date(Date.now() + 9 * 86400_000).toISOString();
+    const name = `Hack Night ${run}`;
+    const created = await (await request.post(`${API}/event/organizer/create`, { headers: auth(await jwt(organizerEmail)),
+      data: { name, description: "Build things", category: "Workshop", eventField: "CSE", eventDate: when, venue: "Lab 2", maxPeople: 50, costOfRegistration: "0" } })).json();
+    expect((await request.put(`${API}/events/admin/approve/${created.id}`, { headers: auth(await jwt(ADMIN.email)) })).ok()).toBe(true);
+
+    const dept = `Dept ${run}`;
+    const peers = [0, 1, 2, 3].map((i) => `peer${i}.${run}@example.com`);
+    for (const [i, email] of peers.entries()) {
+      await request.post(`${API}/auth/signup`, { data: { username: email, password: PASSWORD, roles: ["STUDENT"] } });
+      const reg = await request.post(`${API}/event/${created.id}/register`, { headers: auth(await jwt(email)),
+        data: { name: `Peer ${i}`, email, phone: `98765000${10 + i}`, department: dept, yearOfStudy: "2" } });
+      expect(reg.status()).toBe(201);
+    }
+    await asUser(browser, peers[0], PASSWORD, async (page) => {
+      await gotoSettled(page, `/events/${created.id}`);
+      await expect(page.locator(".dept-going")).toHaveText(`3 from ${dept} are going`);
+    });
+
+    // An earlier journey turned off the student's "new events" notifications; invites respect that, so turn it back on
+    const stu = auth(await jwt(studentEmail));
+    const prefs = await (await request.get(`${API}/social/notification-settings`, { headers: stu })).json();
+    expect((await request.put(`${API}/social/notification-settings`, { headers: stu, data: { ...prefs, newEvents: true } })).ok()).toBe(true);
+
+    await asUser(browser, organizerEmail, PASSWORD, async (page) => {
+      await gotoSettled(page, `/dashboard/manage-event/${created.id}`);
+      const bar = page.locator(".invite-bar");
+      await expect(bar).toContainText("1 student checked in at your earlier events");
+      await bar.getByRole("button", { name: "Invite past attendees" }).click();
+      await expect(bar.getByRole("status")).toContainText("Invites sent to 1 past attendee");
+    });
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await page.locator("button[title=Notifications]").click();
+      await expect(page.getByText(`invites you to ${name}`).first()).toBeVisible();
+    });
+  });
+
   test("calendar subscription: the feed lists the student's events, and resetting the link revokes the old one", async ({ browser, request }) => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
       await gotoSettled(page, "/settings");
@@ -660,7 +700,7 @@ test.describe.serial("CampusEvents journeys", () => {
       await page.waitForURL("**/login"); // the app only leaves once the session is revoked
       await page.waitForLoadState("load");
       // The route guard redirects straight to /login, so only wait for the navigation to start
-      await page.goto("/dashboard", { waitUntil: "commit" });
+      await gotoSettled(page, "/dashboard", { waitUntil: "commit" });
       await expect(page).toHaveURL(/\/login$/);
 
       // The browser still holds no usable refresh cookie: the server revoked it

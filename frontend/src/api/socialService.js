@@ -56,3 +56,6 @@ export const getPublicPortfolio = (slug) => data(api.get(`/public/portfolio/${en
 export const getSemesterGoal = () => data(api.get("/social/goal"));
 export const setSemesterGoal = (target) => data(api.put("/social/goal", { target }));
 export const clearSemesterGoal = () => data(api.delete("/social/goal"));
+export const getDepartmentGoing = (eventId) => data(api.get(`/social/events/${eventId}/department-going`));
+export const getInviteStatus = (eventId) => data(api.get(`/social/events/${eventId}/invite-past-attendees`));
+export const invitePastAttendees = (eventId) => data(api.post(`/social/events/${eventId}/invite-past-attendees`));

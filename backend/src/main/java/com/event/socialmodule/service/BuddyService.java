@@ -108,6 +108,19 @@ public class BuddyService {
 
     // ---------- event buddies ----------
 
+    /** Fewer than this many are never shown, so a count can't point at a particular student. */
+    static final int MIN_DEPARTMENT_COUNT = 3;
+
+    public record DepartmentGoing(String department, long count) {}
+
+    /** "12 from CSE are going": a count of other registered students from the viewer's department, or none. */
+    @Transactional(readOnly = true)
+    public Optional<DepartmentGoing> departmentGoing(Long me, Long eventId) {
+        Optional<String> department = profileApi.department(me).or(() -> eventApi.lastRegistrationDepartment(me));
+        return department.map(d -> new DepartmentGoing(d, eventApi.registeredFromDepartment(eventId, d, me)))
+                .filter(g -> g.count() >= MIN_DEPARTMENT_COUNT);
+    }
+
     @Transactional(readOnly = true)
     public EventBuddies eventBuddies(Long me, Long eventId) {
         boolean registered = eventApi.isRegistered(me, eventId);
