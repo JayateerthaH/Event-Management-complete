@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import Navbar from "../../../components/Navbar";
 import InvitePastAttendees from "../../../components/social/InvitePastAttendees";
+import EventRecap from "../../../components/social/EventRecap";
 import {
   fetchAboutEvent,
   fetchEventById,
@@ -1450,6 +1451,7 @@ export default function EventManagePage() {
       </header>
 
       <InvitePastAttendees eventId={eventId} />
+      <EventRecap eventId={eventId} />
 
       {/* ── Tab navigation ── */}
       <nav className="em-tabs">

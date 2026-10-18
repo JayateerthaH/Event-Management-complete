@@ -75,6 +75,9 @@ public interface EventApi {
     /** Checked-in events per student for events dated in [from, to), for campus-wide comparisons (counts only). */
     Map<Long, Long> attendedCountsBetween(java.util.Date from, java.util.Date to);
 
+    /** Students checked in (QR-scanned) at the event. */
+    long checkedInCount(Long eventId);
+
     /** Whether the user has registered for the event. */
     boolean isRegistered(Long userId, Long eventId);
 

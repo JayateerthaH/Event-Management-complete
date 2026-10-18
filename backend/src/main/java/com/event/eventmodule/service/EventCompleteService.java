@@ -18,6 +18,7 @@ public class EventCompleteService {
     private final RegisterRepository registerRepository;
     private final EventsRepository eventsRepository;
     private final AsyncService asyncService;
+    private final org.springframework.context.ApplicationEventPublisher events;
 
     public List<Long> findAllStudents(Long id) {
         return registerRepository.findUserIdsByEventIdAndIsAttendedTrue(id);
@@ -46,6 +47,8 @@ public class EventCompleteService {
 
         event.setIsCompleted(true);
         asyncService.sendUpdateAsync(basicUpdateDto);
+        // Attendees get a thank-you with feedback, certificate and follow links (social module), after commit
+        events.publishEvent(new com.event.sharedmodule.EventCompletedEvent(eventId, event.getName(), basicUpdateDto.getStudentIds()));
     }
 
     private long durationInHours(Events event) {

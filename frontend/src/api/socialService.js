@@ -61,3 +61,4 @@ export const getInviteStatus = (eventId) => data(api.get(`/social/events/${event
 export const invitePastAttendees = (eventId) => data(api.post(`/social/events/${eventId}/invite-past-attendees`));
 export const getWrapped = (semester) => data(api.get("/social/wrapped", { params: semester ? { semester } : {} }));
 export const wrappedShared = () => api.post("/social/wrapped/shared");
+export const getEventRecap = (eventId) => data(api.get(`/social/events/${eventId}/recap`));

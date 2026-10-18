@@ -190,6 +190,11 @@ public class EventApiImpl implements EventApi {
     }
 
     @Override
+    public long checkedInCount(Long eventId) {
+        return registerRepository.findUserIdsByEventIdAndIsAttendedTrue(eventId).stream().distinct().count();
+    }
+
+    @Override
     public boolean isRegistered(Long userId, Long eventId) {
         return userId != null && eventId != null && userRegistrationRepository.existsByUserIdAndEventId(userId, eventId);
     }

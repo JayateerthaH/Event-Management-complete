@@ -191,3 +191,13 @@
 .invite-bar p { margin: 0; }
 .invite-bar b { color: #f8fafc; }
 @media (max-width: 600px) { .invite-bar { margin: 0.75rem 1rem 0; } .invite-bar .pc-btn { width: 100%; } }
+
+/* Manage event: post-event recap */
+.recap-bar { max-width: 1200px; margin: 0.75rem auto 0; padding: 0.9rem 1rem; border-radius: 12px; color: #cbd5e1;
+  background: rgba(34, 197, 94, 0.06); border: 1px solid rgba(34, 197, 94, 0.25); display: grid; gap: 0.6rem; }
+.recap-bar h2 { margin: 0; font-size: 1rem; color: #f1f5f9; }
+.recap-bar dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.6rem; }
+.recap-bar dl div { display: flex; flex-direction: column-reverse; gap: 0.1rem; }
+.recap-bar dt { color: #94a3b8; font-size: 0.8rem; }
+.recap-bar dd { margin: 0; color: #f8fafc; font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .recap-bar { margin: 0.75rem 1rem 0; } }

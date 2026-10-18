@@ -18,9 +18,11 @@ const BUDDY_TITLES = {
   BUDDY_REQUEST: "New friend request",
   BUDDY_ACCEPTED: "Request accepted",
   FRIEND_GOING: "Your friend is going",
-  ACHIEVEMENT: "New badge earned",
+  ACHIEVEMENT: "Nice work",
   NEW_EVENT: "New event",
   DIGEST: "Your week on campus",
+  SEAT_OPENED: "You got a seat",
+  EVENT_RECAP: "Thanks for coming",
 };
 
 const timeAgo = (dateStr) => {
