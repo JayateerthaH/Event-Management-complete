@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { downloadIcs } from "../../utils/calendar";
 import ResendQrButton from "../ResendQrButton";
 import SaveButton from "../engagement/SaveButton";
@@ -29,6 +29,18 @@ export default function SidebarCard({ event, details, onRegister, onJoinWaitlist
     }, 15000);
     return () => clearInterval(intervalRef.current);
   }, [refetchEvent]);
+
+  // Phones: the card sits below the event content, so a slim bar at the bottom carries the main action.
+  // It hides while the card itself is on screen.
+  const cardRef = useRef(null);
+  const [cardInView, setCardInView] = useState(false);
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([entry]) => setCardInView(entry.isIntersecting), { threshold: 0.15 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [event == null]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!event) return null;
 
@@ -62,8 +74,8 @@ export default function SidebarCard({ event, details, onRegister, onJoinWaitlist
   const isRegistered = event.isRegistered === true;
 
   return (
-    <aside className="ed-sidebar">
-      <div className="ed-sidebar__card">
+    <aside className="ed-sidebar" id="event-actions">
+      <div className="ed-sidebar__card" ref={cardRef}>
         {/* ── Price Header ── */}
         <div className="ed-sidebar__price-section">
           <span className="ed-sidebar__price">
@@ -335,6 +347,36 @@ export default function SidebarCard({ event, details, onRegister, onJoinWaitlist
           </div>
         </div>
       </div>
+      {!isStarted && (
+        <div className={`ed-mobilebar ${cardInView ? "is-hidden" : ""}`} aria-hidden={cardInView}>
+          {isRegistered ? (
+            <>
+              <span className="ed-mobilebar__label ed-mobilebar__label--ok">✓ You're registered</span>
+              <button type="button" className="ed-mobilebar__btn ed-mobilebar__btn--ghost" tabIndex={cardInView ? -1 : 0}
+                onClick={() => cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+                My ticket
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="ed-mobilebar__label">
+                <b>{isFree ? "FREE" : `₹${cost}`}</b>
+                {spotsLeft !== null && <small>{isFull ? "Full" : `${spotsLeft.toLocaleString()} spots left`}</small>}
+              </span>
+              {isFull ? (
+                <button type="button" className="ed-mobilebar__btn" tabIndex={cardInView ? -1 : 0}
+                  onClick={() => cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+                  Waitlist
+                </button>
+              ) : (
+                <button type="button" className="ed-mobilebar__btn" tabIndex={cardInView ? -1 : 0} onClick={onRegister}>
+                  Register
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </aside>
   );
 }

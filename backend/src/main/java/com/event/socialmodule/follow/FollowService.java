@@ -3,6 +3,7 @@ package com.event.socialmodule.follow;
 import com.event.authmodule.communication.OrganizerDirectory;
 import com.event.eventmodule.api.EventApi;
 import com.event.eventmodule.api.EventCard;
+import com.event.profilemodule.communication.ProfileApi;
 import com.event.sharedmodule.UserActivityEvent;
 import com.event.socialmodule.entity.BuddyNotification;
 import com.event.socialmodule.repository.BuddyNotificationRepository;
@@ -30,6 +31,7 @@ public class FollowService {
     private final BuddyNotificationRepository notificationRepository;
     private final NotificationPrefsService prefs;
     private final ApplicationEventPublisher activityPublisher;
+    private final ProfileApi profileApi;
 
     public record OrganizerView(Long organizerId, String name, long followers, boolean following,
                                 int upcomingCount, List<EventCard> upcoming) {}
@@ -72,7 +74,8 @@ public class FollowService {
         if (organizerId == null) return;
         String event = eventApi.eventProfile(eventId).map(p -> p.card().name()).orElse(null);
         if (event == null) return;
-        String message = "New from " + nameOf(organizerId) + ": " + event;
+        String name = nameOf(organizerId);
+        String message = name != null ? "New from " + name + ": " + event : "New event: " + event;
         if (message.length() > 255) message = message.substring(0, 252) + "...";
         for (OrganizerFollow f : followRepository.findByOrganizerId(organizerId)) {
             if (prefs.allows(f.getFollowerId(), BuddyNotification.Type.NEW_EVENT)) {
@@ -89,11 +92,13 @@ public class FollowService {
                 withEvents ? upcoming.stream().limit(3).toList() : List.of());
     }
 
-    /** The club named on their events ("Organized by"), else the organizer account's name. */
+    /** The club named on their events ("Organized by"), else the organizer account's or profile's name; null when none is set (never the id). */
     private String nameOf(Long organizerId) {
         return eventApi.latestOrganizedBy(organizerId)
                 .or(() -> java.util.Optional.ofNullable(organizerDirectory.names(List.of(organizerId)).get(organizerId)))
-                .orElse("Organizer #" + organizerId);
+                .or(() -> java.util.Optional.ofNullable(profileApi.publicProfiles(List.of(organizerId)).get(organizerId))
+                        .map(ProfileApi.PublicProfile::name).filter(n -> !n.isBlank()))
+                .orElse(null);
     }
 
     private static ResponseStatusException bad(String message) {

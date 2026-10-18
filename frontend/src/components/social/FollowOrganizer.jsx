@@ -26,10 +26,10 @@ export default function FollowOrganizer({ eventId }) {
 
   return (
     <section className="follow-org" aria-label="Organizer">
-      <div className="follow-org__avatar" aria-hidden="true">{org.name.charAt(0).toUpperCase()}</div>
+      {org.name && <div className="follow-org__avatar" aria-hidden="true">{org.name.charAt(0).toUpperCase()}</div>}
       <div className="follow-org__body">
-        <span className="eb__label">Organized by</span>
-        <p className="follow-org__name">{org.name}</p>
+        <span className="eb__label">{org.name ? "Organized by" : "Organizer"}</span>
+        {org.name && <p className="follow-org__name">{org.name}</p>}
         <p className="follow-org__meta">
           {org.followers} follower{org.followers === 1 ? "" : "s"} · {org.upcomingCount} upcoming event{org.upcomingCount === 1 ? "" : "s"}
         </p>

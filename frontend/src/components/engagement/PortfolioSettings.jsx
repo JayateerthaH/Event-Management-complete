@@ -53,7 +53,7 @@ export default function PortfolioSettings() {
             {stats.events} {stats.events === 1 ? "event" : "events"} · {stats.certificates} {stats.certificates === 1 ? "certificate" : "certificates"} · {stats.badges} {stats.badges === 1 ? "badge" : "badges"}
           </p>
           <label className="social-check" htmlFor="portfolio-published">
-            <input id="portfolio-published" type="checkbox" checked={mine.published}
+            <input id="portfolio-published" type="checkbox" role="switch" checked={mine.published}
               onChange={(e) => togglePublished(e.target.checked)} />
             <span>
               <b>Make my portfolio public</b><br />

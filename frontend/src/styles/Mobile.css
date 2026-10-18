@@ -36,7 +36,7 @@
   }
 
   /* !important: page styles (e.g. the login "Remember me" box) size these more specifically */
-  :root input[type="checkbox"],
+  :root input[type="checkbox"]:not([role="switch"]),
   :root input[type="radio"] {
     width: 20px !important;
     height: 20px !important;

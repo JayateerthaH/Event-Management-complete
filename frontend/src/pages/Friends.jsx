@@ -303,8 +303,7 @@ function FollowingTab() {
         <li key={o.organizerId}>
           <div className="following-list__head">
             <div>
-              <b>{o.name}</b>
-              <br />
+              {o.name && <><b>{o.name}</b><br /></>}
               <span>{o.followers} follower{o.followers === 1 ? "" : "s"} · {o.upcomingCount} upcoming</span>
             </div>
             <button type="button" className="pc-btn pc-btn--ghost"
