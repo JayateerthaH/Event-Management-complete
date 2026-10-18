@@ -62,3 +62,5 @@ export const invitePastAttendees = (eventId) => data(api.post(`/social/events/${
 export const getWrapped = (semester) => data(api.get("/social/wrapped", { params: semester ? { semester } : {} }));
 export const wrappedShared = () => api.post("/social/wrapped/shared");
 export const getEventRecap = (eventId) => data(api.get(`/social/events/${eventId}/recap`));
+export const getDepartmentLeaderboard = () => data(api.get("/social/leaderboard/departments"));
+export const getSocialProof = (eventId) => data(api.get(`/events/${eventId}/social-proof`));

@@ -84,6 +84,23 @@ public interface EventApi {
     /** Upcoming open events with the most saves this week, then registrations: "Trending this week". */
     List<EventCard> trendingEvents(int limit);
 
+    /** How many students saved ("Interested") the event. */
+    long savesCount(Long eventId);
+
+    /** The organizer's average rating across all their events and how many ratings it's from, if any. */
+    record Rating(double average, long count) {}
+
+    Optional<Rating> organizerRating(Long organizerId);
+
+    /** Check-ins per department for events dated in [from, to), most first (department label, count). */
+    java.util.LinkedHashMap<String, Long> checkInsByDepartment(java.util.Date from, java.util.Date to);
+
+    /** A student checked in at an event; for follow-ups such as asking for feedback. */
+    record CheckIn(Long userId, Long eventId, String eventName) {}
+
+    /** Check-ins at events dated in [from, to) where the student hasn't given feedback yet. */
+    List<CheckIn> checkInsWithoutFeedback(java.util.Date from, java.util.Date to);
+
     /** Whether the user has registered for the event. */
     boolean isRegistered(Long userId, Long eventId);
 

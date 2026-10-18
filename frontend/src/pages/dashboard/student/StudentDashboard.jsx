@@ -26,6 +26,7 @@ import PlanMyWeek from "../../../components/ai/PlanMyWeek";
 import PushNudge from "../../../components/engagement/PushNudge";
 import TicketSoon from "../../../components/engagement/TicketSoon";
 import TrendingEvents from "../../../components/engagement/TrendingEvents";
+import DepartmentLeaderboard from "../../../components/engagement/DepartmentLeaderboard";
 import {
   BarChart,
   Bar,
@@ -344,7 +345,11 @@ const formatDateReadable = (dateStr) => {
 export default function StudentDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
+  // ?tab=feedback etc. opens a tab directly (links from notifications)
+  const [activeTab, setActiveTab] = useState(() => {
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    return SIDEBAR_TABS.some((t) => t.key === tab) ? tab : "overview";
+  });
   const [badgeCount, setBadgeCount] = useState(null);
   const handleBadgeSummary = useCallback((s) => setBadgeCount(s.earned), []);
   const [userInfo, setUserInfo] = useState(null);
@@ -608,6 +613,7 @@ export default function StudentDashboard() {
             <SavedEvents />
             <SemesterGoal />
             <Achievements onSummary={handleBadgeSummary} />
+            <DepartmentLeaderboard />
 
             {/* Upcoming Registered Events */}
             <section className="sd-card">

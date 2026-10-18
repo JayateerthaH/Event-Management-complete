@@ -138,3 +138,16 @@
 .ticket-soon__row p { margin: 0; flex: 1; min-width: 0; line-height: 1.4; overflow-wrap: anywhere; }
 .ticket-soon__row p span { color: #a7f3d0; font-size: 0.9rem; }
 @media (max-width: 600px) { .ticket-soon__row { flex-wrap: wrap; } .ticket-soon__row .pc-btn { width: 100%; text-align: center; } }
+
+/* Department leaderboard (dashboard) */
+.dept-board__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.dept-board__list li { display: grid; grid-template-columns: 1.6rem minmax(0, 1.3fr) minmax(60px, 1fr) auto; gap: 0.6rem; align-items: center;
+  padding: 0.45rem 0.6rem; border-radius: 10px; color: #e2e8f0; }
+.dept-board__list li.is-mine { background: rgba(139, 92, 246, 0.14); border: 1px solid rgba(139, 92, 246, 0.35); }
+.dept-board__rank { font-weight: 800; color: #fbbf24; text-align: center; }
+.dept-board__name { min-width: 0; overflow-wrap: anywhere; }
+.dept-board__name small { color: #c4b5fd; }
+.dept-board__bar { height: 8px; border-radius: 999px; background: rgba(148, 163, 184, 0.15); overflow: hidden; }
+.dept-board__bar span { display: block; height: 100%; background: linear-gradient(90deg, #8b5cf6, #22c55e); }
+.dept-board__list b { color: #f8fafc; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .dept-board__list li { grid-template-columns: 1.4rem minmax(0, 1fr) auto; } .dept-board__bar { display: none; } }

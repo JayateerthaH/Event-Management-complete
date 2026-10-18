@@ -211,6 +211,34 @@ public class EventApiImpl implements EventApi {
     }
 
     @Override
+    public long savesCount(Long eventId) {
+        return savedEventRepository.countByEventId(eventId);
+    }
+
+    @Override
+    public Optional<Rating> organizerRating(Long organizerId) {
+        if (organizerId == null) return Optional.empty();
+        return feedBackRepository.ratingForOrganizer(organizerId).stream().findFirst()
+                .filter(row -> row[0] != null && ((Number) row[1]).longValue() > 0)
+                .map(row -> new Rating(((Number) row[0]).doubleValue(), ((Number) row[1]).longValue()));
+    }
+
+    @Override
+    public LinkedHashMap<String, Long> checkInsByDepartment(Date from, Date to) {
+        LinkedHashMap<String, Long> out = new LinkedHashMap<>();
+        for (Object[] row : registerRepository.checkInsByDepartment(from, to)) out.put((String) row[0], ((Number) row[1]).longValue());
+        return out;
+    }
+
+    @Override
+    public List<CheckIn> checkInsWithoutFeedback(Date from, Date to) {
+        return registerRepository.checkInsBetween(from, to).stream()
+                .map(row -> new CheckIn((Long) row[0], (Long) row[1], (String) row[2]))
+                .filter(c -> !feedBackRepository.existsByUserIdAndEventId(c.userId(), c.eventId()))
+                .toList();
+    }
+
+    @Override
     public boolean isRegistered(Long userId, Long eventId) {
         return userId != null && eventId != null && userRegistrationRepository.existsByUserIdAndEventId(userId, eventId);
     }

@@ -56,6 +56,24 @@ public interface RegisterRepository extends JpaRepository<Register, Long> {
     """)
     List<Object[]> attendedCountsBetween(@Param("from") java.util.Date from, @Param("to") java.util.Date to);
 
+    /** Rows: [department label, check-ins] for events dated in [from, to), grouped ignoring case and spaces ("Computer Science" = "ComputerScience"). */
+    @Query("""
+        SELECT MIN(TRIM(r.department)), COUNT(r) FROM Register r
+        WHERE r.isAttended = true AND r.department IS NOT NULL AND TRIM(r.department) <> ''
+          AND r.eventsDto.eventDate >= :from AND r.eventsDto.eventDate < :to
+        GROUP BY LOWER(REPLACE(r.department, ' ', ''))
+        ORDER BY COUNT(r) DESC
+    """)
+    List<Object[]> checkInsByDepartment(@Param("from") java.util.Date from, @Param("to") java.util.Date to);
+
+    /** Check-ins at events dated in [from, to): rows are [userId, eventId, eventName]. */
+    @Query("""
+        SELECT DISTINCT r.userId, r.eventsDto.id, r.eventsDto.name FROM Register r
+        WHERE r.isAttended = true AND r.userId IS NOT NULL
+          AND r.eventsDto.eventDate >= :from AND r.eventsDto.eventDate < :to
+    """)
+    List<Object[]> checkInsBetween(@Param("from") java.util.Date from, @Param("to") java.util.Date to);
+
     @Query("SELECT r.department FROM Register r WHERE r.userId = :userId AND r.department IS NOT NULL ORDER BY r.id DESC")
     List<String> departmentsUsedBy(@Param("userId") Long userId, org.springframework.data.domain.Pageable page);
 

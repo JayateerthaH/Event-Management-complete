@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,6 +30,18 @@ public class SavedEventController {
     @GetMapping("/saved")
     public List<EventCard> saved(@RequestAttribute("userId") String userId) {
         return eventApi.savedEvents(Long.valueOf(userId));
+    }
+
+    public record SocialProof(long interested, long going, Double organizerRating, long organizerRatings) {}
+
+    /** Public: "23 interested · organizer rated 4.6 from 40 reviews" for the event page. */
+    @GetMapping("/{eventId:\\d+}/social-proof")
+    public SocialProof socialProof(@PathVariable Long eventId) {
+        var event = eventApi.eventProfile(eventId).filter(p -> p.approved())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        var rating = eventApi.organizerOf(eventId).flatMap(eventApi::organizerRating);
+        return new SocialProof(eventApi.savesCount(eventId), event.card().registeredCount(),
+                rating.map(r -> Math.round(r.average() * 10) / 10.0).orElse(null), rating.map(EventApi.Rating::count).orElse(0L));
     }
 
     /** Public: upcoming events people are saving and registering for this week. */

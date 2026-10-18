@@ -25,6 +25,7 @@ const BUDDY_TITLES = {
   EVENT_RECAP: "Thanks for coming",
   SAVED_SOON: "Tomorrow: an event you saved",
   ALMOST_FULL: "Almost full",
+  FEEDBACK_ASK: "How was it?",
 };
 
 const timeAgo = (dateStr) => {
@@ -95,10 +96,11 @@ export default function Navbar() {
       const buddies = (Array.isArray(buddyData) ? buddyData : []).map((n) => ({
         key: `b-${n.id}`, title: BUDDY_TITLES[n.type] || "Friends", message: n.message, createdAt: n.createdAt,
         unread: !n.read,
-        to: n.type === "FRIEND_GOING" && n.eventId ? `/events/${n.eventId}`
+        to: n.type === "FEEDBACK_ASK" ? "/dashboard?tab=feedback"
           : n.type === "BUDDY_REQUEST" ? "/friends?tab=requests"
-          : n.type === "ACHIEVEMENT" || n.type === "DIGEST" ? "/dashboard"
-          : n.type === "NEW_EVENT" && n.eventId ? `/events/${n.eventId}` : "/friends",
+          : n.type === "BUDDY_ACCEPTED" ? "/friends"
+          : n.eventId ? `/events/${n.eventId}`
+          : n.type === "ACHIEVEMENT" || n.type === "DIGEST" ? "/dashboard" : "/friends",
       }));
       setNotifications(
         [...buddies, ...announcements].sort((x, y) => new Date(y.createdAt || 0) - new Date(x.createdAt || 0)),

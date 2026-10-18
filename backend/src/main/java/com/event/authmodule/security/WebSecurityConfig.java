@@ -52,7 +52,7 @@ public class WebSecurityConfig {
                                         "/events/{eventId:\\d+}/about", "/events/{eventId:\\d+}/details",
                                         "/events/{eventId:\\d+}/schedule", "/events/{eventId:\\d+}/faqs",
                                         "/events/{eventId:\\d+}/highlights", "/events/{eventId:\\d+}/speakers",
-                                        "/events/{eventId:\\d+}/whatToBring",
+                                        "/events/{eventId:\\d+}/whatToBring", "/events/{eventId:\\d+}/social-proof",
                                         "/event/images/{eventId:\\d+}", "/images/**",
                                         "/ai/events/{eventId:\\d+}/similar").permitAll()   // no LLM, approved events only
                                 .requestMatchers(HttpMethod.POST, "/events/filter").permitAll()   // approved events only

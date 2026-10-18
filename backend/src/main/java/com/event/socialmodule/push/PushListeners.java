@@ -28,7 +28,7 @@ public class PushListeners {
     static boolean urgent(BuddyNotification.Type type) {
         return switch (type) {
             case BUDDY_REQUEST, BUDDY_ACCEPTED, SEAT_OPENED, ALMOST_FULL -> true;
-            case FRIEND_GOING, ACHIEVEMENT, NEW_EVENT, DIGEST, EVENT_RECAP, SAVED_SOON -> false;
+            case FRIEND_GOING, ACHIEVEMENT, NEW_EVENT, DIGEST, EVENT_RECAP, SAVED_SOON, FEEDBACK_ASK -> false;
         };
     }
 
@@ -44,8 +44,10 @@ public class PushListeners {
             case EVENT_RECAP -> "Thanks for coming";
             case SAVED_SOON -> "Tomorrow: an event you saved";
             case ALMOST_FULL -> "Almost full";
+            case FEEDBACK_ASK -> "How was it?";
         };
-        String url = n.eventId() != null ? "/events/" + n.eventId()
+        String url = n.type() == BuddyNotification.Type.FEEDBACK_ASK ? "/dashboard?tab=feedback"
+                : n.eventId() != null ? "/events/" + n.eventId()
                 : switch (n.type()) {
                     case BUDDY_REQUEST -> "/friends?tab=requests";
                     case BUDDY_ACCEPTED -> "/friends";

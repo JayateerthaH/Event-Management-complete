@@ -12,6 +12,12 @@ public interface FeedBackRepository extends JpaRepository<FeedBack, Long> {
     long countByUserId(Long userId);
 
     boolean existsByUserIdAndEventId(Long userId, Long eventId);
+
+    /** [average stars, number of ratings] across all of an organizer's events. */
+    @org.springframework.data.jpa.repository.Query("""
+        select avg(f.noOfStars), count(f) from FeedBack f, com.event.eventmodule.entity.Events e
+        where e.id = f.eventId and e.organizerId = :organizerId and f.noOfStars > 0""")
+    List<Object[]> ratingForOrganizer(@org.springframework.data.repository.query.Param("organizerId") Long organizerId);
     
     void deleteAllByEventId(Long eventId);
 }
