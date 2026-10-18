@@ -10,10 +10,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class EngagementController {
 
     private final EngagementService engagementService;
+    private final HealthMetricsService healthMetricsService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/engagement")
     public EngagementService.Engagement engagement() {
         return engagementService.engagement();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/engagement/health")
+    public HealthMetricsService.Health health() {
+        return healthMetricsService.health();
     }
 }

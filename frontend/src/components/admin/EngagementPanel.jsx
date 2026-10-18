@@ -5,8 +5,14 @@ const LABELS = {
   active: "Active days", login: "Logins", signup: "Signups", event_registered: "Registrations",
   attended: "Check-ins", event_saved: "Events saved", interests_picked: "Interests picked",
   buddy_opt_in: "Buddy opt-ins", buddy_request: "Buddy requests", buddy_accepted: "Buddies accepted",
-  event_duplicated: "Events duplicated",
+  event_duplicated: "Events duplicated", event_shared: "Events shared", organizer_followed: "Organizers followed",
+  waitlist_joined: "Waitlist joins", seat_released: "Seats released", portfolio_published: "Portfolios published",
+  goal_set: "Semester goals set", wrapped_viewed: "Wrapped views", wrapped_shared: "Wrapped shares",
+  push_enabled: "Phone notifications on", push_disabled: "Phone notifications off",
 };
+const mins = (m) => (m == null ? "—" : m < 1 ? "< 1 min" : m < 120 ? `${Math.round(m)} min` : `${Math.round(m / 60)} h`);
+const num = (v) => (v == null ? "—" : v.toFixed(v < 10 ? 2 : 0));
+const OPT_OUT = { friend_requests: "Friend requests", friend_going: "Friend is going", new_events: "New events", badges: "Badges", weekly_digest: "Weekly digest" };
 const pct = (v) => (v == null ? "—" : `${Math.round(v * 100)}%`);
 
 /** Admin Analytics: weekly/monthly active users, week-1 retention and what people do. */
@@ -30,8 +36,11 @@ export default function EngagementPanel() {
     }
   };
 
+  const [health, setHealth] = useState(null);
+
   useEffect(() => {
     api.get("/admin/engagement").then((r) => setData(r.data)).catch((e) => setError(apiErrorMessage(e)));
+    api.get("/admin/engagement/health").then((r) => setHealth(r.data)).catch(() => setHealth(null));
   }, []);
 
   if (error) return <section className="admin-card"><h2 className="admin-card__title">Engagement</h2><p className="admin-empty">{error}</p></section>;
@@ -93,6 +102,37 @@ export default function EngagementPanel() {
         </button>
       </div>
       {digest && <p className="engagement__since" role="status">{digest}</p>}
+
+      {health && (
+        <>
+          <h3 className="engagement__h3">Retention and health</h3>
+          <div className="engagement__tiles">
+            {[["Day 1", health.day1], ["Day 7", health.day7], ["Day 30", health.day30]].map(([label, r]) => (
+              <div key={label}>
+                <span className="engagement__value">{pct(r.rate)}</span>
+                <span className="engagement__label">{label} retention{r.cohort ? ` (of ${r.cohort})` : " (not enough signups yet)"}</span>
+              </div>
+            ))}
+            <div><span className="engagement__value">{mins(health.medianMinutesToFirstRegistration)}</span><span className="engagement__label">Signup to first registration (median, target under 2 min)</span></div>
+            <div><span className="engagement__value">{pct(health.firstHourRegistrationShare)}</span><span className="engagement__label">Register within an hour of signing up</span></div>
+            <div><span className="engagement__value">{pct(health.showUp.rate)}</span><span className="engagement__label">Show-up rate (QR check-ins{health.showUp.cohort ? `, ${health.showUp.cohort} events` : ""}); no-shows {health.showUp.rate == null ? "—" : pct(1 - health.showUp.rate)}</span></div>
+            <div><span className="engagement__value">{pct(health.feedbackRate)}</span><span className="engagement__label">Attendees who gave feedback</span></div>
+            <div><span className="engagement__value">{pct(health.organizerRepeat.rate)}</span><span className="engagement__label">Organizers with another event within 30 days{health.organizerRepeat.cohort ? ` (of ${health.organizerRepeat.cohort})` : ""}</span></div>
+          </div>
+          <ul className="engagement__counts">
+            <li><span>Follows per active user</span><b>{num(health.followsPerStudent)}</b></li>
+            <li><span>Shares per recent event</span><b>{num(health.sharesPerEvent)}</b></li>
+            <li><span>Public portfolios</span><b>{health.portfoliosPublished}</b></li>
+            <li><span>Semester goals set</span><b>{health.goalsSet}</b></li>
+            <li><span>Devices with phone notifications</span><b>{health.pushDevices}</b></li>
+            <li><span>Phone notifications turned on / off (30 days)</span><b>{health.pushTurnedOn30} / {health.pushTurnedOff30}</b></li>
+            {Object.entries(health.notificationsTurnedOff).map(([k, n]) => (
+              <li key={k}><span>Turned off: {OPT_OUT[k] || k}</span><b>{n}</b></li>
+            ))}
+          </ul>
+          <p className="engagement__since">A rising number of people turning notifications off is the warning sign of too many messages.</p>
+        </>
+      )}
 
       <h3 className="engagement__h3">What people did, last 30 days</h3>
       {counts.length === 0 ? <p className="admin-empty">No activity yet.</p> : (

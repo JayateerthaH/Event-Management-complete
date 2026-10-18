@@ -17,6 +17,7 @@ public class PushController {
 
     private final PushService pushService;
     private final PushSubscriptionRepository subscriptions;
+    private final org.springframework.context.ApplicationEventPublisher activity;
 
     public record Keys(String p256dh, String auth) {}
 
@@ -50,7 +51,10 @@ public class PushController {
         s.setEndpoint(body.endpoint());
         s.setP256dh(body.keys().p256dh());
         s.setAuth(body.keys().auth());
-        if (s.getCreatedAt() == null) s.setCreatedAt(LocalDateTime.now());
+        if (s.getCreatedAt() == null) {
+            s.setCreatedAt(LocalDateTime.now());
+            activity.publishEvent(new com.event.sharedmodule.UserActivityEvent(Long.valueOf(userId), "push_enabled", null));
+        }
         subscriptions.save(s);
         return ResponseEntity.noContent().build();
     }
@@ -59,7 +63,10 @@ public class PushController {
     @Transactional
     public ResponseEntity<Void> unsubscribe(@RequestAttribute("userId") String userId, @RequestBody EndpointBody body) {
         if (body != null && body.endpoint() != null) {
-            subscriptions.findByEndpoint(body.endpoint()).filter(s -> s.getUserId().equals(Long.valueOf(userId))).ifPresent(subscriptions::delete);
+            subscriptions.findByEndpoint(body.endpoint()).filter(s -> s.getUserId().equals(Long.valueOf(userId))).ifPresent(s -> {
+                subscriptions.delete(s);
+                activity.publishEvent(new com.event.sharedmodule.UserActivityEvent(Long.valueOf(userId), "push_disabled", null));
+            });
         }
         return ResponseEntity.noContent().build();
     }
