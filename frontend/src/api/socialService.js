@@ -52,3 +52,7 @@ export const getMyPortfolio = () => data(api.get("/social/portfolio"));
 export const setPortfolioPublished = (published) => data(api.put("/social/portfolio", { published }));
 export const resetPortfolioLink = () => data(api.post("/social/portfolio/reset"));
 export const getPublicPortfolio = (slug) => data(api.get(`/public/portfolio/${encodeURIComponent(slug)}`));
+
+export const getSemesterGoal = () => data(api.get("/social/goal"));
+export const setSemesterGoal = (target) => data(api.put("/social/goal", { target }));
+export const clearSemesterGoal = () => data(api.delete("/social/goal"));

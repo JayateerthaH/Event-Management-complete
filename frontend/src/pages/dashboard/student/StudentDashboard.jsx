@@ -21,6 +21,7 @@ import RecommendedEvents from "../../../components/ai/RecommendedEvents";
 import InterestNudge from "../../../components/engagement/InterestNudge";
 import SavedEvents from "../../../components/engagement/SavedEvents";
 import Achievements from "../../../components/engagement/Achievements";
+import SemesterGoal from "../../../components/engagement/SemesterGoal";
 import {
   BarChart,
   Bar,
@@ -597,6 +598,7 @@ export default function StudentDashboard() {
             <InterestNudge />
             <RecommendedEvents limit={6} />
             <SavedEvents />
+            <SemesterGoal />
             <Achievements onSummary={handleBadgeSummary} />
 
             {/* Upcoming Registered Events */}

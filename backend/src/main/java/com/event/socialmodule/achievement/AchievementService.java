@@ -32,6 +32,7 @@ public class AchievementService {
     private final AchievementEarnedRepository earnedRepository;
     private final BuddyNotificationRepository notificationRepository;
     private final com.event.socialmodule.settings.NotificationPrefsService prefs;
+    private final com.event.socialmodule.goal.GoalService goalService;
     private final Map<Long, Instant> lastChecked = new ConcurrentHashMap<>();
 
     public record AchievementView(String key, String name, String description, int progress, int target,
@@ -59,6 +60,7 @@ public class AchievementService {
         List<AchievementView> views = all.stream().map(a -> new AchievementView(a.key(), a.name(), a.description(),
                 a.progress(), a.target(), a.earned(),
                 a.earned() && recorded.containsKey(a.key()) ? recorded.get(a.key()).getEarnedAt() : null)).toList();
+        goalService.check(userId);   // a check-in that earns a badge may also complete the semester goal
         return new Summary((int) views.stream().filter(AchievementView::earned).count(), views.size(), views);
     }
 

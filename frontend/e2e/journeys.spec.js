@@ -495,10 +495,34 @@ test.describe.serial("CampusEvents journeys", () => {
 
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
       await gotoSettled(page, "/settings#portfolio");
+      // The switch flips at once; wait for the server to save it
+      const saved = page.waitForResponse((r) => r.url().endsWith("/social/portfolio") && r.request().method() === "PUT");
       await page.locator("#portfolio").getByLabel(/Make my portfolio public/).uncheck();
+      expect((await saved).ok()).toBe(true);
       await expect(page.locator("#portfolio-url")).toHaveCount(0);
     });
     expect((await request.get(`${API}/public/portfolio/${slug}`)).status()).toBe(404);
+  });
+
+  test("semester goal: the student sets one, sees progress from the scanned check-in, and reaching it is announced", async ({ browser }) => {
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      const card = page.locator(".goal");
+      await expect(card.getByText("How many events do you want to attend this semester?")).toBeVisible();
+      await card.getByRole("button", { name: "3 events" }).click();
+      await expect(card.locator(".goal__count")).toHaveText("1 of 3 events attended");
+      await expect(card.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "1");
+
+      await card.getByRole("button", { name: "Change goal" }).click();
+      await card.getByLabel("Other number of events").fill("1");
+      await card.getByRole("button", { name: "Set" }).click();
+      await expect(card.getByText("Goal reached")).toBeVisible();
+      await page.locator("button[title=Notifications]").click();
+      await expect(page.getByText("Semester goal reached: you attended 1 event this semester.").first()).toBeVisible();
+      await page.keyboard.press("Escape");
+
+      await card.getByRole("button", { name: "Remove goal" }).click();
+      await expect(card.getByRole("button", { name: "5 events" })).toBeVisible();
+    });
   });
 
   test("organizer sends an announcement and the registered student is notified", async ({ browser }) => {

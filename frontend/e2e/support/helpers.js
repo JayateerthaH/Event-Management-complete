@@ -62,9 +62,10 @@ export async function readQrCode(email, eventId) {
 }
 
 /**
- * page.goto that retries once when WebKit reports the navigation was interrupted by the app's own
- * post-login redirect still settling (seen only on the iPhone project, intermittently; WebKit words it
- * either way).
+ * page.goto that copes with WebKit (iPhone project) reporting a navigation as interrupted. Usually the page
+ * did arrive: React Router's own history.replaceState on load is what WebKit counts as the interruption.
+ * Navigating again in that state can crash Playwright's WebKit (an engine assertion), so only retry when
+ * the page really isn't there.
  */
 export async function gotoSettled(page, url) {
   try {
@@ -72,6 +73,8 @@ export async function gotoSettled(page, url) {
   } catch (e) {
     if (!/interrupted by another navigation|Frame load interrupted/.test(e.message)) throw e;
     await page.waitForLoadState("networkidle");
+    const want = new URL(url, page.url()), at = new URL(page.url());
+    if (at.pathname === want.pathname && at.search === want.search) return;
     await page.goto(url);
   }
 }
