@@ -2417,7 +2417,7 @@ export default function OrganizerDashboard() {
         </aside>
 
         {/* -- Main content -- */}
-        <main className="od-content">{renderContent()}</main>
+        <main className="od-content"><div key={activeTab} className="tab-fade">{renderContent()}</div></main>
       </div>
     </div>
   );

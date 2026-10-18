@@ -431,6 +431,8 @@ test.describe.serial("CampusEvents journeys", () => {
       await expect(page.getByRole("status").filter({ hasText: "Saved" })).toBeVisible();
       await page.reload();
       await expect(page.getByLabel(/New events from organizers you follow/)).not.toBeChecked();
+      // Saved-event reminders have their own switch and stay on
+      await expect(page.getByLabel(/Reminders for saved events/)).toBeChecked();
     });
   });
 

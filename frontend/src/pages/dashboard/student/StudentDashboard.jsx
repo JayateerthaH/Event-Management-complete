@@ -1422,7 +1422,7 @@ export default function StudentDashboard() {
             </button>
           </section>
 
-          {renderContent()}
+          <div key={activeTab} className="tab-fade">{renderContent()}</div>
         </main>
       </div>
 

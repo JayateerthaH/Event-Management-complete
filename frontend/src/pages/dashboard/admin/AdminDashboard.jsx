@@ -1912,7 +1912,7 @@ export default function AdminDashboard() {
               </p>
             </div>
           </section>
-          {renderContent()}
+          <div key={activeTab} className="tab-fade">{renderContent()}</div>
         </main>
       </div>
     </div>

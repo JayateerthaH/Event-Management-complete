@@ -8,9 +8,15 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f3f4f6;
+  background: #0b1020; /* matches the dark pages, so nothing flashes light between them */
 }
 
 #root {
   min-height: 100vh;
 }
+
+/* Page content eases in when a page opens (opacity + small slide; no fill-mode, so fixed modals inside stay put) */
+main, .tab-fade { animation: page-in 0.22s ease-out; }
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } }
+@keyframes page-loader-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { main, .tab-fade { animation: none; } }

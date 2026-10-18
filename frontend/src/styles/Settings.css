@@ -1,0 +1,77 @@
+/* Settings page: section cards, quick-jump chips and toggle switches (checkboxes kept for labels and tests). */
+.settings-wrap { max-width: 720px; gap: 1rem; }
+.settings-page .social-form {
+  max-width: none; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 18px; padding: 1.25rem 1.35rem; gap: 0.85rem; scroll-margin-top: 60px;
+}
+.settings-page .social-form .social-h2 { margin: 0; }
+
+.settings-jump {
+  display: flex; gap: 0.45rem; overflow-x: auto; scrollbar-width: none; position: sticky; top: 0; z-index: 5;
+  padding: 0.5rem 0; background: linear-gradient(#0b1020 70%, rgba(11, 16, 32, 0));
+}
+.settings-jump::-webkit-scrollbar { display: none; }
+.settings-jump a {
+  flex: none; color: #cbd5e1; text-decoration: none; font-size: 0.85rem; font-weight: 600;
+  border: 1px solid rgba(148, 163, 184, 0.22); border-radius: 999px; padding: 0.4rem 0.85rem; min-height: 34px;
+  display: inline-flex; align-items: center; transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.settings-jump a:hover, .settings-jump a:focus-visible { background: rgba(139, 92, 246, 0.16); border-color: #8b5cf6; color: #f5f3ff; }
+
+.settings-title { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.settings-saved {
+  color: #86efac; font-size: 0.82rem; font-weight: 600; opacity: 0; transform: translateY(-2px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.settings-saved.is-on { opacity: 1; transform: none; }
+.settings-saved.is-on::before { content: "✓ "; }
+
+.settings-group { border: none; margin: 0; padding: 0; display: grid; }
+.settings-group legend {
+  color: #8b93a7; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0; margin: 0.35rem 0 0.15rem;
+}
+.settings-group + .settings-group { border-top: 1px solid rgba(148, 163, 184, 0.1); padding-top: 0.35rem; }
+
+/* Rows: text on the left, switch on the right */
+.settings-page .social-check {
+  flex-direction: row-reverse; justify-content: space-between; align-items: center; gap: 1rem;
+  padding: 0.65rem 0; min-height: 44px;
+}
+.settings-page .social-check > span { display: grid; gap: 0.15rem; }
+.settings-page .social-check b { color: #e2e8f0; font-weight: 600; }
+.settings-page .social-check small { color: #8b93a7; font-size: 0.82rem; line-height: 1.4; }
+.settings-page .social-check br { display: none; }
+.settings-page .social-check.is-disabled { opacity: 0.5; cursor: not-allowed; }
+
+.settings-page .social-check input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; position: relative; flex: none; cursor: pointer;
+  width: 44px; height: 26px; margin: 0; border-radius: 999px; background: #334155;
+  border: 1px solid rgba(148, 163, 184, 0.3); transition: background 0.2s, border-color 0.2s;
+}
+.settings-page .social-check input[type="checkbox"]::before {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%;
+  background: #f8fafc; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); transition: transform 0.2s ease;
+}
+.settings-page .social-check input[type="checkbox"]:checked { background: #8b5cf6; border-color: #8b5cf6; }
+.settings-page .social-check input[type="checkbox"]:checked::before { transform: translateX(18px); }
+.settings-page .social-check input[type="checkbox"]:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 2px; }
+.settings-page .social-check input[type="checkbox"]:disabled { cursor: not-allowed; }
+
+.settings-skeleton {
+  height: 180px; border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+  background-size: 200% 100%; animation: settings-shimmer 1.2s linear infinite;
+}
+@keyframes settings-shimmer { to { background-position: -200% 0; } }
+.settings-linkbtn { justify-self: start; text-decoration: none; }
+
+@media (max-width: 600px) {
+  .settings-page .social-form { padding: 1rem; border-radius: 14px; }
+  .settings-jump { margin: 0 -1rem; padding: 0.5rem 1rem; }
+  .settings-linkbtn { justify-self: stretch; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .settings-page .social-check input[type="checkbox"], .settings-page .social-check input[type="checkbox"]::before,
+  .settings-saved, .settings-skeleton { transition: none; animation: none; }
+}

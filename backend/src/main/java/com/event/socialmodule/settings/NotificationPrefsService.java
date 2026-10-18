@@ -14,11 +14,11 @@ public class NotificationPrefsService {
     private final NotificationPrefsRepository repository;
 
     public record PrefsView(boolean friendRequests, boolean friendGoing, boolean newEvents, boolean badges,
-                            boolean weeklyDigest, boolean digestEmail) {}
+                            boolean weeklyDigest, boolean digestEmail, boolean eventReminders) {}
 
     /** Partial update: null leaves a setting unchanged. */
     public record PrefsUpdate(Boolean friendRequests, Boolean friendGoing, Boolean newEvents, Boolean badges,
-                              Boolean weeklyDigest, Boolean digestEmail) {}
+                              Boolean weeklyDigest, Boolean digestEmail, Boolean eventReminders) {}
 
     @Transactional(readOnly = true)
     public PrefsView get(Long userId) {
@@ -34,6 +34,7 @@ public class NotificationPrefsService {
         if (u.badges() != null) p.setBadges(u.badges());
         if (u.weeklyDigest() != null) p.setWeeklyDigest(u.weeklyDigest());
         if (u.digestEmail() != null) p.setDigestEmail(u.digestEmail());
+        if (u.eventReminders() != null) p.setEventReminders(u.eventReminders());
         p.setUpdatedAt(LocalDateTime.now());
         return view(repository.save(p));
     }
@@ -50,12 +51,12 @@ public class NotificationPrefsService {
             case ACHIEVEMENT -> p.isBadges();
             case DIGEST -> p.isWeeklyDigest();
             case SEAT_OPENED -> true;   // they asked for the seat; always tell them
-            case EVENT_RECAP, SAVED_SOON, ALMOST_FULL, FEEDBACK_ASK -> p.isNewEvents();   // "thanks for coming" with what's next from the club
+            case EVENT_RECAP, SAVED_SOON, ALMOST_FULL, FEEDBACK_ASK -> p.isEventReminders();
         };
     }
 
     private static PrefsView view(NotificationPrefs p) {
         return new PrefsView(p.isFriendRequests(), p.isFriendGoing(), p.isNewEvents(), p.isBadges(),
-                p.isWeeklyDigest(), p.isDigestEmail());
+                p.isWeeklyDigest(), p.isDigestEmail(), p.isEventReminders());
     }
 }

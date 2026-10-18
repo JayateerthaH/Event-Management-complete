@@ -25,6 +25,9 @@ public class NotificationPrefs {
     private boolean weeklyDigest = true;
     /** Also email the weekly digest (off by default; email is limited). */
     private boolean digestEmail = false;
+    /** Saved-event reminders, almost-full alerts, feedback asks and recaps (default keeps existing rows on). */
+    @Column(columnDefinition = "boolean not null default true")
+    private boolean eventReminders = true;
 
     private LocalDateTime updatedAt;
 

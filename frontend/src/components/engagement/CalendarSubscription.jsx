@@ -33,7 +33,7 @@ export default function CalendarSubscription() {
   };
 
   return (
-    <section className="social-form" aria-labelledby="cal-title">
+    <section className="social-form" id="calendar" aria-labelledby="cal-title">
       <h2 className="social-h2" id="cal-title">Calendar</h2>
       <p className="social-muted">
         Subscribe once and the events you register for or save show up in your phone's calendar, updated automatically.
