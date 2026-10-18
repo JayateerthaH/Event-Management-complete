@@ -11,6 +11,13 @@ admins approve organizers and events and manage the platform.
 | Frontend | React 19, Vite 7, React Router 7, axios, Recharts, html5-qrcode |
 | Integrations | Brevo (email), ZXing (QR codes), OpenHTMLtoPDF (certificates), optional AI features via Claude (Anthropic Java SDK) or Google Gemini (Interactions API) |
 
+## Project guide
+
+[`completeProject.html`](completeProject.html) is an interactive guide to the whole system: the architecture with
+request playback, step-through flows for every module, every endpoint, class and table, the data model, the build
+journey, learnings and interview notes. It's one self-contained file — download it and open it in a browser; it
+works offline. Latest version: commit [`49daa14`](https://github.com/JayateerthaH/Event-Management-complete/commit/49daa14fd36da6ab40c8707d10cf7399cc43b2fc).
+
 ## Features
 
 **Visitors** — browse the home page, search/filter approved events, and view event details without an account.
