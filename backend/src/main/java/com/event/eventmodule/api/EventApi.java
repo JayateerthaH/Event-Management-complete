@@ -54,6 +54,12 @@ public interface EventApi {
 
     Participation participation(Long userId);
 
+    /** A QR-verified attendance for the student portfolio, with the host club and whether a certificate exists. */
+    record AttendedEvent(EventCard card, String organizedBy, boolean certificate) {}
+
+    /** Events the student attended (QR-verified), most recent first. */
+    List<AttendedEvent> attendedEvents(Long userId);
+
     /** Approved events the user saved ("Interested"), most recently saved first. */
     List<EventCard> savedEvents(Long userId);
 

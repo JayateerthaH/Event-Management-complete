@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import CalendarSubscription from "../components/engagement/CalendarSubscription";
+import PortfolioSettings from "../components/engagement/PortfolioSettings";
 import "../styles/Engagement.css";
 import { apiErrorMessage } from "../api/apiClient";
 import { getNotificationSettings, updateNotificationSettings } from "../api/socialService";
@@ -69,6 +70,7 @@ export default function Settings() {
           )}
         </section>
         <CalendarSubscription />
+        <PortfolioSettings />
         <section className="social-form">
           <h2 className="social-h2">Privacy</h2>
           <p className="social-muted">

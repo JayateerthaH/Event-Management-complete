@@ -16,6 +16,17 @@
       "destination": "https://campusevents-api.onrender.com/public/share/events/:eventId"
     },
     {
+      "source": "/p/:slug([A-Za-z0-9_-]+)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(whatsapp|facebookexternalhit|facebot|meta-externalagent|twitterbot|telegrambot|linkedinbot|slackbot|discordbot|skypeuripreview|pinterest|redditbot|embedly|applebot|googlebot|bingbot).*"
+        }
+      ],
+      "destination": "https://campusevents-api.onrender.com/public/share/portfolio/:slug"
+    },
+    {
       "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }

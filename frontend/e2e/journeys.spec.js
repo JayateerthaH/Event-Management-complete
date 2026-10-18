@@ -223,7 +223,10 @@ test.describe.serial("CampusEvents journeys", () => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
       await gotoSettled(page, `/events/${other.id}`);
       const sidebar = page.locator(".ed-sidebar");
+      // The button flips at once; wait for the save itself before leaving the page
+      const savedRes = page.waitForResponse((r) => r.url().endsWith(`/events/${other.id}/save`) && r.request().method() === "POST");
       await sidebar.getByRole("button", { name: "Save this event" }).click();
+      expect((await savedRes).ok()).toBe(true);
       await expect(sidebar.getByRole("button", { name: "Remove from saved events" })).toBeVisible();
 
       await page.goto("/dashboard");
@@ -465,6 +468,39 @@ test.describe.serial("CampusEvents journeys", () => {
     });
   });
 
+  test("portfolio: the student publishes it, anyone can open the link, and unpublishing hides it", async ({ browser, request }) => {
+    let url;
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await gotoSettled(page, "/settings#portfolio");
+      const section = page.locator("#portfolio");
+      await expect(section.getByText("1 event · 1 certificate")).toBeVisible();
+      await section.getByLabel(/Make my portfolio public/).check();
+      const input = page.locator("#portfolio-url");
+      await expect(input).toHaveValue(/\/p\/[A-Za-z0-9_-]+$/);
+      url = await input.inputValue();
+    });
+    const slug = url.split("/p/")[1];
+    await asUser(browser, null, null, async (page) => {
+      await gotoSettled(page, `/p/${slug}`);
+      await expect(page.locator(".portfolio__head h1")).toBeVisible();
+      const row = page.locator(".portfolio__events li", { hasText: eventName });
+      await expect(row).toBeVisible();
+      await expect(row.getByText("Certificate")).toBeVisible();
+      await expect(page.locator(".portfolio__badges", { hasText: "First step" })).toBeVisible();
+      await expect(page.getByText(studentEmail)).toHaveCount(0);
+    });
+    const preview = await (await request.get(`${API}/public/share/portfolio/${slug}`)).text();
+    expect(preview).toContain('property="og:title"');
+    expect(preview).toContain("1 event attended (QR-verified), 1 certificate");
+
+    await asUser(browser, studentEmail, PASSWORD, async (page) => {
+      await gotoSettled(page, "/settings#portfolio");
+      await page.locator("#portfolio").getByLabel(/Make my portfolio public/).uncheck();
+      await expect(page.locator("#portfolio-url")).toHaveCount(0);
+    });
+    expect((await request.get(`${API}/public/portfolio/${slug}`)).status()).toBe(404);
+  });
+
   test("organizer sends an announcement and the registered student is notified", async ({ browser }) => {
     const title = `Room change ${run}`;
     await asUser(browser, organizerEmail, PASSWORD, async (page) => {
@@ -583,7 +619,7 @@ test.describe.serial("CampusEvents journeys", () => {
 
   test("student edits the profile and it persists after reload", async ({ browser }) => {
     await asUser(browser, studentEmail, PASSWORD, async (page) => {
-      await page.goto("/profile");
+      await gotoSettled(page, "/profile");
       await page.getByRole("button", { name: /Edit/ }).first().click();
       await page.locator('input[name="name"]').fill("Stu Dent Updated");
       await page.getByRole("button", { name: "Save Changes" }).click();

@@ -47,3 +47,8 @@ export const getFollowing = () => data(api.get("/social/following"));
 
 export const getNotificationSettings = () => data(api.get("/social/notification-settings"));
 export const updateNotificationSettings = (body) => data(api.put("/social/notification-settings", body));
+
+export const getMyPortfolio = () => data(api.get("/social/portfolio"));
+export const setPortfolioPublished = (published) => data(api.put("/social/portfolio", { published }));
+export const resetPortfolioLink = () => data(api.post("/social/portfolio/reset"));
+export const getPublicPortfolio = (slug) => data(api.get(`/public/portfolio/${encodeURIComponent(slug)}`));

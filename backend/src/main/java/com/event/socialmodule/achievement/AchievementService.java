@@ -62,6 +62,20 @@ public class AchievementService {
         return new Summary((int) views.stream().filter(AchievementView::earned).count(), views.size(), views);
     }
 
+    /** Badges the student has earned, without recording or notifying anything (for public pages). */
+    @Transactional(readOnly = true)
+    public List<AchievementView> earned(Long userId) {
+        int friends = (int) requestRepository.involving(userId, List.of(BuddyRequest.Status.ACCEPTED)).stream()
+                .map(r -> r.otherThan(userId)).distinct().count();
+        Map<String, LocalDateTime> recorded = earnedRepository.findByUserId(userId).stream()
+                .collect(Collectors.toMap(AchievementEarned::getAchievementKey, AchievementEarned::getEarnedAt, (a, b) -> a));
+        return AchievementRules.evaluate(eventApi.participation(userId), friends).stream()
+                .filter(Achievement::earned)
+                .map(a -> new AchievementView(a.key(), a.name(), a.description(), a.progress(), a.target(), true,
+                        recorded.get(a.key())))
+                .toList();
+    }
+
     /** Cheap re-check used when the bell loads, at most every few minutes per student. */
     @Transactional
     public void recheckIfDue(Long userId) {

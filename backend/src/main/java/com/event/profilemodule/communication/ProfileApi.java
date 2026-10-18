@@ -16,6 +16,9 @@ public interface ProfileApi {
     /** Department from the student's profile, if filled in. */
     Optional<String> department(Long userId);
 
+    /** The "About me" text from the student's profile, if filled in. */
+    Optional<String> bio(Long userId);
+
     /** Name from the profile of every user who filled one in, keyed by user id. */
     Map<Long, String> displayNames();
 

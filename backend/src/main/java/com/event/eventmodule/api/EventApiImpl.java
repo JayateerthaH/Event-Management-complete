@@ -137,6 +137,24 @@ public class EventApiImpl implements EventApi {
     }
 
     @Override
+    public List<AttendedEvent> attendedEvents(Long userId) {
+        java.util.Set<Long> withCertificate = new java.util.HashSet<>();
+        registerRepository.findEligibleCertificates(userId).forEach(r -> withCertificate.add(r.getEventsDto().getId()));
+        return registerRepository.findAttendedByUserId(userId).stream()
+                .map(r -> r.getEventsDto())
+                .filter(e -> Boolean.TRUE.equals(e.getIsApproved()))
+                .collect(java.util.stream.Collectors.toMap(Events::getId, e -> e, (a, b) -> a, LinkedHashMap::new))
+                .values().stream()
+                .sorted(java.util.Comparator.comparing(Events::getEventDate,
+                        java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())))
+                .map(e -> new AttendedEvent(toCard(e),
+                        e.getEventDetails() == null || e.getEventDetails().getOrganizedBy() == null
+                                || e.getEventDetails().getOrganizedBy().isBlank() ? null : e.getEventDetails().getOrganizedBy().trim(),
+                        withCertificate.contains(e.getId())))
+                .toList();
+    }
+
+    @Override
     public List<EventCard> savedEvents(Long userId) {
         List<Long> ids = savedEventRepository.findByUserIdOrderByCreatedAtDesc(userId).stream()
                 .map(com.event.eventmodule.saved.SavedEvent::getEventId).toList();

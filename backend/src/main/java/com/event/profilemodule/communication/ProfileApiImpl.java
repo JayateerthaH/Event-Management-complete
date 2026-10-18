@@ -43,6 +43,11 @@ public class ProfileApiImpl implements ProfileApi {
     }
 
     @Override
+    public Optional<String> bio(Long userId) {
+        return studentRepository.findById(userId).map(p -> blankToNull(p.getBio()));
+    }
+
+    @Override
     public Map<Long, String> displayNames() {
         Map<Long, String> names = new HashMap<>();
         for (Object[] row : studentRepository.findIdAndName()) {

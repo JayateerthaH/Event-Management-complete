@@ -1,0 +1,61 @@
+/* Public student portfolio (/p/:slug). Dark like the rest of the app; prints as a plain white page. */
+.portfolio { max-width: 820px; }
+.portfolio__head { display: grid; gap: 0.4rem; position: relative; padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18); }
+.portfolio__kicker { margin: 0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #a78bfa; }
+.portfolio__head h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 2.4rem); color: #f8fafc; line-height: 1.15; }
+.portfolio__meta { margin: 0; color: #cbd5e1; }
+.portfolio__bio { margin: 0.4rem 0 0; color: #94a3b8; line-height: 1.6; max-width: 62ch; white-space: pre-line; }
+.portfolio__print { position: absolute; top: 0; right: 0; }
+
+.portfolio__stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; margin: 0; }
+.portfolio__stats div { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(139, 92, 246, 0.15);
+  border-radius: 14px; padding: 0.9rem 1rem; display: flex; flex-direction: column-reverse; gap: 0.15rem; }
+.portfolio__stats dt { color: #94a3b8; font-size: 0.8rem; }
+.portfolio__stats dd { margin: 0; font-size: 1.7rem; font-weight: 700; color: #f8fafc; font-variant-numeric: tabular-nums; }
+
+.portfolio__section { display: grid; gap: 0.75rem; }
+.portfolio__section h2 { margin: 0; font-size: 1.1rem; color: #f1f5f9; }
+
+.portfolio__chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.portfolio__chips li { font-size: 0.85rem; padding: 0.3rem 0.75rem; border-radius: 999px; color: #ddd6fe;
+  background: rgba(139, 92, 246, 0.12); border: 1px solid rgba(139, 92, 246, 0.25); }
+
+.portfolio__badges { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.portfolio__badges li { display: flex; gap: 0.7rem; align-items: center; padding: 0.7rem 0.85rem; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(148, 163, 184, 0.15); min-width: 0; }
+.portfolio__badges svg { width: 28px; height: 28px; flex: none; color: #fbbf24; }
+.portfolio__badges span { display: grid; min-width: 0; }
+.portfolio__badges b { color: #f1f5f9; font-size: 0.95rem; }
+.portfolio__badges small { color: #94a3b8; font-size: 0.8rem; }
+
+.portfolio__events { list-style: none; margin: 0; padding: 0; display: grid; }
+.portfolio__events li { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr) auto; gap: 0.75rem; align-items: baseline;
+  padding: 0.75rem 0; border-bottom: 1px solid rgba(148, 163, 184, 0.12); }
+.portfolio__events time { color: #94a3b8; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.portfolio__events div { display: grid; gap: 0.15rem; min-width: 0; }
+.portfolio__events a { color: #f1f5f9; font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+.portfolio__events a:hover { color: #c4b5fd; text-decoration: underline; }
+.portfolio__events small { color: #94a3b8; font-size: 0.82rem; overflow-wrap: anywhere; }
+.portfolio-summary { margin: 0; color: #e2e8f0; font-weight: 600; }
+
+@media (max-width: 600px) {
+  .portfolio__print { position: static; justify-self: start; margin-top: 0.5rem; }
+  .portfolio__stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .portfolio__events li { grid-template-columns: minmax(0, 1fr) auto; }
+  .portfolio__events time { grid-column: 1 / -1; }
+}
+
+@media print {
+  .portfolio-page { background: #fff; color: #111; min-height: 0; }
+  .portfolio-page nav, .portfolio__print { display: none !important; }
+  .portfolio { padding: 0; max-width: none; }
+  .portfolio__head h1, .portfolio__section h2, .portfolio__stats dd, .portfolio__badges b, .portfolio__events a { color: #111; }
+  .portfolio__meta, .portfolio__bio, .portfolio__stats dt, .portfolio__badges small, .portfolio__events small,
+  .portfolio__events time, .portfolio-page .social-note { color: #444; }
+  .portfolio__stats div, .portfolio__badges li { background: none; border-color: #ccc; }
+  .portfolio__chips li { color: #111; background: none; border-color: #999; }
+  .portfolio__events li { border-color: #ddd; break-inside: avoid; }
+  .portfolio__kicker { color: #555; }
+}
