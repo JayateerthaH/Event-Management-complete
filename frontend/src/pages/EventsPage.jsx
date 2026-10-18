@@ -1,5 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
+import api from "../api/apiClient";
 import SidebarFilters from "../components/SidebarFilters";
 import EventCard from "../components/EventCard";
 import Pagination from "../components/Pagination";
@@ -101,6 +102,7 @@ const EventsPage = () => {
   // Phones: the filters open as a full-screen panel from the "Filters" button
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
+  const [quick, setQuick] = useState(null); // the active quick filter chip, if any
 
   useEffect(() => {
     if (!filtersOpen) return;
@@ -114,6 +116,7 @@ const EventsPage = () => {
   const handleApplyFilters = useCallback(
     (filters) => {
       applyFilters(filters);
+      setQuick(null);
       setActiveFilterCount(
         (filters.search?.trim() ? 1 : 0) +
           (filters.categories?.length || 0) +
@@ -127,6 +130,7 @@ const EventsPage = () => {
   );
 
   const handleClearFilters = useCallback(() => {
+    setQuick(null);
     clearFilters();
   }, [clearFilters]);
 
@@ -135,13 +139,35 @@ const EventsPage = () => {
     // Navigation or modal logic would go here
   }, []);
 
-  // Determine which events are "hot" or "trending" based on some criteria
-  const getEventBadge = (event, index) => {
-    // Mock logic - in real app, this would come from backend
-    if (index === 0) return { isHot: true, isTrending: false };
-    if (event.maxPeople && event.maxPeople > 500)
-      return { isHot: false, isTrending: true };
-    return { isHot: false, isTrending: false };
+  // Badges from real activity: the two most saved/registered events this week are "hot", the rest of the
+  // trending list "trending"
+  const [trendingRank, setTrendingRank] = useState({});
+  useEffect(() => {
+    api.get("/events/trending", { params: { limit: 12 } })
+      .then(({ data }) => setTrendingRank(Object.fromEntries((Array.isArray(data) ? data : []).map((e, i) => [e.id, i]))))
+      .catch(() => {});
+  }, []);
+  const getEventBadge = (event) => {
+    const rank = trendingRank[event.id];
+    return { isHot: rank != null && rank < 2, isTrending: rank != null && rank >= 2 };
+  };
+
+  // Quick filters for the most common questions: what's on today, this week, and what's free
+  const QUICK = [
+    { id: "today", label: "Today", filters: { date: "today" } },
+    { id: "week", label: "This week", filters: { date: "this-week" } },
+    { id: "free", label: "Free", filters: { fee: "free" } },
+  ];
+  const applyQuick = (q) => {
+    if (quick === q.id) {
+      setQuick(null);
+      clearFilters();
+      setActiveFilterCount(0);
+    } else {
+      setQuick(q.id);
+      applyFilters(q.filters);
+      setActiveFilterCount(1);
+    }
   };
 
   return (
@@ -179,6 +205,17 @@ const EventsPage = () => {
 
           <SmartSearch onActiveChange={setAiActive} />
 
+          {!aiActive && (
+            <div className="quick-filters" role="group" aria-label="Quick filters">
+              {QUICK.map((q) => (
+                <button key={q.id} type="button" className={`quick-filter${quick === q.id ? " is-on" : ""}`}
+                  aria-pressed={quick === q.id} onClick={() => applyQuick(q)}>
+                  {q.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           {aiActive ? null : error ? (
             <ErrorState message={error} onRetry={refresh} />
           ) : loading ? (
@@ -191,8 +228,8 @@ const EventsPage = () => {
             <EmptyState />
           ) : (
             <div className="events-grid">
-              {events.map((event, index) => {
-                const { isHot, isTrending } = getEventBadge(event, index);
+              {events.map((event) => {
+                const { isHot, isTrending } = getEventBadge(event);
                 return (
                   <EventCard
                     key={event.id}

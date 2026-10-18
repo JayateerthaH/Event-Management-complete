@@ -276,3 +276,11 @@
     margin-bottom: 24px;
   }
 }
+
+/* Quick filters above the grid: Today, This week, Free */
+.quick-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1.25rem; }
+.quick-filter { min-height: 40px; padding: 0.45rem 1rem; border-radius: 999px; cursor: pointer; font: inherit; font-weight: 600; font-size: 0.9rem;
+  color: #ddd6fe; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.35); }
+.quick-filter:hover { background: rgba(139, 92, 246, 0.2); }
+.quick-filter.is-on { color: #fff; background: linear-gradient(135deg, #8b5cf6, #6366f1); border-color: transparent; }
+.quick-filter:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 2px; }
