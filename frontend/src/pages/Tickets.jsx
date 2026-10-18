@@ -46,6 +46,11 @@ export default function Tickets() {
       .catch(() => setOffline(true));
   }, [userId]);
 
+  // From the dashboard's "Open ticket" (/tickets#ticket-<eventId>): bring that ticket into view once drawn
+  useEffect(() => {
+    if (tickets && window.location.hash.startsWith("#ticket-")) document.querySelector(window.location.hash)?.scrollIntoView({ block: "center" });
+  }, [tickets]);
+
   useEffect(() => {
     if (!tickets) return;
     let cancelled = false;

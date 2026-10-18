@@ -24,6 +24,8 @@ import Achievements from "../../../components/engagement/Achievements";
 import SemesterGoal from "../../../components/engagement/SemesterGoal";
 import PlanMyWeek from "../../../components/ai/PlanMyWeek";
 import PushNudge from "../../../components/engagement/PushNudge";
+import TicketSoon from "../../../components/engagement/TicketSoon";
+import TrendingEvents from "../../../components/engagement/TrendingEvents";
 import {
   BarChart,
   Bar,
@@ -597,10 +599,12 @@ export default function StudentDashboard() {
               </div>
             </section>
 
+            <TicketSoon />
             <InterestNudge />
             <PushNudge />
             <PlanMyWeek />
             <RecommendedEvents limit={6} />
+            <TrendingEvents limit={3} />
             <SavedEvents />
             <SemesterGoal />
             <Achievements onSummary={handleBadgeSummary} />

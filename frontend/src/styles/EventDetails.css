@@ -1778,3 +1778,8 @@
 @media (max-width: 768px) {
   .ed-similar { padding: 0 1rem 3rem; }
 }
+
+/* "Invite a friend" after registering: friends who come together come back */
+.reg-success__invite { display: block; margin: 0 0 0.75rem; padding: 0.7rem 1rem; border-radius: 10px; text-align: center; font-weight: 600;
+  text-decoration: none; color: #dcfce7; background: rgba(37, 211, 102, 0.16); border: 1px solid rgba(37, 211, 102, 0.5); }
+.reg-success__invite:hover { background: rgba(37, 211, 102, 0.26); }

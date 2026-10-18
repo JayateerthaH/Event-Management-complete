@@ -50,7 +50,7 @@ public class NotificationPrefsService {
             case ACHIEVEMENT -> p.isBadges();
             case DIGEST -> p.isWeeklyDigest();
             case SEAT_OPENED -> true;   // they asked for the seat; always tell them
-            case EVENT_RECAP -> p.isNewEvents();   // "thanks for coming" with what's next from the club
+            case EVENT_RECAP, SAVED_SOON, ALMOST_FULL -> p.isNewEvents();   // "thanks for coming" with what's next from the club
         };
     }
 

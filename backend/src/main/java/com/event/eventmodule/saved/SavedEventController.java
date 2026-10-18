@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -30,6 +31,12 @@ public class SavedEventController {
     @GetMapping("/saved")
     public List<EventCard> saved(@RequestAttribute("userId") String userId) {
         return eventApi.savedEvents(Long.valueOf(userId));
+    }
+
+    /** Public: upcoming events people are saving and registering for this week. */
+    @GetMapping("/trending")
+    public List<EventCard> trending(@RequestParam(defaultValue = "6") int limit) {
+        return eventApi.trendingEvents(limit);
     }
 
     @GetMapping("/saved/ids")

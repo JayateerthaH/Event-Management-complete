@@ -136,6 +136,16 @@ export default function RegisterModal({ event, onClose, onSuccess, mode = 'regis
                 <br />Check your email for confirmation details.</>
               )}
             </p>
+            {!waitlist && (
+              <a
+                className="reg-success__invite"
+                href={`https://wa.me/?text=${encodeURIComponent(`I'm going to ${eventName}. Come with me! ${window.location.origin}${window.location.pathname}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Invite a friend on WhatsApp
+              </a>
+            )}
             <button
               className="reg-success__btn"
               onClick={() => { onSuccess?.(); onClose(); }}

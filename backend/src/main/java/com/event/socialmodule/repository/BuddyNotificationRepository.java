@@ -14,4 +14,6 @@ public interface BuddyNotificationRepository extends JpaRepository<BuddyNotifica
     @Modifying
     @Query("update BuddyNotification n set n.read = true where n.userId = :u and n.read = false")
     int markAllRead(@Param("u") Long userId);
+
+    boolean existsByUserIdAndTypeAndEventId(Long userId, com.event.socialmodule.entity.BuddyNotification.Type type, Long eventId);
 }

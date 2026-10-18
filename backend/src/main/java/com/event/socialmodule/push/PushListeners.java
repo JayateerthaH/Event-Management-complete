@@ -27,8 +27,8 @@ public class PushListeners {
     /** Time-sensitive ones skip quiet hours and the weekly cap. */
     static boolean urgent(BuddyNotification.Type type) {
         return switch (type) {
-            case BUDDY_REQUEST, BUDDY_ACCEPTED, SEAT_OPENED -> true;
-            case FRIEND_GOING, ACHIEVEMENT, NEW_EVENT, DIGEST, EVENT_RECAP -> false;
+            case BUDDY_REQUEST, BUDDY_ACCEPTED, SEAT_OPENED, ALMOST_FULL -> true;
+            case FRIEND_GOING, ACHIEVEMENT, NEW_EVENT, DIGEST, EVENT_RECAP, SAVED_SOON -> false;
         };
     }
 
@@ -42,6 +42,8 @@ public class PushListeners {
             case DIGEST -> "Your week on campus";
             case SEAT_OPENED -> "You got a seat";
             case EVENT_RECAP -> "Thanks for coming";
+            case SAVED_SOON -> "Tomorrow: an event you saved";
+            case ALMOST_FULL -> "Almost full";
         };
         String url = n.eventId() != null ? "/events/" + n.eventId()
                 : switch (n.type()) {

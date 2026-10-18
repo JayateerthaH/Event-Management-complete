@@ -78,6 +78,12 @@ public interface EventApi {
     /** Students checked in (QR-scanned) at the event. */
     long checkedInCount(Long eventId);
 
+    /** Students who saved ("Interested") the event. */
+    List<Long> saversOf(Long eventId);
+
+    /** Upcoming open events with the most saves this week, then registrations: "Trending this week". */
+    List<EventCard> trendingEvents(int limit);
+
     /** Whether the user has registered for the event. */
     boolean isRegistered(Long userId, Long eventId);
 

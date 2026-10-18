@@ -195,6 +195,22 @@ public class EventApiImpl implements EventApi {
     }
 
     @Override
+    public List<Long> saversOf(Long eventId) {
+        return savedEventRepository.findUserIdsByEventId(eventId).stream().distinct().toList();
+    }
+
+    @Override
+    public List<EventCard> trendingEvents(int limit) {
+        Map<Long, Long> saves = new HashMap<>();
+        for (Object[] row : savedEventRepository.savesSince(java.time.LocalDateTime.now().minusDays(7))) saves.put((Long) row[0], (Long) row[1]);
+        return upcomingOpenEvents().stream()
+                .filter(e -> !e.isFull())
+                .sorted(java.util.Comparator.comparingDouble((EventCard e) -> -(saves.getOrDefault(e.id(), 0L) * 2 + e.registeredCount())))
+                .filter(e -> saves.getOrDefault(e.id(), 0L) + e.registeredCount() > 0)
+                .limit(Math.max(1, Math.min(limit, 12))).toList();
+    }
+
+    @Override
     public boolean isRegistered(Long userId, Long eventId) {
         return userId != null && eventId != null && userRegistrationRepository.existsByUserIdAndEventId(userId, eventId);
     }

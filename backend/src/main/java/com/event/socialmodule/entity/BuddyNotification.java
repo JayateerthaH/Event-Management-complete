@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class BuddyNotification {
 
-    public enum Type { BUDDY_REQUEST, BUDDY_ACCEPTED, FRIEND_GOING, ACHIEVEMENT, NEW_EVENT, DIGEST, SEAT_OPENED, EVENT_RECAP }
+    public enum Type { BUDDY_REQUEST, BUDDY_ACCEPTED, FRIEND_GOING, ACHIEVEMENT, NEW_EVENT, DIGEST, SEAT_OPENED, EVENT_RECAP, SAVED_SOON, ALMOST_FULL }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

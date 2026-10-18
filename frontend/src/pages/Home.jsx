@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchBasicInfo as fetchBasicInfoApi } from '../api/homeService';
 import Navbar from '../components/Navbar';
+import TrendingEvents from '../components/engagement/TrendingEvents';
 import '../styles/Home.css';
 
 export default function Home() {
@@ -111,6 +112,9 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </div>
+      <div className="home-trending">
+        <TrendingEvents limit={6} />
       </div>
     </div>
   );

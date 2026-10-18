@@ -23,6 +23,8 @@ const BUDDY_TITLES = {
   DIGEST: "Your week on campus",
   SEAT_OPENED: "You got a seat",
   EVENT_RECAP: "Thanks for coming",
+  SAVED_SOON: "Tomorrow: an event you saved",
+  ALMOST_FULL: "Almost full",
 };
 
 const timeAgo = (dateStr) => {

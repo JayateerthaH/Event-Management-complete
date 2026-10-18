@@ -1086,3 +1086,6 @@
     display: none;
   }
 }
+
+/* Trending this week, below the hero */
+.home-trending { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem 3rem; position: relative; z-index: 1; }
