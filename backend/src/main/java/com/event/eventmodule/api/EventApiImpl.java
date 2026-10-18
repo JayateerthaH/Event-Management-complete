@@ -183,6 +183,13 @@ public class EventApiImpl implements EventApi {
     }
 
     @Override
+    public Map<Long, Long> attendedCountsBetween(Date from, Date to) {
+        Map<Long, Long> counts = new HashMap<>();
+        for (Object[] row : registerRepository.attendedCountsBetween(from, to)) counts.put((Long) row[0], (Long) row[1]);
+        return counts;
+    }
+
+    @Override
     public boolean isRegistered(Long userId, Long eventId) {
         return userId != null && eventId != null && userRegistrationRepository.existsByUserIdAndEventId(userId, eventId);
     }

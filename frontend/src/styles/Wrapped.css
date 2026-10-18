@@ -1,0 +1,33 @@
+/* Campus Wrapped (/wrapped): bold, shareable semester recap in the app's dark violet look. */
+.wrapped { max-width: 900px; }
+.wrapped__head { display: grid; gap: 0.5rem; }
+.wrapped__kicker { margin: 0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #fbbf24; }
+.wrapped__head h1 { margin: 0; font-size: clamp(2rem, 7vw, 3.2rem); line-height: 1.05; color: #f8fafc; }
+.wrapped__semesters { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+.wrapped__semesters button { min-height: 36px; padding: 0.35rem 0.85rem; border-radius: 999px; font: inherit; font-size: 0.85rem; cursor: pointer;
+  color: #cbd5e1; background: transparent; border: 1px solid rgba(148, 163, 184, 0.3); }
+.wrapped__semesters button.is-current { color: #0b1020; background: #fbbf24; border-color: #fbbf24; font-weight: 700; }
+.wrapped__semesters button:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 2px; }
+
+.wrapped__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.85rem; }
+.wrapped__card { display: grid; align-content: center; gap: 0.2rem; padding: 1.2rem; border-radius: 18px; min-height: 140px; color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(139, 92, 246, 0.2); }
+.wrapped__card strong { font-size: 2.6rem; line-height: 1; color: #f8fafc; font-variant-numeric: tabular-nums; }
+.wrapped__card .wrapped__word { font-size: 1.7rem; }
+.wrapped__card--hero { grid-column: 1 / -1; min-height: 200px; text-align: center; justify-items: center;
+  background: linear-gradient(135deg, #6d28d9, #4338ca 55%, #0f766e); border: none; color: #e0e7ff; }
+.wrapped__card--hero strong { font-size: clamp(4rem, 16vw, 6.5rem); }
+.wrapped__card--hero em { font-style: normal; font-weight: 700; margin-top: 0.4rem; padding: 0.3rem 0.8rem; border-radius: 999px; background: #fbbf24; color: #1e1b4b; }
+
+.wrapped__lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.wrapped__lists h2 { margin: 0 0 0.5rem; font-size: 1rem; color: #f1f5f9; }
+.wrapped__lists ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; counter-reset: rank; }
+.wrapped__lists li { display: flex; align-items: center; gap: 0.6rem; padding: 0.6rem 0.8rem; border-radius: 12px; counter-increment: rank;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(148, 163, 184, 0.12); color: #e2e8f0; min-width: 0; }
+.wrapped__lists li::before { content: counter(rank); font-weight: 800; color: #fbbf24; width: 1.2rem; }
+.wrapped__lists li span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.wrapped__lists li b { color: #c4b5fd; }
+.wrapped__story { margin: 0; color: #cbd5e1; font-size: 1.05rem; line-height: 1.6; }
+.wrapped__story b { color: #f8fafc; }
+.wrapped__share { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+@media (max-width: 600px) { .wrapped__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wrapped__card { min-height: 120px; padding: 1rem; } .wrapped__card strong { font-size: 2.1rem; } }

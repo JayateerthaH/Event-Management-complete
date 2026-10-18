@@ -80,3 +80,8 @@ export const fetchFeedbackSummary = async (eventId) => {
   const { data } = await api.get(`/ai/events/${eventId}/feedback-summary`, { timeout: LLM_TIMEOUT });
   return data;
 };
+
+export const planMyWeek = async (note) => {
+  const { data } = await api.get("/ai/plan-week", { params: note ? { note } : {} });
+  return data;
+};

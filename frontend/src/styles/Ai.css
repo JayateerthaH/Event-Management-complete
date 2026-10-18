@@ -285,3 +285,23 @@ button.ai-chip:hover:not(:disabled) { background: rgba(139, 92, 246, 0.2); borde
   .ai-tiles { grid-template-columns: minmax(0, 1fr); }
   .ai-msg { max-width: 95%; }
 }
+
+/* Plan my week */
+.plan-week__form { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.plan-week__input { flex: 1 1 220px; min-width: 0; min-height: 42px; padding: 0.5rem 0.85rem; border-radius: 10px; font: inherit;
+  color: #f1f5f9; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(148, 163, 184, 0.3); }
+.plan-week__input:focus-visible { outline: 2px solid #c4b5fd; outline-offset: 1px; }
+.plan-week__result { display: grid; gap: 0.6rem; margin-top: 0.9rem; }
+.plan-week__result h3 { margin: 0.4rem 0 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: #a78bfa; }
+.plan-week__summary { margin: 0; color: #e2e8f0; line-height: 1.6; }
+.plan-week__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+.plan-week__item { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 0.75rem; align-items: baseline; padding: 0.6rem 0.8rem;
+  border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(148, 163, 184, 0.12); }
+.plan-week__item--going { border-color: rgba(34, 197, 94, 0.3); }
+.plan-week__item time { color: #94a3b8; font-size: 0.85rem; }
+.plan-week__item div { display: grid; gap: 0.15rem; min-width: 0; }
+.plan-week__item a { color: #f1f5f9; font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+.plan-week__item a:hover { color: #c4b5fd; text-decoration: underline; }
+.plan-week__item small { color: #94a3b8; }
+.plan-week__clash { color: #fbbf24; font-weight: 600; }
+@media (max-width: 600px) { .plan-week__item { grid-template-columns: minmax(0, 1fr); gap: 0.2rem; } .plan-week__form .ai-btn { width: 100%; } }

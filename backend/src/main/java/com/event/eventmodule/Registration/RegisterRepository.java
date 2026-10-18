@@ -47,6 +47,15 @@ public interface RegisterRepository extends JpaRepository<Register, Long> {
     """)
     List<Long> pastAttendeesNotRegistered(@Param("organizerId") Long organizerId, @Param("eventId") Long eventId);
 
+    /** Per student: how many events dated in [from, to) they checked in at. Rows are [userId, count]. */
+    @Query("""
+        SELECT r.userId, COUNT(DISTINCT r.eventsDto.id) FROM Register r
+        WHERE r.isAttended = true AND r.userId IS NOT NULL
+          AND r.eventsDto.eventDate >= :from AND r.eventsDto.eventDate < :to
+        GROUP BY r.userId
+    """)
+    List<Object[]> attendedCountsBetween(@Param("from") java.util.Date from, @Param("to") java.util.Date to);
+
     @Query("SELECT r.department FROM Register r WHERE r.userId = :userId AND r.department IS NOT NULL ORDER BY r.id DESC")
     List<String> departmentsUsedBy(@Param("userId") Long userId, org.springframework.data.domain.Pageable page);
 

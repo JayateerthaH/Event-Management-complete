@@ -59,3 +59,5 @@ export const clearSemesterGoal = () => data(api.delete("/social/goal"));
 export const getDepartmentGoing = (eventId) => data(api.get(`/social/events/${eventId}/department-going`));
 export const getInviteStatus = (eventId) => data(api.get(`/social/events/${eventId}/invite-past-attendees`));
 export const invitePastAttendees = (eventId) => data(api.post(`/social/events/${eventId}/invite-past-attendees`));
+export const getWrapped = (semester) => data(api.get("/social/wrapped", { params: semester ? { semester } : {} }));
+export const wrappedShared = () => api.post("/social/wrapped/shared");

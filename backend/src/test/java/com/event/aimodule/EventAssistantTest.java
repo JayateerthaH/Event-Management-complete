@@ -128,7 +128,7 @@ class EventAssistantTest {
         AiController controller = new AiController(mock(AiApi.class), mock(AiSearchService.class),
                 mock(DescriptionAssistantService.class), mock(EventQuestionService.class), drafts,
                 mock(RecommendationService.class), mock(FeedbackSummaryService.class), new AiRateLimiter(), eventApi,
-                new DisabledLlmClient());
+                new DisabledLlmClient(), mock(com.event.aimodule.plan.PlanWeekService.class));
 
         assertThatThrownBy(() -> controller.draftAnnouncement(7L, "5", "ROLE_STUDENT", "s@college.edu",
                 new AnnouncementDraftRequest("hi", null))).isInstanceOf(AccessDeniedException.class);

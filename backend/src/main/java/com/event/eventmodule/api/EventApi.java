@@ -72,6 +72,9 @@ public interface EventApi {
     /** Students who attended (QR-verified) an earlier event by this event's organizer and haven't registered for it. */
     List<Long> pastAttendeesToInvite(Long eventId);
 
+    /** Checked-in events per student for events dated in [from, to), for campus-wide comparisons (counts only). */
+    Map<Long, Long> attendedCountsBetween(java.util.Date from, java.util.Date to);
+
     /** Whether the user has registered for the event. */
     boolean isRegistered(Long userId, Long eventId);
 

@@ -87,6 +87,7 @@ export default function SemesterGoal() {
           <div className="goal__actions">
             <button type="button" className="goal__link" onClick={() => setEditing(true)}>{goal.reached ? "Raise the goal" : "Change goal"}</button>
             <button type="button" className="goal__link" onClick={() => save(clearSemesterGoal)}>Remove goal</button>
+            <Link to="/wrapped" className="goal__link">Your semester Wrapped</Link>
           </div>
         </div>
       )}

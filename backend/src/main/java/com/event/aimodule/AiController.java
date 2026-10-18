@@ -48,6 +48,7 @@ public class AiController {
     private final AiRateLimiter rateLimiter;
     private final EventApi eventApi;
     private final LlmClient llm;
+    private final com.event.aimodule.plan.PlanWeekService planWeekService;
 
     /** Lets the UI show LLM features only when they can work. */
     @GetMapping("/status")
@@ -60,6 +61,14 @@ public class AiController {
                                                   @RequestParam(defaultValue = "6") int limit) {
         rateLimiter.check("recommendations", userId, 60, MINUTE);
         return aiApi.recommendationsFor(Long.valueOf(userId), limit);
+    }
+
+    /** "Plan my week": registered events for the next 7 days plus up to 3 picks (AI-chosen when available). */
+    @GetMapping("/plan-week")
+    public com.event.aimodule.plan.PlanWeekService.WeekPlan planWeek(@RequestAttribute("userId") String userId,
+                                                                     @RequestParam(required = false) String note) {
+        rateLimiter.check("plan-week", userId, 10, MINUTE);
+        return planWeekService.plan(Long.valueOf(userId), note);
     }
 
     @GetMapping("/search")

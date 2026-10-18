@@ -17,6 +17,7 @@ const Welcome = lazy(() => import("./pages/Welcome"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Tickets = lazy(() => import("./pages/Tickets"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
+const Wrapped = lazy(() => import("./pages/Wrapped"));
 const EventsPage = lazy(() => import("./pages/EventsPage"));
 const EventDetailsPage = lazy(() => import("./pages/EventDetailsPage"));
 const EventManagePage = lazy(() => import("./pages/dashboard/organizer/EventManagePage"));
@@ -78,6 +79,14 @@ export default function App() {
           {/* Not behind the login redirect: it must open offline from the saved copy */}
           <Route path="/tickets" element={<Tickets />} />
           <Route path="/p/:slug" element={<Portfolio />} />
+          <Route
+            path="/wrapped"
+            element={
+              <ProtectedRoute>
+                <Wrapped />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/settings"
             element={
