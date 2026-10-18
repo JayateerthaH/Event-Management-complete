@@ -23,6 +23,7 @@ class EventReminderScheduler {
 
     private final RegisterRepository registerRepository;
     private final NotificationApi notificationApi; // Injecting the shared Notification API
+    private final org.springframework.context.ApplicationEventPublisher events;
 
     @org.springframework.beans.factory.annotation.Value("${app.frontend-url:http://localhost:5173}")
     private String frontendUrl = "http://localhost:5173";
@@ -79,8 +80,12 @@ class EventReminderScheduler {
      */
     private void sendReminder(Register reg, Events event, String type, String timingLabel) {
         String key = event.getId() + "-" + reg.getUserId() + "-" + type;
+        // Phone notification too (when the student turned them on); tracked on its own so a failed email doesn't repeat it
+        if (reg.getUserId() != null && sentReminders.add(key + "-push")) {
+            events.publishEvent(new com.event.sharedmodule.EventReminderDue(reg.getUserId(), event.getId(), event.getName(),
+                    "1day".equals(type) ? "tomorrow" : "starting soon"));
+        }
         if (sentReminders.contains(key)) return;
-
         try {
             String subject = timingLabel + ": " + event.getName();
             String body = buildEmailBody(reg, event, type);

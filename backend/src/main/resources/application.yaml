@@ -58,6 +58,11 @@ server:
 app:
   # Used in email links ("View Event Details")
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  # Web push (phone notifications). Off until both keys are set; generate a pair with: npx web-push generate-vapid-keys
+  push:
+    vapid-public-key: ${VAPID_PUBLIC_KEY:}
+    vapid-private-key: ${VAPID_PRIVATE_KEY:}
+    subject: ${VAPID_SUBJECT:mailto:admin@campusevents.app}
   cookie:
     # Cross-site deployment (frontend and API on different domains): COOKIE_SECURE=true, COOKIE_SAME_SITE=None
     secure: ${COOKIE_SECURE:false}

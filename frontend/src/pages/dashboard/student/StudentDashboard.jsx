@@ -23,6 +23,7 @@ import SavedEvents from "../../../components/engagement/SavedEvents";
 import Achievements from "../../../components/engagement/Achievements";
 import SemesterGoal from "../../../components/engagement/SemesterGoal";
 import PlanMyWeek from "../../../components/ai/PlanMyWeek";
+import PushNudge from "../../../components/engagement/PushNudge";
 import {
   BarChart,
   Bar,
@@ -597,6 +598,7 @@ export default function StudentDashboard() {
             </section>
 
             <InterestNudge />
+            <PushNudge />
             <PlanMyWeek />
             <RecommendedEvents limit={6} />
             <SavedEvents />

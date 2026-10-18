@@ -63,3 +63,32 @@ self.addEventListener("fetch", (event) => {
     })());
   }
 });
+
+// Phone notifications (Web Push): show what the server sent; tapping opens the right page in the app
+self.addEventListener("push", (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch { data = { body: event.data && event.data.text() }; }
+  event.waitUntil(self.registration.showNotification(data.title || "CampusEvents", {
+    body: data.body || "",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    tag: data.tag || undefined,
+    data: { url: data.url || "/dashboard" },
+  }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL((event.notification.data && event.notification.data.url) || "/dashboard", self.location.origin).href;
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const w of windows) {
+      if (new URL(w.url).origin === self.location.origin && "focus" in w) {
+        await w.focus();
+        if ("navigate" in w) return w.navigate(target);
+        return undefined;
+      }
+    }
+    return self.clients.openWindow(target);
+  })());
+});

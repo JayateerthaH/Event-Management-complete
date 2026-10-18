@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import CalendarSubscription from "../components/engagement/CalendarSubscription";
 import PortfolioSettings from "../components/engagement/PortfolioSettings";
+import PushSettings from "../components/engagement/PushSettings";
 import "../styles/Engagement.css";
 import { apiErrorMessage } from "../api/apiClient";
 import { getNotificationSettings, updateNotificationSettings } from "../api/socialService";
@@ -69,6 +70,7 @@ export default function Settings() {
             </>
           )}
         </section>
+        <PushSettings />
         <CalendarSubscription />
         <PortfolioSettings />
         <section className="social-form">

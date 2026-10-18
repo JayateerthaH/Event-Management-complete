@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 /** In-app notification shown in the navbar bell. */
 @Entity
 @Table(name = "buddy_notification", schema = "social", indexes = @Index(columnList = "userId"))
+@EntityListeners(com.event.socialmodule.push.BellNotificationEntityListener.class)
 @Getter
 @Setter
 @NoArgsConstructor
