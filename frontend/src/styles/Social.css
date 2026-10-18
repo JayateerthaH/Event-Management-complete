@@ -144,6 +144,11 @@
 
 @media (max-width: 600px) {
   .social-wrap { padding: 1.25rem 1rem 3rem; gap: 1.1rem; }
+  /* All tabs visible: wrap into rows of pills instead of a sideways-scrolling bar */
+  .social-tabs { flex-wrap: wrap; overflow-x: visible; gap: 0.45rem; border-bottom: none; }
+  .social-tabs button { flex: 1 1 auto; justify-content: center; padding: 0.55rem 0.85rem; min-height: 42px;
+    border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 999px; background: rgba(255, 255, 255, 0.03); }
+  .social-tabs button.is-active { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.2); }
   .social-head h1 { font-size: 1.6rem; }
   .find-bar { flex-direction: column; }
   .eb__optin .pc-btn { width: 100%; }
