@@ -9,7 +9,9 @@ import { defineConfig, devices } from "@playwright/test";
 const phones = process.env.E2E_MOBILE
   ? [
       { name: "android", use: { ...devices["Pixel 7"] } },
-      { name: "iphone", use: { ...devices["iPhone 13"] } },
+      // Playwright's WebKit can't run the offline ticket check, and the service worker taking control a few
+      // seconds after load races the journeys' next page.goto there (aborted or crashed navigations).
+      { name: "iphone", use: { ...devices["iPhone 13"], serviceWorkers: "block" } },
     ]
   : [];
 

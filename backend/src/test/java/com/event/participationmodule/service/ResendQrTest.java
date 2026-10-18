@@ -151,7 +151,10 @@ class ResendQrTest {
     private static String decodeQr(byte[] png) throws Exception {
         var image = ImageIO.read(new ByteArrayInputStream(png));
         var bitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(image)));
-        return new MultiFormatReader().decode(bitmap).getText();
+        // The image is a generated code, not a photo: decoding it as a pure barcode never misses
+        var hints = java.util.Map.of(com.google.zxing.DecodeHintType.PURE_BARCODE, Boolean.TRUE,
+                com.google.zxing.DecodeHintType.TRY_HARDER, Boolean.TRUE);
+        return new MultiFormatReader().decode(bitmap, hints).getText();
     }
 
     @Test
