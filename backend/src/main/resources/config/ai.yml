@@ -16,4 +16,5 @@ app:
       model: ${GEMINI_MODEL:gemini-3.8-flash}
       # Optional override (proxy / test stub); empty = Google's endpoint
       base-url: ${GEMINI_BASE_URL:}
-    timeout-seconds: ${AI_TIMEOUT_SECONDS:30}
+    # Below the frontend's 45 s AI timeout, so a slow provider ends in a clear "try again" message, not a browser abort
+    timeout-seconds: ${AI_TIMEOUT_SECONDS:40}

@@ -26,7 +26,7 @@ public class LlmConfig {
                                @Value("${app.ai.gemini.api-key:}") String geminiKey,
                                @Value("${app.ai.gemini.base-url:}") String geminiBaseUrl,
                                @Value("${app.ai.gemini.model:gemini-3.8-flash}") String geminiModel,
-                               @Value("${app.ai.timeout-seconds:30}") long timeoutSeconds) {
+                               @Value("${app.ai.timeout-seconds:40}") long timeoutSeconds) {
         Duration timeout = Duration.ofSeconds(timeoutSeconds);
         return switch (choose(provider, anthropicKey, geminiKey)) {
             case "claude" -> {

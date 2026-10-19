@@ -50,7 +50,9 @@ public class DescriptionAssistantService {
                 orUnknown(request.venue()), orUnknown(request.cost()),
                 points.isEmpty() ? "- (none given)" : "- " + String.join("\n- ", points)));
 
-        return drafts.get(content, () -> llm.generate(SYSTEM_PROMPT, content, DescriptionDraft.class, LlmEffort.MEDIUM, 4000))
+        // Low effort: a 80-150 word description and a few FAQs need little reasoning, and medium thinking made Gemini
+        // take 12-20 s (measured), long enough to hit the request timeout on the small server. Output is ~350 tokens.
+        return drafts.get(content, () -> llm.generate(SYSTEM_PROMPT, content, DescriptionDraft.class, LlmEffort.LOW, 2000))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                         "The AI assistant could not draft a description right now. Please try again."));
     }
